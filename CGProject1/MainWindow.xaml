@@ -7,18 +7,12 @@
         mc:Ignorable="d"
         Title="КГ-СИСТПРО-1-КАЛИНИН" Height="450" Width="800">
     <Grid>
-        <Grid>
+        <Grid Name="grid">
             <Grid.RowDefinitions>
-                <RowDefinition Height="20*"></RowDefinition>
-                <RowDefinition Height="389*"></RowDefinition>
+                <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="29*"></ColumnDefinition>
-                <ColumnDefinition Width="131*"/>
-                <ColumnDefinition Width="160*"></ColumnDefinition>
-                <ColumnDefinition Width="160*"></ColumnDefinition>
-                <ColumnDefinition Width="160*"></ColumnDefinition>
-                <ColumnDefinition Width="160*"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <Menu Grid.Column="0" Grid.ColumnSpan="6" Height="20" VerticalAlignment="Top">
@@ -32,6 +26,7 @@
                 <MenuItem Header="Настройки"></MenuItem>
                 <MenuItem Header="О программе" Click="AboutClick"></MenuItem>
             </Menu>
+
             
             <!--<Button Grid.Column="0" Content="Файл" Grid.ColumnSpan="2">
                 

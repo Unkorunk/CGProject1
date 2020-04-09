@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using CGProject1.Chart;
 using Microsoft.Win32;
 
 namespace CGProject1 {
@@ -8,6 +12,9 @@ namespace CGProject1 {
     public partial class MainWindow : Window {
         private AboutSignal aboutSignalWindow;
         private Signal currentSignal;
+
+        List<Canvas> canvases = new List<Canvas>();
+        List<ChartController> controllers = new List<ChartController>();
 
         public MainWindow() {
             InitializeComponent();
@@ -31,6 +38,38 @@ namespace CGProject1 {
             if (openFileDialog.ShowDialog() == true) {
                 currentSignal = Parser.Parse(openFileDialog.FileName);
                 aboutSignalWindow.UpdateInfo(currentSignal);
+
+                controllers.Clear();
+
+                foreach(var canvas in canvases)
+                {
+                    grid.Children.Remove(canvas);
+                }
+                canvases.Clear();
+
+                if (grid.RowDefinitions.Count > 1)
+                {
+                    grid.RowDefinitions.RemoveRange(1, grid.RowDefinitions.Count - 1);
+                }
+
+                for (int i = 0; i < currentSignal.channels.Length; i++)
+                {
+                    var canvas = new Canvas();
+                    canvas.Width = grid.ActualWidth;
+                    canvas.Height = grid.ActualHeight / currentSignal.channels.Length;
+                    canvases.Add(canvas);
+                    grid.Children.Add(canvas);
+                    if (grid.RowDefinitions.Count < i + 1)
+                    {
+                        grid.RowDefinitions.Add(new RowDefinition());
+                    }
+                    Grid.SetRow(canvas, i);
+                    Grid.SetColumn(canvas, 0);
+                    controllers.Add(new ChartController(canvas, currentSignal.channels[i]) { 
+                        Begin = 0,
+                        End = 10000
+                    });
+                }
             }
         }
 

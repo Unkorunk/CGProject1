@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace CGProject1 {
@@ -13,5 +14,8 @@ namespace CGProject1 {
         public string Source { get; set; }
 
         public double[] values;
+
+        public double MaxValue { get => values.Max(); }
+        public double MinValue { get => values.Min(); }
     }
 }
