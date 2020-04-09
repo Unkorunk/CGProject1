@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 
 namespace CGProject1
 {
@@ -25,7 +26,7 @@ namespace CGProject1
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void AboutClick(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("КГ-СИСТПРО-1-КАЛИНИН\r\n" +
                 "Работу выполнили:\r\n" +
@@ -33,6 +34,14 @@ namespace CGProject1
                 "Калинин Владислав\r\n" +
                 "29.02.2020",
                 "О программе", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void OpenFileClick(object sender, RoutedEventArgs e) {
+            var openFileDialog = new OpenFileDialog();
+            
+            if (openFileDialog.ShowDialog() == true) {
+                Parser.Parse(openFileDialog.FileName);
+            }
         }
     }
 }

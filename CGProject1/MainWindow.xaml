@@ -9,7 +9,7 @@
     <Grid>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="45*"></RowDefinition>
+                <RowDefinition Height="20*"></RowDefinition>
                 <RowDefinition Height="389*"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
@@ -21,11 +21,24 @@
                 <ColumnDefinition Width="160*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Content="Файл" Grid.ColumnSpan="2"></Button>
+            <Menu Grid.Column="0" Grid.ColumnSpan="6" Height="20" VerticalAlignment="Top">
+                <MenuItem Header="Файл">
+                    <MenuItem Header="Открыть" Click="OpenFileClick"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Моделирование"></MenuItem>
+                <MenuItem Header="Инструменты"></MenuItem>
+                <MenuItem Header="Настройки"></MenuItem>
+                <MenuItem Header="О программе" Click="AboutClick"></MenuItem>
+            </Menu>
+            
+            <!--<Button Grid.Column="0" Content="Файл" Grid.ColumnSpan="2">
+                
+
+            </Button>
             <Button Grid.Column="2" Content="Моделирование"></Button>
             <Button Grid.Column="3" Content="Инструменты"></Button>
             <Button Grid.Column="4" Content="Настройки"></Button>
-            <Button Grid.Column="5" Content="О программе" Click="Button_Click"></Button>
+            <Button Grid.Column="5" Content="О программе" Click="Button_Click"></Button>-->
         </Grid>
 
 
