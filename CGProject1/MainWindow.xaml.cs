@@ -14,16 +14,19 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
 
-namespace CGProject1
-{
+namespace CGProject1 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
-        public MainWindow()
-        {
+    public partial class MainWindow : Window {
+        private AboutSignal aboutSignalWindow;
+        private Signal currentSignal;
+
+        public MainWindow() {
             InitializeComponent();
+
+            aboutSignalWindow = new AboutSignal();
+            aboutSignalWindow.UpdateInfo(currentSignal);
         }
 
         private void AboutClick(object sender, RoutedEventArgs e)
@@ -40,8 +43,13 @@ namespace CGProject1
             var openFileDialog = new OpenFileDialog();
             
             if (openFileDialog.ShowDialog() == true) {
-                Parser.Parse(openFileDialog.FileName);
+                currentSignal = Parser.Parse(openFileDialog.FileName);
+                aboutSignalWindow.UpdateInfo(currentSignal);
             }
+        }
+
+        private void AboutSignalClick(object sender, RoutedEventArgs e) {
+            aboutSignalWindow.Show();
         }
     }
 }

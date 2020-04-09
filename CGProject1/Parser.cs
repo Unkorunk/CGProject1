@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Text;
 
 namespace CGProject1 {
     public class Parser {
@@ -15,12 +16,13 @@ namespace CGProject1 {
         }
 
         public static Signal Parse(string filePath) {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Signal result;
             
-            using (var file = new StreamReader(filePath)) {
-
+            using (var file = new StreamReader(filePath, Encoding.GetEncoding("windows-1251"))) {
                 var curState = ParseState.NeedChannelNumber;
                 result = new Signal();
+                result.fileName = Path.GetFileName(filePath);
 
                 int curRow = 0;
 
@@ -40,16 +42,16 @@ namespace CGProject1 {
                                 break;
                             }
                         case ParseState.NeedSamplesNumber: {
-                                int samplesNum = Int32.Parse(trimmed);
+                                int samplesCount = Int32.Parse(trimmed);
 
                                 for (int i = 0; i < result.channels.Length; i++) {
-                                    result.channels[i] = new Channel(samplesNum);
+                                    result.channels[i] = new Channel(samplesCount, result.fileName);
                                 }
 
                                 break;
                             }
                         case ParseState.NeedSamplingFrq: {
-                                result.samplingFrq = double.Parse(trimmed);
+                                result.samplingFrq = double.Parse(trimmed, CultureInfo.InvariantCulture);
                                 break;
                             }
                         case ParseState.NeedDate: {
@@ -70,7 +72,7 @@ namespace CGProject1 {
                                         curOffset++;
                                     }
 
-                                    channel.channelName = trimmed[curStart..(curStart + curOffset)];
+                                    channel.Name = trimmed[curStart..(curStart + curOffset)];
                                     curStart += curOffset + 1;
                                     curOffset = 0;
                                 }
