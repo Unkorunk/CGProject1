@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Markup;
 
 namespace CGProject1 {
     public partial class AboutSignal : Window {
@@ -44,8 +40,8 @@ namespace CGProject1 {
 
             channelNumberText.Content = signal.channels.Length;
             samplesNumberText.Content = signal.SamplesCount;
-            samplingFrqText.Content = $"{signal.samplingFrq} Гц (шаг между отсчетами {signal.DeltaTime} сек)";
-            startDateTimeText.Content = signal.startDateTime.ToString("dd-MM-yyyy hh\\:mm\\:ss\\.fff");
+            samplingFrqText.Content = $"{signal.SamplingFrq} Гц (шаг между отсчетами {signal.DeltaTime} сек)";
+            startDateTimeText.Content = signal.StartDateTime.ToString("dd-MM-yyyy hh\\:mm\\:ss\\.fff");
             endDateTimeText.Content = signal.EndTime.ToString("dd-MM-yyyy hh\\:mm\\:ss\\.fff");
             TimeSpan duration = signal.Duration;
             durationText.Content = $"{duration.Days} суток {duration.Hours} часов {duration.Minutes} минут {(duration.Seconds + (double)duration.Milliseconds / 1000).ToString("0.000", CultureInfo.InvariantCulture)} секунд";
@@ -61,8 +57,8 @@ namespace CGProject1 {
         }
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e) {
-            e.Cancel = true;  // cancels the window close    
-            this.Hide();      // Programmatically hides the window
+            e.Cancel = true;
+            this.Hide();
         }
     }
 }

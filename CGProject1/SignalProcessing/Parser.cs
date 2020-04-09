@@ -51,16 +51,16 @@ namespace CGProject1 {
                                 break;
                             }
                         case ParseState.NeedSamplingFrq: {
-                                result.samplingFrq = double.Parse(trimmed, CultureInfo.InvariantCulture);
+                                result.SamplingFrq = double.Parse(trimmed, CultureInfo.InvariantCulture);
                                 break;
                             }
                         case ParseState.NeedDate: {
-                                result.startDateTime = DateTime.ParseExact(trimmed, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                                result.StartDateTime = DateTime.ParseExact(trimmed, "dd-MM-yyyy", CultureInfo.InvariantCulture);
                                 break;
                             }
                         case ParseState.NeedTime: {
                                 var ts = TimeSpan.ParseExact(trimmed, "hh\\:mm\\:ss\\.fff", CultureInfo.InvariantCulture);
-                                result.startDateTime = result.startDateTime + ts;
+                                result.StartDateTime = result.StartDateTime + ts;
                                 break;
                             }
                         case ParseState.NeedChannelsNames: {
@@ -102,8 +102,6 @@ namespace CGProject1 {
 
                     curState++;
                 }
-
-
             }
 
             return result;

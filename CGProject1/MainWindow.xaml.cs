@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
 using Microsoft.Win32;
 
 namespace CGProject1 {
@@ -29,8 +16,7 @@ namespace CGProject1 {
             aboutSignalWindow.UpdateInfo(currentSignal);
         }
 
-        private void AboutClick(object sender, RoutedEventArgs e)
-        {
+        private void AboutClick(object sender, RoutedEventArgs e) {
             MessageBox.Show("КГ-СИСТПРО-1-КАЛИНИН\r\n" +
                 "Работу выполнили:\r\n" +
                 "Михалев Юрий\r\n" +
