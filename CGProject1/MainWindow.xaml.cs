@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
-using CGProject1.Chart;
 using Microsoft.Win32;
 
 namespace CGProject1 {
@@ -13,8 +12,7 @@ namespace CGProject1 {
         private AboutSignal aboutSignalWindow;
         private Signal currentSignal;
 
-        List<Canvas> canvases = new List<Canvas>();
-        List<ChartController> controllers = new List<ChartController>();
+        List<Chart> charts = new List<Chart>();
 
         public MainWindow() {
             InitializeComponent();
@@ -39,42 +37,77 @@ namespace CGProject1 {
                 currentSignal = Parser.Parse(openFileDialog.FileName);
                 aboutSignalWindow.UpdateInfo(currentSignal);
 
-                controllers.Clear();
+                sliderBegin.Minimum = sliderEnd.Minimum = 0;
+                sliderBegin.Maximum = sliderEnd.Maximum = currentSignal.SamplesCount;
+                sliderBegin.Value = sliderBegin.Minimum;
+                sliderEnd.Value = sliderEnd.Minimum;
 
-                foreach(var canvas in canvases)
+                foreach(var chart in charts)
                 {
-                    grid.Children.Remove(canvas);
+                    channels.Children.Remove(chart);
                 }
-                canvases.Clear();
+                charts.Clear();
 
-                if (grid.RowDefinitions.Count > 1)
+                if (channels.RowDefinitions.Count > 1)
                 {
-                    grid.RowDefinitions.RemoveRange(1, grid.RowDefinitions.Count - 1);
+                    channels.RowDefinitions.RemoveRange(1, channels.RowDefinitions.Count - 1);
                 }
 
                 for (int i = 0; i < currentSignal.channels.Length; i++)
                 {
-                    var canvas = new Canvas();
-                    canvas.Width = grid.ActualWidth;
-                    canvas.Height = grid.ActualHeight / currentSignal.channels.Length;
-                    canvases.Add(canvas);
-                    grid.Children.Add(canvas);
-                    if (grid.RowDefinitions.Count < i + 1)
+                    var chart = new Chart(currentSignal.channels[i]);
+
+                    // TODO: normal fix?
+                    chart.Height = (stackPanel.ActualHeight - menu.ActualHeight) / currentSignal.channels.Length;
+
+                    charts.Add(chart);
+                    channels.Children.Add(chart);
+                    if (channels.RowDefinitions.Count < i + 1)
                     {
-                        grid.RowDefinitions.Add(new RowDefinition());
+                        channels.RowDefinitions.Add(new RowDefinition());
                     }
-                    Grid.SetRow(canvas, i);
-                    Grid.SetColumn(canvas, 0);
-                    controllers.Add(new ChartController(canvas, currentSignal.channels[i]) { 
-                        Begin = 0,
-                        End = 10000
-                    });
+                    Grid.SetRow(chart, i);
+                    Grid.SetColumn(chart, 0);
                 }
             }
         }
 
         private void AboutSignalClick(object sender, RoutedEventArgs e) {
             aboutSignalWindow.Show();
+        }
+
+        private void sliderBegin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            foreach (var chart in charts)
+            {
+                chart.Begin = (int)sliderBegin.Value;
+            }
+            if (sliderEnd.Value < e.NewValue)
+            {
+                sliderEnd.Value = e.NewValue;
+                foreach (var chart in charts)
+                {
+                    chart.End = (int)sliderEnd.Value;
+                }
+            }
+
+            labelBegin.Content = "Begin: " + (int)sliderBegin.Value;
+            labelEnd.Content = "End: " + (int)sliderEnd.Value;
+        }
+
+        private void sliderEnd_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (e.NewValue < sliderBegin.Value)
+            {
+                (sender as Slider).Value = sliderBegin.Value;
+            }
+
+            labelEnd.Content = "End: " + (int)sliderEnd.Value;
+
+            foreach (var chart in charts)
+            {
+                chart.End = (int)sliderEnd.Value;
+            }
         }
     }
 }

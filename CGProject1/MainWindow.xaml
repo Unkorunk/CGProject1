@@ -7,15 +7,8 @@
         mc:Ignorable="d"
         Title="КГ-СИСТПРО-1-КАЛИНИН" Height="450" Width="800">
     <Grid>
-        <Grid Name="grid">
-            <Grid.RowDefinitions>
-                <RowDefinition></RowDefinition>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-
-            <Menu Grid.Column="0" Grid.ColumnSpan="6" Height="20" VerticalAlignment="Top">
+        <StackPanel Name="stackPanel">
+            <Menu Name="menu" VerticalAlignment="Top">
                 <MenuItem Header="Файл">
                     <MenuItem Header="Открыть" Click="OpenFileClick"></MenuItem>
                 </MenuItem>
@@ -26,18 +19,46 @@
                 <MenuItem Header="Настройки"></MenuItem>
                 <MenuItem Header="О программе" Click="AboutClick"></MenuItem>
             </Menu>
+            <Grid Name="grid">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.5*"></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
 
-            
-            <!--<Button Grid.Column="0" Content="Файл" Grid.ColumnSpan="2">
-                
+                <Grid Grid.Row="0" Grid.Column="0" Name="channels">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                </Grid>
 
-            </Button>
-            <Button Grid.Column="2" Content="Моделирование"></Button>
-            <Button Grid.Column="3" Content="Инструменты"></Button>
-            <Button Grid.Column="4" Content="Настройки"></Button>
-            <Button Grid.Column="5" Content="О программе" Click="Button_Click"></Button>-->
-        </Grid>
+                <Grid Grid.Row="0" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
 
+                    <StackPanel>
+                        <StackPanel>
+                            <Label Name="labelBegin">Begin: 0</Label>
+                            <Slider Name="sliderBegin" ValueChanged="sliderBegin_ValueChanged"></Slider>
+                        </StackPanel>
+                        <StackPanel>
+                            <Label Name="labelEnd">End: 0</Label>
+                            <Slider Name="sliderEnd" ValueChanged="sliderEnd_ValueChanged"></Slider>
+                        </StackPanel>
+                    </StackPanel>
+
+                </Grid>
+            </Grid>
+        </StackPanel>
 
     </Grid>
 </Window>
