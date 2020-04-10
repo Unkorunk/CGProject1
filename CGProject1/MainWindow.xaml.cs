@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -56,9 +55,6 @@ namespace CGProject1 {
                 for (int i = 0; i < currentSignal.channels.Length; i++)
                 {
                     var chart = new Chart(currentSignal.channels[i]);
-
-                    // TODO: normal fix?
-                    chart.Height = (stackPanel.ActualHeight - menu.ActualHeight) / currentSignal.channels.Length;
 
                     charts.Add(chart);
                     channels.Children.Add(chart);

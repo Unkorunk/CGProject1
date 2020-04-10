@@ -7,8 +7,16 @@
         mc:Ignorable="d"
         Title="КГ-СИСТПРО-1-КАЛИНИН" Height="450" Width="800">
     <Grid>
-        <StackPanel Name="stackPanel">
-            <Menu Name="menu" VerticalAlignment="Top">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+
+            <Menu Grid.Row="0" Name="menu" VerticalAlignment="Top">
                 <MenuItem Header="Файл">
                     <MenuItem Header="Открыть" Click="OpenFileClick"></MenuItem>
                 </MenuItem>
@@ -19,7 +27,7 @@
                 <MenuItem Header="Настройки"></MenuItem>
                 <MenuItem Header="О программе" Click="AboutClick"></MenuItem>
             </Menu>
-            <Grid Name="grid">
+            <Grid Grid.Row="1" Name="grid">
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
@@ -58,7 +66,7 @@
 
                 </Grid>
             </Grid>
-        </StackPanel>
+        </Grid>
 
     </Grid>
 </Window>
