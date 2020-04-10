@@ -9,6 +9,7 @@ namespace CGProject1 {
     /// </summary>
     public partial class MainWindow : Window {
         private AboutSignal aboutSignalWindow;
+        private bool showing = false;
         private Signal currentSignal;
 
         List<Chart> charts = new List<Chart>();
@@ -31,6 +32,10 @@ namespace CGProject1 {
             
             if (openFileDialog.ShowDialog() == true) {
                 currentSignal = Parser.Parse(openFileDialog.FileName);
+                if (aboutSignalWindow != null)
+                {
+                    aboutSignalWindow.UpdateInfo(currentSignal);
+                }
 
                 sliderBegin.Minimum = sliderEnd.Minimum = 0;
                 sliderBegin.Maximum = sliderEnd.Maximum = currentSignal.SamplesCount;
@@ -65,9 +70,14 @@ namespace CGProject1 {
         }
 
         private void AboutSignalClick(object sender, RoutedEventArgs e) {
-            aboutSignalWindow = new AboutSignal();
-            aboutSignalWindow.UpdateInfo(currentSignal);
-            aboutSignalWindow.Show();
+            if (!this.showing)
+            {
+                aboutSignalWindow = new AboutSignal();
+                aboutSignalWindow.UpdateInfo(currentSignal);
+                aboutSignalWindow.Closed += (object sender, System.EventArgs e) => this.showing = false;
+                aboutSignalWindow.Show();
+                showing = true;
+            }
         }
 
         private void sliderBegin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
