@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Microsoft.Win32;
 
 namespace CGProject1 {
@@ -12,7 +13,8 @@ namespace CGProject1 {
         private bool showing = false;
         private Signal currentSignal;
 
-        List<Chart> charts = new List<Chart>();
+        private List<Chart> charts = new List<Chart>();
+        private Chart activeChannel;
 
         public MainWindow() {
             InitializeComponent();
@@ -63,10 +65,55 @@ namespace CGProject1 {
                     {
                         channels.RowDefinitions.Add(new RowDefinition());
                     }
+
                     Grid.SetRow(chart, i);
                     Grid.SetColumn(chart, 0);
+
+                    chart.Begin = 0;
+                    chart.End = currentSignal.SamplesCount;
                 }
+
+                activeChannelLabel.Content = "Активный канал:";
+                activeChannelPanel.Children.Clear();
+                activeChannel = null;
             }
+        }
+
+        private void OnChannelClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            var point = Mouse.GetPosition(channels);
+
+            int row = 0;
+            double accumulatedHeight = 0.0;
+
+            foreach (var rowDefinition in channels.RowDefinitions) {
+                accumulatedHeight += rowDefinition.ActualHeight;
+                if (accumulatedHeight >= point.Y)
+                    break;
+                row++;
+            }
+
+            if (currentSignal == null || row >= currentSignal.channels.Length) {
+                return;
+            }
+
+            foreach (var chart in charts) {
+                chart.Selected = false;
+                chart.InvalidateVisual();
+            }
+
+            charts[row].Selected = true;
+            charts[row].InvalidateVisual();
+
+            activeChannel = new Chart(currentSignal.channels[row]);
+            activeChannel.Begin = (int)sliderBegin.Value;
+            activeChannel.End = (int)sliderEnd.Value;
+
+            activeChannelPanel.Children.Clear();
+            activeChannelPanel.Children.Add(activeChannel);
+            activeChannelLabel.Content = $"Активный канал: {currentSignal.channels[row].Name}";
+
+            Grid.SetRow(activeChannel, 0);
+            Grid.SetColumn(activeChannel, 0);
         }
 
         private void AboutSignalClick(object sender, RoutedEventArgs e) {
@@ -82,16 +129,16 @@ namespace CGProject1 {
 
         private void sliderBegin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            foreach (var chart in charts)
-            {
-                chart.Begin = (int)sliderBegin.Value;
+            if (activeChannel != null) {
+                activeChannel.Begin = (int)sliderBegin.Value;
             }
+
             if (sliderEnd.Value < e.NewValue)
             {
                 sliderEnd.Value = e.NewValue;
-                foreach (var chart in charts)
-                {
-                    chart.End = (int)sliderEnd.Value;
+
+                if (activeChannel != null) {
+                    activeChannel.End = (int)sliderEnd.Value;
                 }
             }
 
@@ -112,10 +159,10 @@ namespace CGProject1 {
 
             labelEnd.Content = "End: " + (int)sliderEnd.Value;
 
-            foreach (var chart in charts)
-            {
-                chart.End = (int)sliderEnd.Value;
+            if (activeChannel != null) {
+                activeChannel.End = (int)sliderEnd.Value;
             }
+            
 
             if (aboutSignalWindow != null) {
                 aboutSignalWindow.UpdateActiveSegment((int)sliderBegin.Value, (int)sliderEnd.Value);

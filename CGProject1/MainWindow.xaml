@@ -36,7 +36,7 @@
                     <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
-                <Grid Grid.Row="0" Grid.Column="0" Name="channels">
+                <Grid Grid.Row="0" Grid.Column="0" Name="channels" MouseUp="OnChannelClick">
                     <Grid.RowDefinitions>
                         <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
@@ -53,16 +53,25 @@
                         <ColumnDefinition></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel>
-                        <StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="50"></RowDefinition>
+                            <RowDefinition Height="50"></RowDefinition>
+                            <RowDefinition Height="30"></RowDefinition>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        
+                        <StackPanel Grid.Row="0">
                             <Label Name="labelBegin">Begin: 0</Label>
-                            <Slider Name="sliderBegin" ValueChanged="sliderBegin_ValueChanged"></Slider>
+                            <Slider Name="sliderBegin" ValueChanged="sliderBegin_ValueChanged" Minimum="0" Maximum="0"></Slider>
                         </StackPanel>
-                        <StackPanel>
+                        <StackPanel Grid.Row="1">
                             <Label Name="labelEnd">End: 0</Label>
-                            <Slider Name="sliderEnd" ValueChanged="sliderEnd_ValueChanged"></Slider>
+                            <Slider Name="sliderEnd" ValueChanged="sliderEnd_ValueChanged" Minimum="0" Maximum="0"></Slider>
                         </StackPanel>
-                    </StackPanel>
+                        <Label Name="activeChannelLabel" Grid.Row="2" FontWeight="Bold" HorizontalAlignment="Center">Активный канал</Label>
+                        <Grid x:Name="activeChannelPanel" Grid.Row="3"></Grid>
+                    </Grid>
 
                 </Grid>
             </Grid>

@@ -11,7 +11,7 @@ namespace CGProject1
 
         private int begin = 0;
         private int end = 0;
-        public bool Selected { get; private set; }
+        public bool Selected { get; set; }
         public int Begin
         {
             get => begin; set
@@ -124,11 +124,14 @@ namespace CGProject1
             }
         }
 
-        protected override void OnMouseUp(MouseButtonEventArgs e)
-        {
-            base.OnMouseUp(e);
-            this.Selected = !this.Selected;
-            InvalidateVisual();
-        }
+        //protected override void OnMouseUp(MouseButtonEventArgs e)
+        //{
+        //    base.OnMouseUp(e);
+        //    this.Selected = !this.Selected;
+        //    InvalidateVisual();
+
+            
+
+        //}
     }
 }
