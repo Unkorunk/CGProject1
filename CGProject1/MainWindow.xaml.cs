@@ -15,6 +15,7 @@ namespace CGProject1 {
 
         private List<Chart> charts = new List<Chart>();
         private Chart activeChannel;
+        private Chart activeChannelInGrid;
 
         public MainWindow() {
             InitializeComponent();
@@ -98,10 +99,14 @@ namespace CGProject1 {
 
             foreach (var chart in charts) {
                 chart.Selected = false;
+                chart.DisableSelectInterval();
                 chart.InvalidateVisual();
             }
 
+            activeChannelInGrid = charts[row];
             charts[row].Selected = true;
+            charts[row].SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
+            charts[row].EnableSelectInterval();
             charts[row].InvalidateVisual();
 
             activeChannel = new Chart(currentSignal.channels[row]);
@@ -144,6 +149,7 @@ namespace CGProject1 {
 
             labelBegin.Content = "Begin: " + (int)sliderBegin.Value;
             labelEnd.Content = "End: " + (int)sliderEnd.Value;
+            if (activeChannelInGrid != null) activeChannelInGrid.SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
 
             if (aboutSignalWindow != null) {
                 aboutSignalWindow.UpdateActiveSegment((int)sliderBegin.Value, (int)sliderEnd.Value);
@@ -162,7 +168,8 @@ namespace CGProject1 {
             if (activeChannel != null) {
                 activeChannel.End = (int)sliderEnd.Value;
             }
-            
+            if (activeChannelInGrid != null) activeChannelInGrid.SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
+
 
             if (aboutSignalWindow != null) {
                 aboutSignalWindow.UpdateActiveSegment((int)sliderBegin.Value, (int)sliderEnd.Value);
