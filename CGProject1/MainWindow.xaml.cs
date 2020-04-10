@@ -15,9 +15,6 @@ namespace CGProject1 {
 
         public MainWindow() {
             InitializeComponent();
-
-            aboutSignalWindow = new AboutSignal();
-            aboutSignalWindow.UpdateInfo(currentSignal);
         }
 
         private void AboutClick(object sender, RoutedEventArgs e) {
@@ -34,7 +31,6 @@ namespace CGProject1 {
             
             if (openFileDialog.ShowDialog() == true) {
                 currentSignal = Parser.Parse(openFileDialog.FileName);
-                aboutSignalWindow.UpdateInfo(currentSignal);
 
                 sliderBegin.Minimum = sliderEnd.Minimum = 0;
                 sliderBegin.Maximum = sliderEnd.Maximum = currentSignal.SamplesCount;
@@ -69,6 +65,8 @@ namespace CGProject1 {
         }
 
         private void AboutSignalClick(object sender, RoutedEventArgs e) {
+            aboutSignalWindow = new AboutSignal();
+            aboutSignalWindow.UpdateInfo(currentSignal);
             aboutSignalWindow.Show();
         }
 

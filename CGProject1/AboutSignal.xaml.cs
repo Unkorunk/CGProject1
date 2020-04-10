@@ -55,10 +55,5 @@ namespace CGProject1 {
             label.SetValue(Grid.RowProperty, curRow);
             curRow++;
         }
-
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e) {
-            e.Cancel = true;
-            this.Hide();
-        }
     }
 }
