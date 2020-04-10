@@ -13,6 +13,7 @@ namespace CGProject1 {
         private Label startDateTimeText;
         private Label endDateTimeText;
         private Label durationText;
+        private Label activeSegmentText;
 
         public AboutSignal() {
             InitializeComponent();
@@ -23,9 +24,10 @@ namespace CGProject1 {
             InfoLabelInit(ref startDateTimeText);
             InfoLabelInit(ref endDateTimeText);
             InfoLabelInit(ref durationText);
+            InfoLabelInit(ref activeSegmentText);
         }
 
-        public void UpdateInfo(Signal signal) {
+        public void UpdateInfo(Signal signal, int begin, int end) {
             if (signal == null) {
                 channelNumberText.Content = "No signal";
                 samplesNumberText.Content = "No signal";
@@ -33,6 +35,7 @@ namespace CGProject1 {
                 startDateTimeText.Content = "No signal";
                 endDateTimeText.Content = "No signal";
                 durationText.Content = "No signal";
+                activeSegmentText.Content = "No signal";
 
                 ChannelsTable.ItemsSource = null;
                 return;
@@ -46,6 +49,12 @@ namespace CGProject1 {
             TimeSpan duration = signal.Duration;
             durationText.Content = $"{duration.Days} суток {duration.Hours} часов {duration.Minutes} минут {(duration.Seconds + (double)duration.Milliseconds / 1000).ToString("0.000", CultureInfo.InvariantCulture)} секунд";
             ChannelsTable.ItemsSource = signal.channels;
+
+            UpdateActiveSegment(begin, end);
+        }
+
+        public void UpdateActiveSegment(int start, int end) {
+            activeSegmentText.Content = $"Активный сегмент: [{start}; {end}]";
         }
 
         private void InfoLabelInit(ref Label label) {

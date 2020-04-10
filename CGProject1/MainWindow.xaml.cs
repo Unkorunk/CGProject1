@@ -34,7 +34,7 @@ namespace CGProject1 {
                 currentSignal = Parser.Parse(openFileDialog.FileName);
                 if (aboutSignalWindow != null)
                 {
-                    aboutSignalWindow.UpdateInfo(currentSignal);
+                    aboutSignalWindow.UpdateInfo(currentSignal, (int)sliderBegin.Value, (int)sliderEnd.Value);
                 }
 
                 sliderBegin.Minimum = sliderEnd.Minimum = 0;
@@ -73,7 +73,7 @@ namespace CGProject1 {
             if (!this.showing)
             {
                 aboutSignalWindow = new AboutSignal();
-                aboutSignalWindow.UpdateInfo(currentSignal);
+                aboutSignalWindow.UpdateInfo(currentSignal, (int)sliderBegin.Value, (int)sliderEnd.Value);
                 aboutSignalWindow.Closed += (object sender, System.EventArgs e) => this.showing = false;
                 aboutSignalWindow.Show();
                 showing = true;
@@ -97,6 +97,10 @@ namespace CGProject1 {
 
             labelBegin.Content = "Begin: " + (int)sliderBegin.Value;
             labelEnd.Content = "End: " + (int)sliderEnd.Value;
+
+            if (aboutSignalWindow != null) {
+                aboutSignalWindow.UpdateActiveSegment((int)sliderBegin.Value, (int)sliderEnd.Value);
+            }
         }
 
         private void sliderEnd_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -111,6 +115,10 @@ namespace CGProject1 {
             foreach (var chart in charts)
             {
                 chart.End = (int)sliderEnd.Value;
+            }
+
+            if (aboutSignalWindow != null) {
+                aboutSignalWindow.UpdateActiveSegment((int)sliderBegin.Value, (int)sliderEnd.Value);
             }
         }
     }
