@@ -159,13 +159,15 @@ namespace CGProject1
                 }
             }
 
-            dc.DrawText(
-new FormattedText(channel.Name,
+            var formText = new FormattedText(channel.Name,
 CultureInfo.GetCultureInfo("en-us"),
 FlowDirection.LeftToRight,
 new Typeface("Times New Roman"),
-14, Brushes.Red),
-new Point(0, 0));
+14, Brushes.Red);
+
+            dc.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Gray, 1.0), new Rect(0, 0, formText.Width, formText.Height));
+
+            dc.DrawText(formText, new Point(0, 0));
 
         }
 
