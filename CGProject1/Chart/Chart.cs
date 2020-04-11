@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
@@ -46,7 +47,7 @@ namespace CGProject1
         protected override void OnRender(DrawingContext dc)
         {
             if (this.Length < 2) return;
-            
+
             const double startOptimizationWith = 1.0;
 
             double stepX = this.ActualWidth / (this.Length - 1);
@@ -89,7 +90,7 @@ namespace CGProject1
                     new Point(0, stepY * (prevValueMin - channelMinValue) / height + offsetY),
                     new Point(stepX, stepY * (prevValueMax - channelMinValue) / height + offsetY)
                 );
-                
+
                 int n = (this.Length + stepOptimization - 1) / stepOptimization;
                 if (enableSelectInterval)
                 {
@@ -157,6 +158,15 @@ namespace CGProject1
                     prevValue = nowValue;
                 }
             }
+
+            dc.DrawText(
+new FormattedText(channel.Name,
+CultureInfo.GetCultureInfo("en-us"),
+FlowDirection.LeftToRight,
+new Typeface("Times New Roman"),
+14, Brushes.Red),
+new Point(0, 0));
+
         }
 
         public void EnableSelectInterval()
