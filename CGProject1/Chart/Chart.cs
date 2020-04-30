@@ -160,10 +160,10 @@ namespace CGProject1
             }
 
             var formText = new FormattedText(channel.Name,
-CultureInfo.GetCultureInfo("en-us"),
-FlowDirection.LeftToRight,
-new Typeface("Times New Roman"),
-14, Brushes.Red);
+                CultureInfo.GetCultureInfo("en-us"),
+                FlowDirection.LeftToRight,
+                new Typeface("Times New Roman"),
+                14, Brushes.Red);
 
             dc.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Gray, 1.0), new Rect(0, 0, formText.Width, formText.Height));
 

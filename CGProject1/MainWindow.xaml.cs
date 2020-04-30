@@ -10,7 +10,10 @@ namespace CGProject1 {
     /// </summary>
     public partial class MainWindow : Window {
         private AboutSignal aboutSignalWindow;
+        private Oscillograms oscillogramWindow;
+
         private bool showing = false;
+        private bool isOscillogramShowing = false;
         private Signal currentSignal;
 
         private List<Chart> charts = new List<Chart>();
@@ -56,12 +59,36 @@ namespace CGProject1 {
                     channels.RowDefinitions.RemoveRange(1, channels.RowDefinitions.Count - 1);
                 }
 
+                if (isOscillogramShowing) {
+                    oscillogramWindow.Update(currentSignal);
+                }
+
                 for (int i = 0; i < currentSignal.channels.Length; i++)
                 {
                     var chart = new Chart(currentSignal.channels[i]);
 
                     charts.Add(chart);
                     channels.Children.Add(chart);
+
+                    chart.ContextMenu = new ContextMenu();
+
+                    var item1 = new MenuItem();
+                    item1.Header = "Осциллограмма";
+                    int cur = i;
+                    item1.Click += (object sender, RoutedEventArgs args) => {
+                        if (!isOscillogramShowing) {
+                            isOscillogramShowing = true;
+                            oscillogramWindow = new Oscillograms();
+                            oscillogramWindow.Closed += (object sender, System.EventArgs e) => this.isOscillogramShowing = false;
+                            oscillogramWindow.Update(currentSignal);
+                            oscillogramWindow.Show();
+                        }
+
+                        oscillogramWindow.AddChannel(currentSignal.channels[cur]);
+                    };
+
+                    chart.ContextMenu.Items.Add(item1);
+
                     if (channels.RowDefinitions.Count < i + 1)
                     {
                         channels.RowDefinitions.Add(new RowDefinition());
