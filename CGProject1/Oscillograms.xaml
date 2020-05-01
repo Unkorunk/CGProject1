@@ -8,7 +8,7 @@
         Title="Oscillograms" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"></ColumnDefinition>
+            <ColumnDefinition Width="125"></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -22,7 +22,7 @@
             </StackPanel>
         </ScrollViewer>
         <StackPanel Grid.Row="1" Grid.Column="1">
-            <ScrollBar Orientation="Horizontal" Name="OscillogramScroll"></ScrollBar>
+            <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged"></ScrollBar>
             <Slider Name="BeginSlider" Minimum="0" Maximum="0" ValueChanged="BeginSlider_ValueChanged"></Slider>
             <Slider Name="EndSlider" Minimum="0" Maximum="0" ValueChanged="EndSlider_ValueChanged"></Slider>
         </StackPanel>

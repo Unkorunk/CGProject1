@@ -30,6 +30,7 @@ namespace CGProject1 {
             EndSlider.IsEnabled = signal != null;
             BeginBox.IsEnabled = signal != null;
             EndBox.IsEnabled = signal != null;
+            OscillogramScroll.IsEnabled = signal != null;
 
             if (signal != null) {
                 samplesCount = signal.SamplesCount;
@@ -44,6 +45,10 @@ namespace CGProject1 {
 
                 BeginBox.Text = 0.ToString();
                 EndBox.Text = samplesCount.ToString();
+
+                //OscillogramScroll.Minimum = 0;
+                //OscillogramScroll.Maximum = 0;
+                //OscillogramScroll.ViewportSize = samplesCount;
             }
             
         }
@@ -71,7 +76,7 @@ namespace CGProject1 {
         }
 
         private void BeginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            InputBeginEnd((int)BeginSlider.Value, (int)e.NewValue);
+            InputBeginEnd((int)e.NewValue, (int)EndSlider.Value);
         }
 
         private void EndSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
@@ -119,6 +124,10 @@ namespace CGProject1 {
             EndSlider.Value = end;
             BeginBox.Text = begin.ToString();
             EndBox.Text = end.ToString();
+
+            //OscillogramScroll.Minimum = 0;
+            //OscillogramScroll.Maximum = samplesCount - end + begin;
+            //OscillogramScroll.Value = (begin + end) / 2;
         }
 
         private void previewTextInput(object sender, TextCompositionEventArgs e) {
@@ -136,6 +145,10 @@ namespace CGProject1 {
 
         private bool TextIsNumeric(string input) {
             return input.All(c => Char.IsDigit(c) || Char.IsControl(c));
+        }
+
+        private void OscillogramScroll_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+
         }
     }
 }
