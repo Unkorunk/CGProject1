@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using System.Windows.Controls;
+using System.Collections.Generic;
 
 namespace CGProject1 {
     /// <summary>
@@ -19,6 +13,8 @@ namespace CGProject1 {
         private HashSet<Chart> activeCharts;
 
         private int samplesCount = 0;
+
+        bool locked = false;
 
         public Oscillograms() {
             InitializeComponent();
@@ -46,9 +42,10 @@ namespace CGProject1 {
                 BeginBox.Text = 0.ToString();
                 EndBox.Text = samplesCount.ToString();
 
-                //OscillogramScroll.Minimum = 0;
-                //OscillogramScroll.Maximum = 0;
-                //OscillogramScroll.ViewportSize = samplesCount;
+                OscillogramScroll.Minimum = 0;
+                OscillogramScroll.Maximum = signal.SamplesCount;
+                double p = 0.999;
+                OscillogramScroll.ViewportSize = signal.SamplesCount * p / (1.0 - p);
             }
             
         }
@@ -87,11 +84,11 @@ namespace CGProject1 {
             long begin;
             long end;
 
-            if (!Int64.TryParse(BeginBox.Text, out begin)) {
+            if (!long.TryParse(BeginBox.Text, out begin)) {
                 begin = 0;
             }
 
-            if (!Int64.TryParse(EndBox.Text, out end)) {
+            if (!long.TryParse(EndBox.Text, out end)) {
                 end = samplesCount;
             }
 
@@ -99,6 +96,12 @@ namespace CGProject1 {
         }
 
         private void InputBeginEnd(long begin, long end) {
+            if (locked)
+            {
+                locked = false;
+                return;
+            }
+
             if (begin > samplesCount) {
                 begin = samplesCount;
             }
@@ -115,6 +118,13 @@ namespace CGProject1 {
                 end = begin;
             }
 
+            double p = (end - begin + 1) * 1.0 / samplesCount;
+            if (Math.Abs(p - 1.0) < 1e-5) p = 0.999;
+            OscillogramScroll.ViewportSize = samplesCount * p / Math.Abs(1.0 - p);
+            locked = true;
+            OscillogramScroll.Value = begin * (1.0 + p / Math.Abs(1.0 - p));
+            
+
             foreach (var chart in activeCharts) {
                 chart.Begin = (int)begin;
                 chart.End = (int)end;
@@ -124,10 +134,6 @@ namespace CGProject1 {
             EndSlider.Value = end;
             BeginBox.Text = begin.ToString();
             EndBox.Text = end.ToString();
-
-            //OscillogramScroll.Minimum = 0;
-            //OscillogramScroll.Maximum = samplesCount - end + begin;
-            //OscillogramScroll.Value = (begin + end) / 2;
         }
 
         private void previewTextInput(object sender, TextCompositionEventArgs e) {
@@ -148,7 +154,18 @@ namespace CGProject1 {
         }
 
         private void OscillogramScroll_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (locked)
+            {
+                locked = false;
+                return;
+            }
 
+            double p = (EndSlider.Value - BeginSlider.Value + 1) * 1.0 / samplesCount;
+            double begin = e.NewValue * Math.Abs(1.0 - p);
+            double end = begin + EndSlider.Value - BeginSlider.Value;
+            locked = true;
+            BeginSlider.Value = begin;
+            EndSlider.Value = end;
         }
     }
 }
