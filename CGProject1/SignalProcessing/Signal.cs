@@ -57,5 +57,12 @@ namespace CGProject1 {
         public Signal(string name) {
             this.fileName = name;
         }
+
+        public void UpdateChannelsInfo() {
+            foreach (var channel in channels) {
+                channel.StartDateTime = this.StartDateTime;
+                channel.SamplingFrq = this.SamplingFrq;
+            }
+        }
     }
 }

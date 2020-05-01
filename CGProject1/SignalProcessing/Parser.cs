@@ -104,6 +104,7 @@ namespace CGProject1 {
                 }
             }
 
+            result.UpdateChannelsInfo();
             return result;
         }
     }
