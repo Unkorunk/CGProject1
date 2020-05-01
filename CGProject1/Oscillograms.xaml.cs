@@ -15,6 +15,8 @@ namespace CGProject1 {
         private int samplesCount = 0;
 
         bool locked = false;
+        DateTime startTime;
+        double deltaTime;
 
         public Oscillograms() {
             InitializeComponent();
@@ -46,6 +48,9 @@ namespace CGProject1 {
                 OscillogramScroll.Maximum = signal.SamplesCount;
                 double p = 0.999;
                 OscillogramScroll.ViewportSize = signal.SamplesCount * p / (1.0 - p);
+
+                startTime = signal.StartDateTime;
+                deltaTime = signal.DeltaTime;
             }
             
         }
@@ -136,6 +141,8 @@ namespace CGProject1 {
             EndSlider.Value = end;
             BeginBox.Text = begin.ToString();
             EndBox.Text = end.ToString();
+            BeginTimeLabel.Content = (startTime + TimeSpan.FromSeconds(deltaTime * begin)).ToString("dd-MM-yyyy hh\\:mm\\:ss");
+            EndTimeLabel.Content = (startTime + TimeSpan.FromSeconds(deltaTime * end)).ToString("dd-MM-yyyy hh\\:mm\\:ss");
         }
 
         private void previewTextInput(object sender, TextCompositionEventArgs e) {

@@ -111,7 +111,7 @@ namespace CGProject1
 
                     var t = this.channel.StartDateTime + TimeSpan.FromSeconds(this.channel.DeltaTime * idx);
 
-                    var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n hh\\:mm\\:ss"),
+                    var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + idx.ToString() + ")",
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
                         new Typeface("Times New Roman"),

@@ -13,7 +13,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition></RowDefinition>
-            <RowDefinition Height="75"></RowDefinition>
+            <RowDefinition Height="125"></RowDefinition>
         </Grid.RowDefinitions>
 
         <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
@@ -23,7 +23,9 @@
         </ScrollViewer>
         <StackPanel Grid.Row="1" Grid.Column="1">
             <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged"></ScrollBar>
+            <Label Name="BeginTimeLabel">Start time:</Label>
             <Slider Name="BeginSlider" Minimum="0" Maximum="0" ValueChanged="BeginSlider_ValueChanged"></Slider>
+            <Label Name="EndTimeLabel">End time:</Label>
             <Slider Name="EndSlider" Minimum="0" Maximum="0" ValueChanged="EndSlider_ValueChanged"></Slider>
         </StackPanel>
 
@@ -35,11 +37,13 @@
             <Grid.RowDefinitions>
                 <RowDefinition></RowDefinition>
                 <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
-            <Label Grid.Row="0">Begin</Label>
-            <Label Grid.Row="1">End</Label>
-            <TextBox Name="BeginBox" Grid.Row="0" Grid.Column="1" MaxLength="9" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" TextChanged="textBox_ValueChanged"></TextBox>
-            <TextBox Name="EndBox" Grid.Row="1" Grid.Column="1" MaxLength="9" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" TextChanged="textBox_ValueChanged"></TextBox>
+            <Label Grid.Row="1">Begin</Label>
+            <Label Grid.Row="2">End</Label>
+            <TextBox Name="BeginBox" Grid.Row="1" Grid.Column="1" MaxLength="9" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" TextChanged="textBox_ValueChanged"></TextBox>
+            <TextBox Name="EndBox" Grid.Row="2" Grid.Column="1" MaxLength="9" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" TextChanged="textBox_ValueChanged"></TextBox>
         </Grid>
 
     </Grid>
