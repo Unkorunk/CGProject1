@@ -56,7 +56,8 @@ namespace CGProject1 {
             newChart.Begin = (int)BeginSlider.Value;
             newChart.End = (int)EndSlider.Value;
 
-            newChart.Height = 100;
+            newChart.Height = 300;
+            newChart.Margin = new Thickness(0, 2, 0, 2);
 
             OscillogramsField.Children.Add(newChart);
             newChart.GridDraw = true;

@@ -17,7 +17,6 @@ namespace CGProject1 {
         private Signal currentSignal;
 
         private List<Chart> charts = new List<Chart>();
-        private Chart activeChannel;
         private Chart activeChannelInGrid;
 
         public MainWindow() {
@@ -40,13 +39,8 @@ namespace CGProject1 {
                 currentSignal = Parser.Parse(openFileDialog.FileName);
                 if (aboutSignalWindow != null)
                 {
-                    aboutSignalWindow.UpdateInfo(currentSignal, (int)sliderBegin.Value, (int)sliderEnd.Value);
+                    aboutSignalWindow.UpdateInfo(currentSignal);
                 }
-
-                sliderBegin.Minimum = sliderEnd.Minimum = 0;
-                sliderBegin.Maximum = sliderEnd.Maximum = currentSignal.SamplesCount;
-                sliderBegin.Value = sliderBegin.Minimum;
-                sliderEnd.Value = sliderEnd.Minimum;
 
                 foreach(var chart in charts)
                 {
@@ -54,10 +48,10 @@ namespace CGProject1 {
                 }
                 charts.Clear();
 
-                if (channels.RowDefinitions.Count > 1)
-                {
-                    channels.RowDefinitions.RemoveRange(1, channels.RowDefinitions.Count - 1);
-                }
+                //if (channels.RowDefinitions.Count > 1)
+                //{
+                //    channels.RowDefinitions.RemoveRange(1, channels.RowDefinitions.Count - 1);
+                //}
 
                 if (isOscillogramShowing) {
                     oscillogramWindow.Update(currentSignal);
@@ -66,6 +60,7 @@ namespace CGProject1 {
                 for (int i = 0; i < currentSignal.channels.Length; i++)
                 {
                     var chart = new Chart(currentSignal.channels[i]);
+                    chart.Height = 100;
 
                     charts.Add(chart);
                     channels.Children.Add(chart);
@@ -83,21 +78,18 @@ namespace CGProject1 {
 
                     chart.ContextMenu.Items.Add(item1);
 
-                    if (channels.RowDefinitions.Count < i + 1)
-                    {
-                        channels.RowDefinitions.Add(new RowDefinition());
-                    }
+                    //if (channels.RowDefinitions.Count < i + 1)
+                    //{
+                        
+                    //    channels.RowDefinitions.Add(new RowDefinition());
+                    //}
 
-                    Grid.SetRow(chart, i);
-                    Grid.SetColumn(chart, 0);
+                    //Grid.SetRow(chart, i);
+                    //Grid.SetColumn(chart, 0);
 
                     chart.Begin = 0;
                     chart.End = currentSignal.SamplesCount;
                 }
-
-                activeChannelLabel.Content = "Активный канал:";
-                activeChannelPanel.Children.Clear();
-                activeChannel = null;
             }
         }
 
@@ -107,8 +99,8 @@ namespace CGProject1 {
             int row = 0;
             double accumulatedHeight = 0.0;
 
-            foreach (var rowDefinition in channels.RowDefinitions) {
-                accumulatedHeight += rowDefinition.ActualHeight;
+            foreach (var chart in charts) {
+                accumulatedHeight += chart.ActualHeight;
                 if (accumulatedHeight >= point.Y)
                     break;
                 row++;
@@ -126,27 +118,16 @@ namespace CGProject1 {
 
             activeChannelInGrid = charts[row];
             charts[row].Selected = true;
-            charts[row].SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
+            //charts[row].SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
             charts[row].EnableSelectInterval();
             charts[row].InvalidateVisual();
-
-            activeChannel = new Chart(currentSignal.channels[row]);
-            activeChannel.Begin = (int)sliderBegin.Value;
-            activeChannel.End = (int)sliderEnd.Value;
-
-            activeChannelPanel.Children.Clear();
-            activeChannelPanel.Children.Add(activeChannel);
-            activeChannelLabel.Content = $"Активный канал: {currentSignal.channels[row].Name}";
-
-            Grid.SetRow(activeChannel, 0);
-            Grid.SetColumn(activeChannel, 0);
         }
 
         private void AboutSignalClick(object sender, RoutedEventArgs e) {
             if (!this.showing)
             {
                 aboutSignalWindow = new AboutSignal();
-                aboutSignalWindow.UpdateInfo(currentSignal, (int)sliderBegin.Value, (int)sliderEnd.Value);
+                aboutSignalWindow.UpdateInfo(currentSignal);
                 aboutSignalWindow.Closed += (object sender, System.EventArgs e) => this.showing = false;
                 aboutSignalWindow.Show();
                 showing = true;
@@ -164,50 +145,6 @@ namespace CGProject1 {
                 oscillogramWindow.Closed += (object sender, System.EventArgs e) => this.isOscillogramShowing = false;
                 oscillogramWindow.Update(currentSignal);
                 oscillogramWindow.Show();
-            }
-        }
-
-        private void sliderBegin_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (activeChannel != null) {
-                activeChannel.Begin = (int)sliderBegin.Value;
-            }
-
-            if (sliderEnd.Value < e.NewValue)
-            {
-                sliderEnd.Value = e.NewValue;
-
-                if (activeChannel != null) {
-                    activeChannel.End = (int)sliderEnd.Value;
-                }
-            }
-
-            labelBegin.Content = "Begin: " + (int)sliderBegin.Value;
-            labelEnd.Content = "End: " + (int)sliderEnd.Value;
-            if (activeChannelInGrid != null) activeChannelInGrid.SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
-
-            if (aboutSignalWindow != null) {
-                aboutSignalWindow.UpdateActiveSegment((int)sliderBegin.Value, (int)sliderEnd.Value);
-            }
-        }
-
-        private void sliderEnd_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (e.NewValue < sliderBegin.Value)
-            {
-                (sender as Slider).Value = sliderBegin.Value;
-            }
-
-            labelEnd.Content = "End: " + (int)sliderEnd.Value;
-
-            if (activeChannel != null) {
-                activeChannel.End = (int)sliderEnd.Value;
-            }
-            if (activeChannelInGrid != null) activeChannelInGrid.SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
-
-
-            if (aboutSignalWindow != null) {
-                aboutSignalWindow.UpdateActiveSegment((int)sliderBegin.Value, (int)sliderEnd.Value);
             }
         }
     }

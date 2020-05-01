@@ -31,7 +31,7 @@
         <Label Grid.Column="0" Grid.Row="4" FontWeight="Bold">Дата и время начала записи:</Label>
         <Label Grid.Column="0" Grid.Row="5" FontWeight="Bold">Дата и время окончания записи:</Label>
         <Label Grid.Column="0" Grid.Row="6" FontWeight="Bold">Длительность:</Label>
-        <Label Grid.Column="0" Grid.Row="7" FontWeight="Bold">Активный фрагмент:</Label>
+        <!--<Label Grid.Column="0" Grid.Row="7" FontWeight="Bold">Активный фрагмент:</Label>-->
         
         <Label Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="2" HorizontalAlignment="Center" FontWeight="Bold" FontSize="14">Информация о каналах</Label>
 
