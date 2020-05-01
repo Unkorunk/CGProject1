@@ -76,13 +76,7 @@ namespace CGProject1 {
                     item1.Header = "Осциллограмма";
                     int cur = i;
                     item1.Click += (object sender, RoutedEventArgs args) => {
-                        if (!isOscillogramShowing) {
-                            isOscillogramShowing = true;
-                            oscillogramWindow = new Oscillograms();
-                            oscillogramWindow.Closed += (object sender, System.EventArgs e) => this.isOscillogramShowing = false;
-                            oscillogramWindow.Update(currentSignal);
-                            oscillogramWindow.Show();
-                        }
+                        OpenOscillograms();
 
                         oscillogramWindow.AddChannel(currentSignal.channels[cur]);
                     };
@@ -156,6 +150,20 @@ namespace CGProject1 {
                 aboutSignalWindow.Closed += (object sender, System.EventArgs e) => this.showing = false;
                 aboutSignalWindow.Show();
                 showing = true;
+            }
+        }
+
+        private void OscillogramsClick(object sender, RoutedEventArgs e) {
+            OpenOscillograms();
+        }
+
+        private void OpenOscillograms() {
+            if (!this.isOscillogramShowing) {
+                isOscillogramShowing = true;
+                oscillogramWindow = new Oscillograms();
+                oscillogramWindow.Closed += (object sender, System.EventArgs e) => this.isOscillogramShowing = false;
+                oscillogramWindow.Update(currentSignal);
+                oscillogramWindow.Show();
             }
         }
 
