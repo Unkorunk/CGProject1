@@ -59,6 +59,7 @@ namespace CGProject1 {
             newChart.Height = 100;
 
             OscillogramsField.Children.Add(newChart);
+            newChart.GridDraw = true;
             activeCharts.Add(newChart);
 
             newChart.ContextMenu = new ContextMenu();

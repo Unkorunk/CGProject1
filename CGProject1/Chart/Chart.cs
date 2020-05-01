@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
 
 namespace CGProject1
@@ -36,6 +34,8 @@ namespace CGProject1
                 InvalidateVisual();
             }
         }
+
+        public bool GridDraw { get; set; }
 
         public int Length { get => End - Begin + 1; }
 
@@ -74,10 +74,80 @@ namespace CGProject1
                 new Rect(0, 0, ActualWidth, ActualHeight)
             );
 
-            if (optimization)
+            if (enableSelectInterval)
             {
+                if (optimization)
+                {
+                    dc.DrawRectangle(Brushes.LightCoral,
+                        new Pen(Brushes.Transparent, 2.0),
+                        new Rect(2.0 * stepX * (selectIntervalBegin - this.Begin) / stepOptimization, 0,
+                                 2.0 * stepX * (selectIntervalEnd - selectIntervalBegin) / stepOptimization, ActualHeight
+                        )
+                    );
+                } else
+                {
+                    dc.DrawRectangle(Brushes.LightCoral,
+                        new Pen(Brushes.Transparent, 2.0),
+                        new Rect(stepX * (selectIntervalBegin - this.Begin), 0,
+                        (selectIntervalEnd - selectIntervalBegin) * stepX, ActualHeight)
+                    );
+                }
+            }
+
+            if (this.GridDraw)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    double x = (i + 1) * this.ActualWidth / 9;
+                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(x, 0), new Point(x, this.ActualHeight));
+                    int idx;
+                    if (optimization)
+                    {
+                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
+                    } else
+                    {
+                        idx = (int)Math.Round(x / stepX + this.Begin);
+                    }
+                    var formText1 = new FormattedText(idx.ToString(),
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue
+                    );
+
+                    dc.DrawText(formText1, new Point(x - formText1.Width / 2, 0));
+                }
+
+                double minValue = double.MaxValue;
+                double maxValue = double.MinValue;
+                for (int j = this.Begin; j <= this.End; j++)
+                {
+                    minValue = Math.Min(minValue, this.channel.values[j]);
+                    maxValue = Math.Max(maxValue, this.channel.values[j]);
+                }
+
+                for (int i = 0; i < 5; i++)
+                {
+                    double y = (i + 1) * this.ActualHeight / 6;
+                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(0, y), new Point(this.ActualWidth, y));
+
+                    var formText1 = new FormattedText(Math.Round(maxValue - (i + 1) * (maxValue - minValue) / 6).ToString(),
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue
+                    );
+
+                    dc.DrawText(formText1, new Point(0, y - formText1.Height / 2));
+                }
+            }
+
+
+            if (optimization)
+            {  
                 double prevValueMin = double.MaxValue;
                 double prevValueMax = double.MinValue;
+
                 for (int i = 0; i < stepOptimization; i++)
                 {
                     int idx = this.Begin + i;
@@ -87,20 +157,11 @@ namespace CGProject1
                 }
                 dc.DrawLine(
                     new Pen(Brushes.Black, 1.0),
-                    new Point(0, stepY * (prevValueMin - channelMinValue) / height + offsetY),
-                    new Point(stepX, stepY * (prevValueMax - channelMinValue) / height + offsetY)
+                    new Point(0, stepY * (1.0 - (prevValueMin - channelMinValue) / height) + offsetY),
+                    new Point(stepX, stepY * (1.0 - (prevValueMax - channelMinValue) / height) + offsetY)
                 );
 
                 int n = (this.Length + stepOptimization - 1) / stepOptimization;
-                if (enableSelectInterval)
-                {
-                    dc.DrawRectangle(Brushes.LightCoral,
-                        new Pen(Brushes.Transparent, 2.0),
-                        new Rect(2.0 * stepX * (selectIntervalBegin - this.Begin) / stepOptimization, 0,
-                                 2.0 * stepX * (selectIntervalEnd - selectIntervalBegin) / stepOptimization, ActualHeight
-                        )
-                    );
-                }
 
                 for (int i = 1; i < n; i++)
                 {
@@ -124,13 +185,13 @@ namespace CGProject1
                     int lineX = 1 + 2 * (i - 1);
                     dc.DrawLine(
                         new Pen(Brushes.Black, 1.0),
-                        new Point(lineX * stepX, stepY * (prevValueMax - channelMinValue) / height + offsetY),
-                        new Point((lineX + 1) * stepX, stepY * (nowValueMin - channelMinValue) / height + offsetY)
+                        new Point(lineX * stepX, stepY * (1.0 - (prevValueMax - channelMinValue) / height) + offsetY),
+                        new Point((lineX + 1) * stepX, stepY * (1.0 - (nowValueMin - channelMinValue) / height) + offsetY)
                     );
                     dc.DrawLine(
                         new Pen(Brushes.Black, 1.0),
-                        new Point((lineX + 1) * stepX, stepY * (nowValueMin - channelMinValue) / height + offsetY),
-                        new Point((lineX + 2) * stepX, stepY * (nowValueMax - channelMinValue) / height + offsetY)
+                        new Point((lineX + 1) * stepX, stepY * (1.0 - (nowValueMin - channelMinValue) / height) + offsetY),
+                        new Point((lineX + 2) * stepX, stepY * (1.0 - (nowValueMax - channelMinValue) / height) + offsetY)
                     );
 
                     prevValueMax = nowValueMax;
@@ -138,22 +199,14 @@ namespace CGProject1
             }
             else
             {
-                if (enableSelectInterval)
-                {
-                    dc.DrawRectangle(Brushes.LightCoral,
-                        new Pen(Brushes.Transparent, 2.0),
-                        new Rect((selectIntervalBegin - this.Begin) * stepX, 0, (selectIntervalEnd - selectIntervalBegin) * stepX, ActualHeight)
-                    );
-                }
-
                 double prevValue = this.channel.values[this.Begin];
                 for (int i = 1; i < this.Length; i++)
                 {
                     double nowValue = this.channel.values[this.Begin + i];
                     dc.DrawLine(
                         new Pen(Brushes.Black, 1.0),
-                        new Point((i - 1) * stepX, stepY * (prevValue - channelMinValue) / height + offsetY),
-                        new Point(i * stepX, stepY * (nowValue - channelMinValue) / height + offsetY)
+                        new Point((i - 1) * stepX, stepY * (1.0 - (prevValue - channelMinValue) / height) + offsetY),
+                        new Point(i * stepX, stepY * (1.0 - (nowValue - channelMinValue) / height) + offsetY)
                     );
                     prevValue = nowValue;
                 }
