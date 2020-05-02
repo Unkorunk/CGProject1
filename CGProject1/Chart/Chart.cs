@@ -184,7 +184,7 @@ namespace CGProject1
                     );
                     formText1.TextAlignment = TextAlignment.Center;
 
-                    dc.DrawText(formText1, new Point(x - formText1.Width / 2, 0));
+                    dc.DrawText(formText1, new Point(x, 0));
                 }
 
                 double minValue = double.MaxValue;
