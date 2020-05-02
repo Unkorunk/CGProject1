@@ -176,5 +176,14 @@ namespace CGProject1 {
             BeginSlider.Value = begin;
             EndSlider.Value = end;
         }
+
+        private void isScale_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var chart in activeCharts)
+            {
+                chart.IsScale = isScale.IsChecked == null ? false : (bool)isScale.IsChecked;
+                chart.InvalidateVisual();
+            }
+        }
     }
 }

@@ -44,6 +44,8 @@ namespace CGProject1
             this.channel = channel;
         }
 
+        public bool IsScale { get; set; }
+
         protected override void OnRender(DrawingContext dc)
         {
             if (this.Length < 2) return;
@@ -64,8 +66,21 @@ namespace CGProject1
 
             double offsetY = this.ActualHeight / 2.0 - stepY / 2.0;
 
-            double channelMinValue = this.channel.MinValue;
-            double channelMaxValue = this.channel.MaxValue;
+            double channelMinValue = double.MaxValue;
+            double channelMaxValue = double.MinValue;
+            if (IsScale)
+            {
+                for (int i = this.Begin; i <=  this.End; i++)
+                {
+                    channelMinValue = Math.Min(channelMinValue, this.channel.values[i]);
+                    channelMaxValue = Math.Max(channelMaxValue, this.channel.values[i]);
+                }
+            } else
+            {
+                channelMinValue = this.channel.MinValue;
+                channelMaxValue = this.channel.MaxValue;
+            }
+
 
             double height = Math.Abs(channelMaxValue - channelMinValue);
 
@@ -73,9 +88,6 @@ namespace CGProject1
                 new Pen(Brushes.DarkGray, 2.0),
                 new Rect(0, 0, ActualWidth, ActualHeight)
             );
-
-            
-
 
             if (optimization)
             {  
