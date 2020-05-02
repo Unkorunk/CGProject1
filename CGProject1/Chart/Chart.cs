@@ -74,76 +74,7 @@ namespace CGProject1
                 new Rect(0, 0, ActualWidth, ActualHeight)
             );
 
-            if (enableSelectInterval)
-            {
-                if (optimization)
-                {
-                    dc.DrawRectangle(Brushes.LightCoral,
-                        new Pen(Brushes.Transparent, 2.0),
-                        new Rect(2.0 * stepX * (selectIntervalBegin - this.Begin) / stepOptimization, 0,
-                                 2.0 * stepX * (selectIntervalEnd - selectIntervalBegin) / stepOptimization, ActualHeight
-                        )
-                    );
-                } else
-                {
-                    dc.DrawRectangle(Brushes.LightCoral,
-                        new Pen(Brushes.Transparent, 2.0),
-                        new Rect(stepX * (selectIntervalBegin - this.Begin), 0,
-                        (selectIntervalEnd - selectIntervalBegin) * stepX, ActualHeight)
-                    );
-                }
-            }
-
-            if (this.GridDraw)
-            {
-                for (int i = 0; i < 8; i++)
-                {
-                    double x = (i + 1) * this.ActualWidth / 9;
-                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(x, 0), new Point(x, this.ActualHeight));
-                    int idx;
-                    if (optimization)
-                    {
-                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
-                    } else
-                    {
-                        idx = (int)Math.Round(x / stepX + this.Begin);
-                    }
-
-                    var t = this.channel.StartDateTime + TimeSpan.FromSeconds(this.channel.DeltaTime * idx);
-
-                    var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + idx.ToString() + ")",
-                        CultureInfo.GetCultureInfo("en-us"),
-                        FlowDirection.LeftToRight,
-                        new Typeface("Times New Roman"),
-                        12, Brushes.Blue
-                    );
-
-                    dc.DrawText(formText1, new Point(x - formText1.Width / 2, 0));
-                }
-
-                double minValue = double.MaxValue;
-                double maxValue = double.MinValue;
-                for (int j = this.Begin; j <= this.End; j++)
-                {
-                    minValue = Math.Min(minValue, this.channel.values[j]);
-                    maxValue = Math.Max(maxValue, this.channel.values[j]);
-                }
-
-                for (int i = 0; i < 5; i++)
-                {
-                    double y = (i + 1) * this.ActualHeight / 6;
-                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(0, y), new Point(this.ActualWidth, y));
-
-                    var formText1 = new FormattedText(Math.Round(maxValue - (i + 1) * (maxValue - minValue) / 6).ToString(),
-                        CultureInfo.GetCultureInfo("en-us"),
-                        FlowDirection.LeftToRight,
-                        new Typeface("Times New Roman"),
-                        12, Brushes.Blue
-                    );
-
-                    dc.DrawText(formText1, new Point(0, y - formText1.Height / 2));
-                }
-            }
+            
 
 
             if (optimization)
@@ -212,6 +143,68 @@ namespace CGProject1
                         new Point(i * stepX, stepY * (1.0 - (nowValue - channelMinValue) / height) + offsetY)
                     );
                     prevValue = nowValue;
+                }
+            }
+
+            if (enableSelectInterval) {
+                if (optimization) {
+                    dc.DrawRectangle(Brushes.LightCoral,
+                        new Pen(Brushes.Transparent, 2.0),
+                        new Rect(2.0 * stepX * (selectIntervalBegin - this.Begin) / stepOptimization, 0,
+                                 2.0 * stepX * (selectIntervalEnd - selectIntervalBegin) / stepOptimization, ActualHeight
+                        )
+                    );
+                } else {
+                    dc.DrawRectangle(Brushes.LightCoral,
+                        new Pen(Brushes.Transparent, 2.0),
+                        new Rect(stepX * (selectIntervalBegin - this.Begin), 0,
+                        (selectIntervalEnd - selectIntervalBegin) * stepX, ActualHeight)
+                    );
+                }
+            }
+
+            if (this.GridDraw) {
+                for (int i = 0; i < 8; i++) {
+                    double x = (i + 1) * this.ActualWidth / 9;
+                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(x, 0), new Point(x, this.ActualHeight));
+                    int idx;
+                    if (optimization) {
+                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
+                    } else {
+                        idx = (int)Math.Round(x / stepX + this.Begin);
+                    }
+
+                    var t = this.channel.StartDateTime + TimeSpan.FromSeconds(this.channel.DeltaTime * idx);
+
+                    var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + idx.ToString() + ")",
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue
+                    );
+
+                    dc.DrawText(formText1, new Point(x - formText1.Width / 2, 0));
+                }
+
+                double minValue = double.MaxValue;
+                double maxValue = double.MinValue;
+                for (int j = this.Begin; j <= this.End; j++) {
+                    minValue = Math.Min(minValue, this.channel.values[j]);
+                    maxValue = Math.Max(maxValue, this.channel.values[j]);
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    double y = (i + 1) * this.ActualHeight / 6;
+                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(0, y), new Point(this.ActualWidth, y));
+
+                    var formText1 = new FormattedText(Math.Round(maxValue - (i + 1) * (maxValue - minValue) / 6).ToString(),
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue
+                    );
+
+                    dc.DrawText(formText1, new Point(0, y - formText1.Height / 2));
                 }
             }
 

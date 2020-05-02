@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
-        Title="Oscillograms" Height="450" Width="800">
+        Title="Oscillograms" Height="600" Width="1200">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="125"></ColumnDefinition>
@@ -22,7 +22,7 @@
             </StackPanel>
         </ScrollViewer>
         <StackPanel Grid.Row="1" Grid.Column="1">
-            <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged"></ScrollBar>
+            <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged" LargeChange="150" SmallChange="30"></ScrollBar>
             <Label Name="BeginTimeLabel">Start time:</Label>
             <Slider Name="BeginSlider" Minimum="0" Maximum="0" ValueChanged="BeginSlider_ValueChanged"></Slider>
             <Label Name="EndTimeLabel">End time:</Label>
