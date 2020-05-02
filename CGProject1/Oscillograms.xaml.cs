@@ -159,7 +159,7 @@ namespace CGProject1 {
         }
 
         private bool TextIsNumeric(string input) {
-            return input.All(c => Char.IsDigit(c) || Char.IsControl(c));
+            return input.All(c => char.IsDigit(c) || char.IsControl(c));
         }
 
         private void OscillogramScroll_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {

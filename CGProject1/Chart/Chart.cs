@@ -182,6 +182,7 @@ namespace CGProject1
                         new Typeface("Times New Roman"),
                         12, Brushes.Blue
                     );
+                    formText1.TextAlignment = TextAlignment.Center;
 
                     dc.DrawText(formText1, new Point(x - formText1.Width / 2, 0));
                 }
