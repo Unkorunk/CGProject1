@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Diagnostics.Contracts;
 
 namespace CGProject1 {
     /// <summary>
@@ -18,9 +20,30 @@ namespace CGProject1 {
         DateTime startTime;
         double deltaTime;
 
+        MenuItem defaultScaling = null;
+
         public Oscillograms() {
             InitializeComponent();
             activeCharts = new HashSet<Chart>();
+
+            var globalScaling = new MenuItem();
+            globalScaling.Header = "Глобальное";
+            globalScaling.Click += GlobalScaling_Click;
+            globalScaling.IsChecked = true;
+
+            defaultScaling = globalScaling;
+
+            ScalingChooser.Items.Add(globalScaling);
+
+            var autoScaling = new MenuItem();
+            autoScaling.Header = "Автомасштаб";
+            autoScaling.Click += AutoScaling_Click;
+            ScalingChooser.Items.Add(autoScaling);
+
+            var fixedScaling = new MenuItem();
+            fixedScaling.Header = "Фиксированное";
+            fixedScaling.Click += FixedScaling_Click;
+            ScalingChooser.Items.Add(fixedScaling);
         }
 
         public void Update(Signal signal) {
@@ -29,6 +52,9 @@ namespace CGProject1 {
             BeginBox.IsEnabled = signal != null;
             EndBox.IsEnabled = signal != null;
             OscillogramScroll.IsEnabled = signal != null;
+
+            ResetScalingMode(defaultScaling);
+            
 
             if (signal != null) {
                 samplesCount = signal.SamplesCount;
@@ -177,12 +203,36 @@ namespace CGProject1 {
             EndSlider.Value = end;
         }
 
-        private void isScale_Click(object sender, RoutedEventArgs e)
-        {
-            foreach (var chart in activeCharts)
-            {
-                chart.IsScale = isScale.IsChecked == null ? false : (bool)isScale.IsChecked;
-                chart.InvalidateVisual();
+        private void ResetScalingMode(MenuItem scalingMode) {
+            foreach (MenuItem item in ScalingChooser.Items) {
+                if (item == scalingMode) {
+                    item.IsChecked = true;
+                } else {
+                    item.IsChecked = false;
+                }
+            }
+        }
+
+        private void GlobalScaling_Click(object sender, RoutedEventArgs e) {
+            ResetScalingMode(sender as MenuItem);
+
+            foreach (var chart in activeCharts) {
+                chart.Scaling = Chart.ScalingMode.Global;
+            }
+        }
+
+        private void AutoScaling_Click(object sender, RoutedEventArgs e) {
+            ResetScalingMode(sender as MenuItem);
+
+            foreach (var chart in activeCharts) {
+                chart.Scaling = Chart.ScalingMode.Auto;
+            }
+        }
+        private void FixedScaling_Click(object sender, RoutedEventArgs e) {
+            ResetScalingMode(sender as MenuItem);
+
+            foreach (var chart in activeCharts) {
+                chart.Scaling = Chart.ScalingMode.Fixed;
             }
         }
     }

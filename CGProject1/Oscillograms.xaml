@@ -12,16 +12,22 @@
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="20"></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition Height="125"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+        <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
             <StackPanel Name="OscillogramsField">
 
             </StackPanel>
         </ScrollViewer>
-        <StackPanel Grid.Row="1" Grid.Column="1">
+        <Menu Grid.ColumnSpan="2" Height="20">
+            <MenuItem Name="ScalingChooser" Header="Масштабирование">
+                
+            </MenuItem>
+        </Menu>
+        <StackPanel Grid.Row="2" Grid.Column="1">
             <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged" LargeChange="150" SmallChange="30"></ScrollBar>
             <Label Name="BeginTimeLabel">Start time:</Label>
             <Slider Name="BeginSlider" Minimum="0" Maximum="0" ValueChanged="BeginSlider_ValueChanged"></Slider>
@@ -29,7 +35,7 @@
             <Slider Name="EndSlider" Minimum="0" Maximum="0" ValueChanged="EndSlider_ValueChanged"></Slider>
         </StackPanel>
 
-        <Grid Grid.Row="1" Grid.Column="0">
+        <Grid Grid.Row="2" Grid.Column="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="40"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
@@ -40,7 +46,6 @@
                 <RowDefinition></RowDefinition>
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
-            <CheckBox Name="isScale" Grid.Row="0" Grid.ColumnSpan="2" Click="isScale_Click">Type Scale</CheckBox>
             <Label Grid.Row="1">Begin</Label>
             <Label Grid.Row="2">End</Label>
             <TextBox Name="BeginBox" Grid.Row="1" Grid.Column="1" MaxLength="9" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" TextChanged="textBox_ValueChanged"></TextBox>

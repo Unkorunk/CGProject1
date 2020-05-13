@@ -7,6 +7,29 @@ namespace CGProject1
 {
     class Chart : FrameworkElement
     {
+        public enum ScalingMode {
+            Global,
+            Auto,
+            Fixed
+        }
+
+        private double minChannelValue = 0;
+        private double maxChannelValue = 0;
+
+        public ScalingMode Scaling { get; set; }
+
+        public double MinFixedScale { get => minChannelValue; set {
+                minChannelValue = value;
+                InvalidateVisual();
+            }
+        }
+        public double MaxFixedScale {
+            get => maxChannelValue; set {
+                minChannelValue = value;
+                InvalidateVisual();
+            }
+        }
+
         private Channel channel;
 
         #region [SelectInterval] Variables
@@ -68,18 +91,44 @@ namespace CGProject1
 
             double channelMinValue = double.MaxValue;
             double channelMaxValue = double.MinValue;
-            if (IsScale)
-            {
-                for (int i = this.Begin; i <=  this.End; i++)
-                {
-                    channelMinValue = Math.Min(channelMinValue, this.channel.values[i]);
-                    channelMaxValue = Math.Max(channelMaxValue, this.channel.values[i]);
-                }
-            } else
-            {
-                channelMinValue = this.channel.MinValue;
-                channelMaxValue = this.channel.MaxValue;
+
+            switch (this.Scaling) {
+                case ScalingMode.Auto: {
+                        this.minChannelValue = double.MaxValue;
+                        this.maxChannelValue = double.MinValue;
+
+                        for (int i = this.Begin; i <= this.End; i++) {
+                            channelMinValue = Math.Min(channelMinValue, this.channel.values[i]);
+                            channelMaxValue = Math.Max(channelMaxValue, this.channel.values[i]);
+                        }
+
+                        break;
+                    }
+                case ScalingMode.Global: {
+                        channelMinValue = this.channel.MinValue;
+                        channelMaxValue = this.channel.MaxValue;
+                        break;
+                    }
+
+                default: {
+                        channelMinValue = this.minChannelValue;
+                        channelMaxValue = this.maxChannelValue;
+                    }
+                    break;
             }
+
+            //if (IsScale)
+            //{
+            //    for (int i = this.Begin; i <=  this.End; i++)
+            //    {
+            //        channelMinValue = Math.Min(channelMinValue, this.channel.values[i]);
+            //        channelMaxValue = Math.Max(channelMaxValue, this.channel.values[i]);
+            //    }
+            //} else
+            //{
+            //    channelMinValue = this.channel.MinValue;
+            //    channelMaxValue = this.channel.MaxValue;
+            //}
 
 
             double height = Math.Abs(channelMaxValue - channelMinValue);
