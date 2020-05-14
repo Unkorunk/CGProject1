@@ -74,6 +74,8 @@ namespace CGProject1
         private bool enableSelectInterval = false;
         private int selectIntervalBegin = 0;
         private int selectIntervalEnd = 0;
+
+        private int fakeBegin = 0;
         #endregion [SelectInterval] Variables
 
         private int begin = 0;
@@ -408,6 +410,7 @@ namespace CGProject1
             {
                 int idx = GetIdx(position);
                 selectIntervalBegin = selectIntervalEnd = Math.Clamp(idx, this.Begin, this.End);
+                fakeBegin = selectIntervalBegin;
 
                 enableSelectInterval = true;
                 InvalidateVisual();
@@ -424,7 +427,18 @@ namespace CGProject1
                 position.Y >= interfaceOffset.Height)
             {
                 int idx = GetIdx(position);
-                selectIntervalEnd = Math.Clamp(idx, selectIntervalBegin, this.End);
+
+                selectIntervalEnd = idx;
+                selectIntervalBegin = fakeBegin;
+                if (selectIntervalEnd < selectIntervalBegin)
+                {
+                    selectIntervalBegin = idx;
+                    selectIntervalEnd = fakeBegin;
+                }
+
+                selectIntervalBegin = Math.Clamp(selectIntervalBegin, this.Begin, this.End);
+                selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End);
+
                 enableSelectInterval = false;
 
                 if (selectIntervalEnd > selectIntervalBegin)
@@ -448,7 +462,17 @@ namespace CGProject1
                 enableSelectInterval && this.IsMouseSelect)
             {
                 int idx = GetIdx(position);
-                selectIntervalEnd = Math.Clamp(idx, selectIntervalBegin, this.End);
+
+                selectIntervalEnd = idx;
+                selectIntervalBegin = fakeBegin;
+                if (selectIntervalEnd < selectIntervalBegin)
+                {
+                    selectIntervalBegin = idx;
+                    selectIntervalEnd = fakeBegin;
+                }
+
+                selectIntervalBegin = Math.Clamp(selectIntervalBegin, this.Begin, this.End);
+                selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End);
 
                 InvalidateVisual();
             }
