@@ -33,6 +33,33 @@ namespace CGProject1.SignalProcessing {
                     });
             discreteModels.Add(discretExp);
 
+            var discretSin = new ChannelConstructor("Дискр. синусоида", 3,
+                    new string[] { "Амплитуда", "Круг. частота", "Нач. фаза" },
+                    new double[] { double.MinValue, 0, 0 }, new double[] { double.MaxValue, Math.PI, Math.PI * 2 },
+                    (int n, double dt, double[] args) => {
+                        return args[0] * Math.Sin(n * args[1] + args[2]);
+                    });
+            discreteModels.Add(discretSin);
+
+            var meandr = new ChannelConstructor("Меандр", 4,
+                    new string[] { "Период" }, new double[] { 1 }, new double[] { double.MaxValue },
+                    (int n, double dt, double[] args) => {
+                        int l = (int)args[0];
+                        if ((n % l) < l / 2.0) {
+                            return 1;
+                        }
+                        return -1;
+                    });
+            discreteModels.Add(meandr);
+
+            var saw = new ChannelConstructor("Пила", 5,
+                    new string[] { "Период" }, new double[] { 1 }, new double[] { double.MaxValue },
+                    (int n, double dt, double[] args) => {
+                        int l = (int)args[0];
+                        return (n % l) * 1.0 / l;
+                    });
+            discreteModels.Add(saw);
+
             continiousModels = new List<ChannelConstructor>();
         }
 
