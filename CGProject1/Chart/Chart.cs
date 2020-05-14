@@ -9,7 +9,7 @@ namespace CGProject1
     {
         public enum ScalingMode {
             Global,
-            Auto,
+            Local,
             Fixed
         }
 
@@ -19,14 +19,20 @@ namespace CGProject1
         public ScalingMode Scaling { get; set; }
 
         public double MinFixedScale { get => minChannelValue; set {
-                minChannelValue = value;
-                InvalidateVisual();
+                if (this.Scaling == ScalingMode.Fixed)
+                {
+                    minChannelValue = value;
+                    InvalidateVisual();
+                }
             }
         }
         public double MaxFixedScale {
             get => maxChannelValue; set {
-                minChannelValue = value;
-                InvalidateVisual();
+                if (this.Scaling == ScalingMode.Fixed)
+                {
+                    minChannelValue = value;
+                    InvalidateVisual();
+                }
             }
         }
 
@@ -67,8 +73,6 @@ namespace CGProject1
             this.channel = channel;
         }
 
-        public bool IsScale { get; set; }
-
         protected override void OnRender(DrawingContext dc)
         {
             if (this.Length < 2) return;
@@ -86,52 +90,34 @@ namespace CGProject1
             }
 
             double stepY = this.ActualHeight;
-
             double offsetY = this.ActualHeight / 2.0 - stepY / 2.0;
 
-            double channelMinValue = double.MaxValue;
-            double channelMaxValue = double.MinValue;
+            switch (this.Scaling)
+            {
+                case ScalingMode.Global:
+                    {
+                        this.minChannelValue = this.channel.MinValue;
+                        this.maxChannelValue = this.channel.MaxValue;
 
-            switch (this.Scaling) {
-                case ScalingMode.Auto: {
-                        this.minChannelValue = double.MaxValue;
-                        this.maxChannelValue = double.MinValue;
+                        break;
+                    }
+                case ScalingMode.Local:
+                    {
+                        this.minChannelValue = this.channel.MaxValue;
+                        this.maxChannelValue = this.channel.MinValue;
 
-                        for (int i = this.Begin; i <= this.End; i++) {
-                            channelMinValue = Math.Min(channelMinValue, this.channel.values[i]);
-                            channelMaxValue = Math.Max(channelMaxValue, this.channel.values[i]);
+                        for (int i = this.Begin; i <= this.End; i++)
+                        {
+                            this.minChannelValue = Math.Min(this.minChannelValue, this.channel.values[i]);
+                            this.maxChannelValue = Math.Max(this.maxChannelValue, this.channel.values[i]);
                         }
 
                         break;
                     }
-                case ScalingMode.Global: {
-                        channelMinValue = this.channel.MinValue;
-                        channelMaxValue = this.channel.MaxValue;
-                        break;
-                    }
-
-                default: {
-                        channelMinValue = this.minChannelValue;
-                        channelMaxValue = this.maxChannelValue;
-                    }
-                    break;
+                case ScalingMode.Fixed: break;
             }
 
-            //if (IsScale)
-            //{
-            //    for (int i = this.Begin; i <=  this.End; i++)
-            //    {
-            //        channelMinValue = Math.Min(channelMinValue, this.channel.values[i]);
-            //        channelMaxValue = Math.Max(channelMaxValue, this.channel.values[i]);
-            //    }
-            //} else
-            //{
-            //    channelMinValue = this.channel.MinValue;
-            //    channelMaxValue = this.channel.MaxValue;
-            //}
-
-
-            double height = Math.Abs(channelMaxValue - channelMinValue);
+            double height = Math.Abs(this.maxChannelValue - this.minChannelValue);
 
             dc.DrawRectangle(this.Selected ? Brushes.LightBlue : Brushes.LightGray,
                 new Pen(Brushes.DarkGray, 2.0),
@@ -152,8 +138,8 @@ namespace CGProject1
                 }
                 dc.DrawLine(
                     new Pen(Brushes.Black, 1.0),
-                    new Point(0, stepY * (1.0 - (prevValueMin - channelMinValue) / height) + offsetY),
-                    new Point(stepX, stepY * (1.0 - (prevValueMax - channelMinValue) / height) + offsetY)
+                    new Point(0, stepY * (1.0 - (prevValueMin - this.minChannelValue) / height) + offsetY),
+                    new Point(stepX, stepY * (1.0 - (prevValueMax - this.minChannelValue) / height) + offsetY)
                 );
 
                 int n = (this.Length + stepOptimization - 1) / stepOptimization;
@@ -180,13 +166,13 @@ namespace CGProject1
                     int lineX = 1 + 2 * (i - 1);
                     dc.DrawLine(
                         new Pen(Brushes.Black, 1.0),
-                        new Point(lineX * stepX, stepY * (1.0 - (prevValueMax - channelMinValue) / height) + offsetY),
-                        new Point((lineX + 1) * stepX, stepY * (1.0 - (nowValueMin - channelMinValue) / height) + offsetY)
+                        new Point(lineX * stepX, stepY * (1.0 - (prevValueMax - this.minChannelValue) / height) + offsetY),
+                        new Point((lineX + 1) * stepX, stepY * (1.0 - (nowValueMin - this.minChannelValue) / height) + offsetY)
                     );
                     dc.DrawLine(
                         new Pen(Brushes.Black, 1.0),
-                        new Point((lineX + 1) * stepX, stepY * (1.0 - (nowValueMin - channelMinValue) / height) + offsetY),
-                        new Point((lineX + 2) * stepX, stepY * (1.0 - (nowValueMax - channelMinValue) / height) + offsetY)
+                        new Point((lineX + 1) * stepX, stepY * (1.0 - (nowValueMin - this.minChannelValue) / height) + offsetY),
+                        new Point((lineX + 2) * stepX, stepY * (1.0 - (nowValueMax - this.minChannelValue) / height) + offsetY)
                     );
 
                     prevValueMax = nowValueMax;
@@ -200,8 +186,8 @@ namespace CGProject1
                     double nowValue = this.channel.values[this.Begin + i];
                     dc.DrawLine(
                         new Pen(Brushes.Black, 1.0),
-                        new Point((i - 1) * stepX, stepY * (1.0 - (prevValue - channelMinValue) / height) + offsetY),
-                        new Point(i * stepX, stepY * (1.0 - (nowValue - channelMinValue) / height) + offsetY)
+                        new Point((i - 1) * stepX, stepY * (1.0 - (prevValue - this.minChannelValue) / height) + offsetY),
+                        new Point(i * stepX, stepY * (1.0 - (nowValue - this.minChannelValue) / height) + offsetY)
                     );
                     prevValue = nowValue;
                 }
@@ -248,18 +234,11 @@ namespace CGProject1
                     dc.DrawText(formText1, new Point(x, 0));
                 }
 
-                double minValue = double.MaxValue;
-                double maxValue = double.MinValue;
-                for (int j = this.Begin; j <= this.End; j++) {
-                    minValue = Math.Min(minValue, this.channel.values[j]);
-                    maxValue = Math.Max(maxValue, this.channel.values[j]);
-                }
-
                 for (int i = 0; i < 5; i++) {
                     double y = (i + 1) * this.ActualHeight / 6;
                     dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(0, y), new Point(this.ActualWidth, y));
 
-                    var formText1 = new FormattedText(Math.Round(maxValue - (i + 1) * (maxValue - minValue) / 6).ToString(),
+                    var formText1 = new FormattedText(Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6).ToString(),
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
                         new Typeface("Times New Roman"),
@@ -298,15 +277,5 @@ namespace CGProject1
             selectIntervalEnd = Math.Clamp(end, this.Begin, this.End);
             InvalidateVisual();
         }
-
-        //protected override void OnMouseUp(MouseButtonEventArgs e)
-        //{
-        //    base.OnMouseUp(e);
-        //    this.Selected = !this.Selected;
-        //    InvalidateVisual();
-
-            
-
-        //}
     }
 }

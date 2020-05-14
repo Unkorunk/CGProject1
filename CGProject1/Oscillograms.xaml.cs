@@ -225,7 +225,7 @@ namespace CGProject1 {
             ResetScalingMode(sender as MenuItem);
 
             foreach (var chart in activeCharts) {
-                chart.Scaling = Chart.ScalingMode.Auto;
+                chart.Scaling = Chart.ScalingMode.Local;
             }
         }
         private void FixedScaling_Click(object sender, RoutedEventArgs e) {
