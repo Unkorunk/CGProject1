@@ -39,6 +39,9 @@ namespace CGProject1 {
 
                 ContinousModelPanel.Children.Add(modelBtn);
             }
+
+            PreviewButton.IsEnabled = false;
+            ChannelSaveBtn.IsEnabled = false;
         }
 
         private ChannelConstructor currentModel = null;
@@ -106,6 +109,9 @@ namespace CGProject1 {
                     ArgumentsPanel.Children.Add(field);
                     argumentsFields[i] = field;
                 }
+
+                PreviewButton.IsEnabled = true;
+                ChannelSaveBtn.IsEnabled = true;
             }
         }
 
