@@ -4,8 +4,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Diagnostics.Contracts;
 
 namespace CGProject1 {
     /// <summary>
@@ -47,12 +45,12 @@ namespace CGProject1 {
 
             var uniformGlobalScaling = new MenuItem();
             uniformGlobalScaling.Header = "Единое глобальное";
-            uniformGlobalScaling.Click += UniformGlobalScaling_Click; ;
+            uniformGlobalScaling.Click += UniformGlobalScaling_Click;
             ScalingChooser.Items.Add(uniformGlobalScaling);
 
             var uniformLocalScaling = new MenuItem();
             uniformLocalScaling.Header = "Единое локальное";
-            uniformLocalScaling.Click += UniformLocalScaling_Click; ;
+            uniformLocalScaling.Click += UniformLocalScaling_Click;
             ScalingChooser.Items.Add(uniformLocalScaling);
         }
 
@@ -241,8 +239,13 @@ namespace CGProject1 {
         private void FixedScaling_Click(object sender, RoutedEventArgs e) {
             ResetScalingMode(sender as MenuItem);
 
+            var settings = new SettingsFixedScale();
+            settings.ShowDialog();
+
             foreach (var chart in activeCharts) {
                 chart.Scaling = Chart.ScalingMode.Fixed;
+                chart.MinFixedScale = settings.From;
+                chart.MaxFixedScale = settings.To;
             }
         }
         private void UniformLocalScaling_Click(object sender, RoutedEventArgs e)

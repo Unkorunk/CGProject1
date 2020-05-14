@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace CGProject1
@@ -22,7 +21,9 @@ namespace CGProject1
         private double maxChannelValue = 0;
 
         private ScalingMode _scaling;
-        public ScalingMode Scaling { get => _scaling; set
+        public ScalingMode Scaling {
+            get => _scaling;
+            set
             {
                 _scaling = value;
                 InvalidateVisual();
@@ -36,7 +37,7 @@ namespace CGProject1
             {
                 if (this.Scaling == ScalingMode.Fixed)
                 {
-                    minChannelValue = value;
+                    this.minChannelValue = value;
                     InvalidateVisual();
                 }
             }
@@ -48,7 +49,7 @@ namespace CGProject1
             {
                 if (this.Scaling == ScalingMode.Fixed)
                 {
-                    minChannelValue = value;
+                    this.maxChannelValue = value;
                     InvalidateVisual();
                 }
             }
@@ -104,6 +105,9 @@ namespace CGProject1
         protected override void OnRender(DrawingContext dc)
         {
             if (this.Length < 2) return;
+
+            var clipGeomery = new RectangleGeometry(new Rect(0, 0, this.ActualWidth, this.ActualHeight));
+            dc.PushClip(clipGeomery);
 
             const double startOptimizationWith = 1.0;
 
