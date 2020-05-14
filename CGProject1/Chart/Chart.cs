@@ -21,7 +21,13 @@ namespace CGProject1
         private double minChannelValue = 0;
         private double maxChannelValue = 0;
 
-        public ScalingMode Scaling { get; set; }
+        private ScalingMode _scaling;
+        public ScalingMode Scaling { get => _scaling; set
+            {
+                _scaling = value;
+                InvalidateVisual();
+            }
+        }
 
         public double MinFixedScale
         {
@@ -47,7 +53,13 @@ namespace CGProject1
                 }
             }
         }
-        public List<Chart> GroupedCharts { get; set; }
+        private List<Chart> _groupedCharts;
+        public List<Chart> GroupedCharts { get => _groupedCharts; set
+            {
+                _groupedCharts = value;
+                InvalidateVisual();
+            }
+        }
 
         private Channel channel;
 
@@ -86,6 +98,7 @@ namespace CGProject1
         public Chart(in Channel channel)
         {
             this.channel = channel;
+            this._groupedCharts = new List<Chart>() { this };
         }
 
         protected override void OnRender(DrawingContext dc)
