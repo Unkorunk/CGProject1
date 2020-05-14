@@ -27,7 +27,6 @@ namespace CGProject1 {
             var globalScaling = new MenuItem();
             globalScaling.Header = "Глобальное";
             globalScaling.Click += GlobalScaling_Click;
-            globalScaling.IsChecked = true;
 
             defaultScaling = globalScaling;
 
@@ -61,9 +60,8 @@ namespace CGProject1 {
             EndBox.IsEnabled = signal != null;
             OscillogramScroll.IsEnabled = signal != null;
 
-            ResetScalingMode(defaultScaling);
+            //ResetScalingMode(defaultScaling);
             
-
             if (signal != null) {
                 samplesCount = signal.SamplesCount;
                 OscillogramsField.Children.Clear();
@@ -111,6 +109,54 @@ namespace CGProject1 {
             };
 
             newChart.ContextMenu.Items.Add(item1);
+
+            var scaleMenu = new MenuItem();
+            scaleMenu.Header = "Масштабирование";
+            newChart.ContextMenu.Items.Add(scaleMenu);
+
+            #region Scale
+            var globalScaling = new MenuItem();
+            globalScaling.Header = "Глобальное";
+            globalScaling.Click += (object sender, RoutedEventArgs args) => {
+                newChart.Scaling = Chart.ScalingMode.Global;
+            };
+            scaleMenu.Items.Add(globalScaling);
+
+            var autoScaling = new MenuItem();
+            autoScaling.Header = "Локальное";
+            autoScaling.Click += (object sender, RoutedEventArgs args) => {
+                newChart.Scaling = Chart.ScalingMode.Local;
+            };
+            scaleMenu.Items.Add(autoScaling);
+
+            var fixedScaling = new MenuItem();
+            fixedScaling.Header = "Фиксированное";
+            fixedScaling.Click += (object sender, RoutedEventArgs args) => {
+                var settings = new SettingsFixedScale();
+                settings.ShowDialog();
+
+                newChart.Scaling = Chart.ScalingMode.Fixed;
+                newChart.MinFixedScale = settings.From;
+                newChart.MaxFixedScale = settings.To;
+            };
+            scaleMenu.Items.Add(fixedScaling);
+
+            var uniformGlobalScaling = new MenuItem();
+            uniformGlobalScaling.Header = "Единое глобальное";
+            uniformGlobalScaling.Click += (object sender, RoutedEventArgs args) => {
+                newChart.GroupedCharts = activeCharts.ToList();
+                newChart.Scaling = Chart.ScalingMode.UniformGlobal;
+            };
+            scaleMenu.Items.Add(uniformGlobalScaling);
+
+            var uniformLocalScaling = new MenuItem();
+            uniformLocalScaling.Header = "Единое локальное";
+            uniformLocalScaling.Click += (object sender, RoutedEventArgs args) => {
+                newChart.GroupedCharts = activeCharts.ToList();
+                newChart.Scaling = Chart.ScalingMode.UniformLocal;
+            };
+            scaleMenu.Items.Add(uniformLocalScaling);
+            #endregion Scale
         }
 
         private void BeginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
@@ -211,18 +257,18 @@ namespace CGProject1 {
             EndSlider.Value = end;
         }
 
-        private void ResetScalingMode(MenuItem scalingMode) {
-            foreach (MenuItem item in ScalingChooser.Items) {
-                if (item == scalingMode) {
-                    item.IsChecked = true;
-                } else {
-                    item.IsChecked = false;
-                }
-            }
-        }
+        //private void ResetScalingMode(MenuItem scalingMode) {
+        //    foreach (MenuItem item in ScalingChooser.Items) {
+        //        if (item == scalingMode) {
+        //            item.IsChecked = true;
+        //        } else {
+        //            item.IsChecked = false;
+        //        }
+        //    }
+        //}
 
         private void GlobalScaling_Click(object sender, RoutedEventArgs e) {
-            ResetScalingMode(sender as MenuItem);
+            //ResetScalingMode(sender as MenuItem);
 
             foreach (var chart in activeCharts) {
                 chart.Scaling = Chart.ScalingMode.Global;
@@ -230,14 +276,14 @@ namespace CGProject1 {
         }
 
         private void AutoScaling_Click(object sender, RoutedEventArgs e) {
-            ResetScalingMode(sender as MenuItem);
+            //ResetScalingMode(sender as MenuItem);
 
             foreach (var chart in activeCharts) {
                 chart.Scaling = Chart.ScalingMode.Local;
             }
         }
         private void FixedScaling_Click(object sender, RoutedEventArgs e) {
-            ResetScalingMode(sender as MenuItem);
+            //ResetScalingMode(sender as MenuItem);
 
             var settings = new SettingsFixedScale();
             settings.ShowDialog();
@@ -250,7 +296,7 @@ namespace CGProject1 {
         }
         private void UniformLocalScaling_Click(object sender, RoutedEventArgs e)
         {
-            ResetScalingMode(sender as MenuItem);
+            //ResetScalingMode(sender as MenuItem);
 
             foreach (var chart in activeCharts)
             {
@@ -260,7 +306,7 @@ namespace CGProject1 {
         }
         private void UniformGlobalScaling_Click(object sender, RoutedEventArgs e)
         {
-            ResetScalingMode(sender as MenuItem);
+            //ResetScalingMode(sender as MenuItem);
 
             foreach (var chart in activeCharts)
             {
