@@ -172,14 +172,12 @@ namespace CGProject1 {
 
             foreach (var chart in charts) {
                 chart.Selected = false;
-                chart.DisableSelectInterval();
                 chart.InvalidateVisual();
             }
 
             activeChannelInGrid = charts[row];
             charts[row].Selected = true;
             //charts[row].SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
-            charts[row].EnableSelectInterval();
             charts[row].InvalidateVisual();
         }
 
