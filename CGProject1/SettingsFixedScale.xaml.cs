@@ -48,6 +48,7 @@ namespace CGProject1
         private void ButtonCancel_Click(object sender, RoutedEventArgs e)
         {
             Status = false;
+            this.Close();
         }
     }
 }
