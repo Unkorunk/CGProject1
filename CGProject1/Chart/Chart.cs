@@ -1,16 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace CGProject1
 {
     class Chart : FrameworkElement
     {
-        public enum ScalingMode {
+        public enum ScalingMode
+        {
             Global,
             Local,
-            Fixed
+            Fixed,
+            UniformGlobal,
+            UniformLocal
         }
 
         private double minChannelValue = 0;
@@ -18,7 +23,11 @@ namespace CGProject1
 
         public ScalingMode Scaling { get; set; }
 
-        public double MinFixedScale { get => minChannelValue; set {
+        public double MinFixedScale
+        {
+            get => minChannelValue;
+            set
+            {
                 if (this.Scaling == ScalingMode.Fixed)
                 {
                     minChannelValue = value;
@@ -26,8 +35,11 @@ namespace CGProject1
                 }
             }
         }
-        public double MaxFixedScale {
-            get => maxChannelValue; set {
+        public double MaxFixedScale
+        {
+            get => maxChannelValue;
+            set
+            {
                 if (this.Scaling == ScalingMode.Fixed)
                 {
                     minChannelValue = value;
@@ -35,6 +47,7 @@ namespace CGProject1
                 }
             }
         }
+        public List<Chart> GroupedCharts { get; set; }
 
         private Channel channel;
 
@@ -49,7 +62,8 @@ namespace CGProject1
         public bool Selected { get; set; }
         public int Begin
         {
-            get => begin; set
+            get => begin;
+            set
             {
                 begin = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
                 InvalidateVisual();
@@ -57,7 +71,8 @@ namespace CGProject1
         }
         public int End
         {
-            get => end; set
+            get => end;
+            set
             {
                 end = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
                 InvalidateVisual();
@@ -114,6 +129,40 @@ namespace CGProject1
 
                         break;
                     }
+                case ScalingMode.UniformGlobal:
+                    {
+                        this.minChannelValue = this.channel.MinValue;
+                        this.maxChannelValue = this.channel.MaxValue;
+                        foreach(var chart in GroupedCharts)
+                        {
+                            this.minChannelValue = Math.Min(this.minChannelValue, chart.channel.MinValue);
+                            this.maxChannelValue = Math.Max(this.maxChannelValue, chart.channel.MaxValue);
+                        }
+
+                        break;
+                    }
+                case ScalingMode.UniformLocal:
+                    {
+                        this.minChannelValue = this.channel.MaxValue;
+                        this.maxChannelValue = this.channel.MinValue;
+
+                        for (int i = this.Begin; i <= this.End; i++)
+                        {
+                            this.minChannelValue = Math.Min(this.minChannelValue, this.channel.values[i]);
+                            this.maxChannelValue = Math.Max(this.maxChannelValue, this.channel.values[i]);
+                        }
+
+                        foreach (var chart in GroupedCharts)
+                        {
+                            for (int i = chart.Begin; i <= chart.End; i++)
+                            {
+                                this.minChannelValue = Math.Min(this.minChannelValue, chart.channel.values[i]);
+                                this.maxChannelValue = Math.Max(this.maxChannelValue, chart.channel.values[i]);
+                            }
+                        }
+
+                        break;
+                    }
                 case ScalingMode.Fixed: break;
             }
 
@@ -125,7 +174,7 @@ namespace CGProject1
             );
 
             if (optimization)
-            {  
+            {
                 double prevValueMin = double.MaxValue;
                 double prevValueMax = double.MinValue;
 
@@ -193,15 +242,19 @@ namespace CGProject1
                 }
             }
 
-            if (enableSelectInterval) {
-                if (optimization) {
+            if (enableSelectInterval)
+            {
+                if (optimization)
+                {
                     dc.DrawRectangle(Brushes.LightCoral,
                         new Pen(Brushes.Transparent, 2.0),
                         new Rect(2.0 * stepX * (selectIntervalBegin - this.Begin) / stepOptimization, 0,
                                  2.0 * stepX * (selectIntervalEnd - selectIntervalBegin) / stepOptimization, ActualHeight
                         )
                     );
-                } else {
+                }
+                else
+                {
                     dc.DrawRectangle(Brushes.LightCoral,
                         new Pen(Brushes.Transparent, 2.0),
                         new Rect(stepX * (selectIntervalBegin - this.Begin), 0,
@@ -210,14 +263,19 @@ namespace CGProject1
                 }
             }
 
-            if (this.GridDraw) {
-                for (int i = 0; i < 8; i++) {
+            if (this.GridDraw)
+            {
+                for (int i = 0; i < 8; i++)
+                {
                     double x = (i + 1) * this.ActualWidth / 9;
                     dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(x, 0), new Point(x, this.ActualHeight));
                     int idx;
-                    if (optimization) {
+                    if (optimization)
+                    {
                         idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
-                    } else {
+                    }
+                    else
+                    {
                         idx = (int)Math.Round(x / stepX + this.Begin);
                     }
 
@@ -227,14 +285,15 @@ namespace CGProject1
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
                         new Typeface("Times New Roman"),
-                        12, Brushes.Blue
+                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
                     );
                     formText1.TextAlignment = TextAlignment.Center;
 
                     dc.DrawText(formText1, new Point(x, 0));
                 }
 
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 5; i++)
+                {
                     double y = (i + 1) * this.ActualHeight / 6;
                     dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(0, y), new Point(this.ActualWidth, y));
 
@@ -242,7 +301,7 @@ namespace CGProject1
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
                         new Typeface("Times New Roman"),
-                        12, Brushes.Blue
+                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
                     );
 
                     dc.DrawText(formText1, new Point(0, y - formText1.Height / 2));
@@ -253,12 +312,11 @@ namespace CGProject1
                 CultureInfo.GetCultureInfo("en-us"),
                 FlowDirection.LeftToRight,
                 new Typeface("Times New Roman"),
-                14, Brushes.Red);
+                14, Brushes.Red, VisualTreeHelper.GetDpi(this).PixelsPerDip);
 
             dc.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Gray, 1.0), new Rect(0, 0, formText.Width, formText.Height));
 
             dc.DrawText(formText, new Point(0, 0));
-
         }
 
         public void EnableSelectInterval()

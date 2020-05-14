@@ -36,7 +36,7 @@ namespace CGProject1 {
             ScalingChooser.Items.Add(globalScaling);
 
             var autoScaling = new MenuItem();
-            autoScaling.Header = "Автомасштаб";
+            autoScaling.Header = "Локальное";
             autoScaling.Click += AutoScaling_Click;
             ScalingChooser.Items.Add(autoScaling);
 
@@ -44,6 +44,16 @@ namespace CGProject1 {
             fixedScaling.Header = "Фиксированное";
             fixedScaling.Click += FixedScaling_Click;
             ScalingChooser.Items.Add(fixedScaling);
+
+            var uniformGlobalScaling = new MenuItem();
+            uniformGlobalScaling.Header = "Единое глобальное";
+            uniformGlobalScaling.Click += UniformGlobalScaling_Click; ;
+            ScalingChooser.Items.Add(uniformGlobalScaling);
+
+            var uniformLocalScaling = new MenuItem();
+            uniformLocalScaling.Header = "Единое локальное";
+            uniformLocalScaling.Click += UniformLocalScaling_Click; ;
+            ScalingChooser.Items.Add(uniformLocalScaling);
         }
 
         public void Update(Signal signal) {
@@ -233,6 +243,26 @@ namespace CGProject1 {
 
             foreach (var chart in activeCharts) {
                 chart.Scaling = Chart.ScalingMode.Fixed;
+            }
+        }
+        private void UniformLocalScaling_Click(object sender, RoutedEventArgs e)
+        {
+            ResetScalingMode(sender as MenuItem);
+
+            foreach (var chart in activeCharts)
+            {
+                chart.GroupedCharts = activeCharts.ToList();
+                chart.Scaling = Chart.ScalingMode.UniformLocal;
+            }
+        }
+        private void UniformGlobalScaling_Click(object sender, RoutedEventArgs e)
+        {
+            ResetScalingMode(sender as MenuItem);
+
+            foreach (var chart in activeCharts)
+            {
+                chart.GroupedCharts = activeCharts.ToList();
+                chart.Scaling = Chart.ScalingMode.UniformGlobal;
             }
         }
     }
