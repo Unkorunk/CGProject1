@@ -9,6 +9,8 @@ namespace CGProject1 {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
+        public static MainWindow instance = null;
+
         private AboutSignal aboutSignalWindow;
         private Oscillograms oscillogramWindow;
         private ModelingWindow modelingWindow;
@@ -16,13 +18,27 @@ namespace CGProject1 {
         private bool showing = false;
         private bool isOscillogramShowing = false;
         private bool isModelingWindowShowing = false;
-        private Signal currentSignal;
+        public Signal currentSignal;
 
         private List<Chart> charts = new List<Chart>();
         private Chart activeChannelInGrid;
 
         public MainWindow() {
+            instance = this;
             InitializeComponent();
+            this.Closed += (object sender, System.EventArgs e) => {
+                if (aboutSignalWindow != null) {
+                    aboutSignalWindow.Close();
+                }
+
+                if (modelingWindow != null) {
+                    modelingWindow.Close();
+                }
+
+                if (isOscillogramShowing) {
+                    oscillogramWindow.Close();
+                }
+            };
         }
 
         private void AboutClick(object sender, RoutedEventArgs e) {
@@ -43,64 +59,114 @@ namespace CGProject1 {
             }
         }
 
+        public void AddChannel(Channel channel) {
+            channel.StartDateTime = this.currentSignal.StartDateTime;
+            channel.SamplingFrq = this.currentSignal.SamplingFrq;
+
+            this.currentSignal.channels.Add(channel);
+
+            if (aboutSignalWindow != null) {
+                aboutSignalWindow.UpdateInfo(this.currentSignal);
+            }
+
+            if (modelingWindow != null) {
+                modelingWindow.Close();
+            }
+
+            var chart = new Chart(channel);
+            chart.Height = 100;
+
+            charts.Add(chart);
+            channels.Children.Add(chart);
+
+            chart.ContextMenu = new ContextMenu();
+
+            var item1 = new MenuItem();
+            item1.Header = "Осциллограмма";
+            int cur = this.currentSignal.channels.Count - 1;
+            item1.Click += (object sender, RoutedEventArgs args) => {
+                OpenOscillograms();
+
+                oscillogramWindow.AddChannel(currentSignal.channels[cur]);
+            };
+
+            chart.ContextMenu.Items.Add(item1);
+
+            chart.Begin = 0;
+            chart.End = currentSignal.SamplesCount;
+            
+        }
+
+        public void ResetSignal(Signal newSignal) {
+            if (aboutSignalWindow != null) {
+                aboutSignalWindow.Close();
+            }
+
+            if (modelingWindow != null) {
+                modelingWindow.Close();
+            }
+
+            if (isOscillogramShowing) {
+                oscillogramWindow.Close();
+            }
+
+            foreach (var chart in charts) {
+                channels.Children.Remove(chart);
+            }
+            charts.Clear();
+
+            //if (channels.RowDefinitions.Count > 1)
+            //{
+            //    channels.RowDefinitions.RemoveRange(1, channels.RowDefinitions.Count - 1);
+            //}
+
+            SignalProcessing.Modelling.ResetCounters();
+
+            this.currentSignal = newSignal;
+
+            if (this.currentSignal == null) {
+                return;
+            }
+
+            for (int i = 0; i < currentSignal.channels.Count; i++) {
+                var chart = new Chart(currentSignal.channels[i]);
+                chart.Height = 100;
+
+                charts.Add(chart);
+                channels.Children.Add(chart);
+
+                chart.ContextMenu = new ContextMenu();
+
+                var item1 = new MenuItem();
+                item1.Header = "Осциллограмма";
+                int cur = i;
+                item1.Click += (object sender, RoutedEventArgs args) => {
+                    OpenOscillograms();
+
+                    oscillogramWindow.AddChannel(currentSignal.channels[cur]);
+                };
+
+                chart.ContextMenu.Items.Add(item1);
+
+                //if (channels.RowDefinitions.Count < i + 1)
+                //{
+
+                //    channels.RowDefinitions.Add(new RowDefinition());
+                //}
+
+                //Grid.SetRow(chart, i);
+                //Grid.SetColumn(chart, 0);
+
+                chart.Begin = 0;
+                chart.End = currentSignal.SamplesCount;
+            }
+        }
+
         private void OpenFileClick(object sender, RoutedEventArgs e) {
             var openFileDialog = new OpenFileDialog();
             
             if (openFileDialog.ShowDialog() == true) {
-                currentSignal = Parser.Parse(openFileDialog.FileName);
-                if (aboutSignalWindow != null)
-                {
-                    aboutSignalWindow.UpdateInfo(currentSignal);
-                }
-
-                foreach(var chart in charts)
-                {
-                    channels.Children.Remove(chart);
-                }
-                charts.Clear();
-
-                //if (channels.RowDefinitions.Count > 1)
-                //{
-                //    channels.RowDefinitions.RemoveRange(1, channels.RowDefinitions.Count - 1);
-                //}
-
-                if (isOscillogramShowing) {
-                    oscillogramWindow.Update(currentSignal);
-                }
-
-                for (int i = 0; i < currentSignal.channels.Count; i++)
-                {
-                    var chart = new Chart(currentSignal.channels[i]);
-                    chart.Height = 100;
-
-                    charts.Add(chart);
-                    channels.Children.Add(chart);
-
-                    chart.ContextMenu = new ContextMenu();
-
-                    var item1 = new MenuItem();
-                    item1.Header = "Осциллограмма";
-                    int cur = i;
-                    item1.Click += (object sender, RoutedEventArgs args) => {
-                        OpenOscillograms();
-
-                        oscillogramWindow.AddChannel(currentSignal.channels[cur]);
-                    };
-
-                    chart.ContextMenu.Items.Add(item1);
-
-                    //if (channels.RowDefinitions.Count < i + 1)
-                    //{
-                        
-                    //    channels.RowDefinitions.Add(new RowDefinition());
-                    //}
-
-                    //Grid.SetRow(chart, i);
-                    //Grid.SetColumn(chart, 0);
-
-                    chart.Begin = 0;
-                    chart.End = currentSignal.SamplesCount;
-                }
+                ResetSignal(Parser.Parse(openFileDialog.FileName));
             }
         }
 

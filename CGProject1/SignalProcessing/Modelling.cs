@@ -63,6 +63,16 @@ namespace CGProject1.SignalProcessing {
             continiousModels = new List<ChannelConstructor>();
         }
 
+        public static void ResetCounters() {
+            foreach (var model in discreteModels) {
+                model.ResetCounter();
+            }
+
+            foreach (var model in continiousModels) {
+                model.ResetCounter();
+            }
+        }
+
         public static List<ChannelConstructor> discreteModels;
 
         public static List<ChannelConstructor> continiousModels;
