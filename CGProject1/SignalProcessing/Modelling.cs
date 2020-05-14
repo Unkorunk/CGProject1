@@ -16,6 +16,23 @@ namespace CGProject1.SignalProcessing {
                     });
             discreteModels.Add(delayedPulse);
 
+            var delayedRise = new ChannelConstructor("Задержанный скачок", 1,
+                    new string[] { "Задержка скачка" }, new double[] { double.MinValue }, new double[] { double.MaxValue },
+                    (int n, double dt, double[] args) => {
+                        if (n < args[0]) {
+                            return 0;
+                        }
+                        return 1;
+                    });
+            discreteModels.Add(delayedRise);
+
+            var discretExp = new ChannelConstructor("Дискр. уб. экспонента", 2,
+                    new string[] { "Основание экспоненты" }, new double[] { 0 }, new double[] { 1 },
+                    (int n, double dt, double[] args) => {
+                        return Math.Pow(args[0], n);
+                    });
+            discreteModels.Add(discretExp);
+
             continiousModels = new List<ChannelConstructor>();
         }
 

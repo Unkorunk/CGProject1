@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -109,7 +110,7 @@ namespace CGProject1 {
         private double[] ValidateArguments() {
             var args = new double[currentModel.MinArgValues.Length];
             for (int i = 0; i < currentModel.MinArgValues.Length; i++) {
-                double val = double.Parse(argumentsFields[i].Text);
+                double val = double.Parse(argumentsFields[i].Text, CultureInfo.InvariantCulture);
 
                 if (val < currentModel.MinArgValues[i]) {
                     val = currentModel.MinArgValues[i];
@@ -120,20 +121,20 @@ namespace CGProject1 {
                 }
 
                 args[i] = val;
-                argumentsFields[i].Text = val.ToString();
+                argumentsFields[i].Text = val.ToString(CultureInfo.InvariantCulture);
             }
 
-            int samples = (int)double.Parse(argumentsFields[argumentsFields.Length - 2].Text);
+            int samples = (int)double.Parse(argumentsFields[argumentsFields.Length - 2].Text, CultureInfo.InvariantCulture);
             if (samples < 1) {
                 samples = 1;
             }
             if (samples > 1000000000) {
                 samples = 1000000000;
             }
-            argumentsFields[argumentsFields.Length - 2].Text = samples.ToString();
+            argumentsFields[argumentsFields.Length - 2].Text = samples.ToString(CultureInfo.InvariantCulture);
 
             this.samplesCount = samples;
-            this.samplingFrq = double.Parse(argumentsFields[argumentsFields.Length - 1].Text);
+            this.samplingFrq = double.Parse(argumentsFields[argumentsFields.Length - 1].Text, CultureInfo.InvariantCulture);
 
             return args;
         }
