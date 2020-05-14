@@ -18,8 +18,6 @@ namespace CGProject1 {
         DateTime startTime;
         double deltaTime;
 
-        MenuItem defaultScaling = null;
-
         public Oscillograms() {
             InitializeComponent();
             activeCharts = new HashSet<Chart>();
@@ -27,9 +25,6 @@ namespace CGProject1 {
             var globalScaling = new MenuItem();
             globalScaling.Header = "Глобальное";
             globalScaling.Click += GlobalScaling_Click;
-
-            defaultScaling = globalScaling;
-
             ScalingChooser.Items.Add(globalScaling);
 
             var autoScaling = new MenuItem();
@@ -134,10 +129,12 @@ namespace CGProject1 {
             fixedScaling.Click += (object sender, RoutedEventArgs args) => {
                 var settings = new SettingsFixedScale();
                 settings.ShowDialog();
-
-                newChart.Scaling = Chart.ScalingMode.Fixed;
-                newChart.MinFixedScale = settings.From;
-                newChart.MaxFixedScale = settings.To;
+                if (settings.Status)
+                {
+                    newChart.Scaling = Chart.ScalingMode.Fixed;
+                    newChart.MinFixedScale = settings.From;
+                    newChart.MaxFixedScale = settings.To;
+                }
             };
             scaleMenu.Items.Add(fixedScaling);
 
@@ -287,11 +284,14 @@ namespace CGProject1 {
 
             var settings = new SettingsFixedScale();
             settings.ShowDialog();
-
-            foreach (var chart in activeCharts) {
-                chart.Scaling = Chart.ScalingMode.Fixed;
-                chart.MinFixedScale = settings.From;
-                chart.MaxFixedScale = settings.To;
+            if (settings.Status)
+            {
+                foreach (var chart in activeCharts)
+                {
+                    chart.Scaling = Chart.ScalingMode.Fixed;
+                    chart.MinFixedScale = settings.From;
+                    chart.MaxFixedScale = settings.To;
+                }
             }
         }
         private void UniformLocalScaling_Click(object sender, RoutedEventArgs e)
