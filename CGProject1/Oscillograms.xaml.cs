@@ -91,6 +91,12 @@ namespace CGProject1 {
             newChart.Begin = (int)BeginSlider.Value;
             newChart.End = (int)EndSlider.Value;
 
+            newChart.OnMouseSelect += (sender, newBegin, newEnd) =>
+            {
+                BeginSlider.Value = newBegin;
+                EndSlider.Value = newEnd;
+            };
+
             newChart.Height = 300;
             newChart.Margin = new Thickness(0, 2, 0, 2);
 
