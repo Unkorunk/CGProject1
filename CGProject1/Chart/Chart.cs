@@ -109,21 +109,50 @@ namespace CGProject1
             var clipGeomery = new RectangleGeometry(new Rect(0, 0, this.ActualWidth, this.ActualHeight));
             dc.PushClip(clipGeomery);
 
+            #region [Interface] Reserve
+            Size interfaceOffset = new Size();
+
+            if (this.GridDraw) {
+                var formText1 = new FormattedText(DateTime.Now.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + int.MaxValue.ToString() + ")",
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                );
+                formText1.TextAlignment = TextAlignment.Center;
+                interfaceOffset.Height = formText1.Height;
+
+                formText1 = new FormattedText(int.MaxValue.ToString(),
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                );
+                interfaceOffset.Width = formText1.Width;
+            }
+
+            Size actSize = new Size(this.ActualWidth - interfaceOffset.Width,
+                this.ActualHeight - interfaceOffset.Height);
+            #endregion [Interface] Reserve
+
+            #region [Optimization]
             const double startOptimizationWith = 1.0;
 
-            double stepX = this.ActualWidth / (this.Length - 1);
+            double stepX = actSize.Width / (this.Length - 1);
             bool optimization = (stepX < startOptimizationWith);
             int stepOptimization = 0;
             if (optimization)
             {
-                stepOptimization = (int)Math.Ceiling(startOptimizationWith * this.Length / this.ActualWidth);
+                stepOptimization = (int)Math.Ceiling(startOptimizationWith * this.Length / actSize.Width);
                 stepX *= stepOptimization;
                 stepX /= 2.0;
             }
 
-            double stepY = this.ActualHeight;
-            double offsetY = this.ActualHeight / 2.0 - stepY / 2.0;
+            double stepY = actSize.Height;
+            double offsetY = actSize.Height / 2.0 - stepY / 2.0;
+            #endregion [Optimization]
 
+            #region [Scaling]
             switch (this.Scaling)
             {
                 case ScalingMode.Global:
@@ -184,12 +213,78 @@ namespace CGProject1
             }
 
             double height = Math.Abs(this.maxChannelValue - this.minChannelValue);
+            #endregion [Scaling]
 
+            #region [Interface] Draw
+
+            #region Background
             dc.DrawRectangle(this.Selected ? Brushes.LightBlue : Brushes.LightGray,
                 new Pen(Brushes.DarkGray, 2.0),
-                new Rect(0, 0, ActualWidth, ActualHeight)
+                new Rect(interfaceOffset.Width, interfaceOffset.Height, ActualWidth, ActualHeight)
             );
+            #endregion Background
 
+            if (this.GridDraw)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    double x = (i + 1) * actSize.Width / 9;
+                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width + x, interfaceOffset.Height),
+                        new Point(interfaceOffset.Width + x, interfaceOffset.Height + actSize.Height));
+                    int idx;
+                    if (optimization)
+                    {
+                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
+                    }
+                    else
+                    {
+                        idx = (int)Math.Round(x / stepX + this.Begin);
+                    }
+
+                    var t = this.channel.StartDateTime + TimeSpan.FromSeconds(this.channel.DeltaTime * idx);
+
+                    var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + idx.ToString() + ")",
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                    );
+                    formText1.TextAlignment = TextAlignment.Center;
+
+                    dc.DrawText(formText1, new Point(interfaceOffset.Width + x, 0));
+                }
+
+                for (int i = 0; i < 5; i++)
+                {
+                    double y = (i + 1) * actSize.Height / 6;
+                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width, interfaceOffset.Height + y),
+                        new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
+                    var formText1 = new FormattedText(Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6).ToString(),
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                    );
+
+                    dc.DrawText(formText1, new Point(0, interfaceOffset.Height + y - formText1.Height / 2));
+                }
+            }
+
+            #region Channel Name
+            var formText = new FormattedText(channel.Name,
+                CultureInfo.GetCultureInfo("en-us"),
+                FlowDirection.LeftToRight,
+                new Typeface("Times New Roman"),
+                14, Brushes.Red, VisualTreeHelper.GetDpi(this).PixelsPerDip);
+
+            dc.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Gray, 1.0), new Rect(0, 0, formText.Width, formText.Height));
+
+            dc.DrawText(formText, new Point(0, 0));
+            #endregion Channel Name
+
+            #endregion [Interface] Draw
+
+            #region [Chart] Draw
             if (optimization)
             {
                 double prevValueMin = double.MaxValue;
@@ -204,8 +299,8 @@ namespace CGProject1
                 }
                 dc.DrawLine(
                     new Pen(Brushes.Black, 1.0),
-                    new Point(0, stepY * (1.0 - (prevValueMin - this.minChannelValue) / height) + offsetY),
-                    new Point(stepX, stepY * (1.0 - (prevValueMax - this.minChannelValue) / height) + offsetY)
+                    new Point(interfaceOffset.Width, interfaceOffset.Height + stepY * (1.0 - (prevValueMin - this.minChannelValue) / height) + offsetY),
+                    new Point(interfaceOffset.Width + stepX, interfaceOffset.Height + stepY * (1.0 - (prevValueMax - this.minChannelValue) / height) + offsetY)
                 );
 
                 int n = (this.Length + stepOptimization - 1) / stepOptimization;
@@ -232,13 +327,13 @@ namespace CGProject1
                     int lineX = 1 + 2 * (i - 1);
                     dc.DrawLine(
                         new Pen(Brushes.Black, 1.0),
-                        new Point(lineX * stepX, stepY * (1.0 - (prevValueMax - this.minChannelValue) / height) + offsetY),
-                        new Point((lineX + 1) * stepX, stepY * (1.0 - (nowValueMin - this.minChannelValue) / height) + offsetY)
+                        new Point(interfaceOffset.Width + lineX * stepX, interfaceOffset.Height + stepY * (1.0 - (prevValueMax - this.minChannelValue) / height) + offsetY),
+                        new Point(interfaceOffset.Width + (lineX + 1) * stepX, interfaceOffset.Height + stepY * (1.0 - (nowValueMin - this.minChannelValue) / height) + offsetY)
                     );
                     dc.DrawLine(
                         new Pen(Brushes.Black, 1.0),
-                        new Point((lineX + 1) * stepX, stepY * (1.0 - (nowValueMin - this.minChannelValue) / height) + offsetY),
-                        new Point((lineX + 2) * stepX, stepY * (1.0 - (nowValueMax - this.minChannelValue) / height) + offsetY)
+                        new Point(interfaceOffset.Width + (lineX + 1) * stepX, interfaceOffset.Height + stepY * (1.0 - (nowValueMin - this.minChannelValue) / height) + offsetY),
+                        new Point(interfaceOffset.Width + (lineX + 2) * stepX, interfaceOffset.Height + stepY * (1.0 - (nowValueMax - this.minChannelValue) / height) + offsetY)
                     );
 
                     prevValueMax = nowValueMax;
@@ -252,13 +347,15 @@ namespace CGProject1
                     double nowValue = this.channel.values[this.Begin + i];
                     dc.DrawLine(
                         new Pen(Brushes.Black, 1.0),
-                        new Point((i - 1) * stepX, stepY * (1.0 - (prevValue - this.minChannelValue) / height) + offsetY),
-                        new Point(i * stepX, stepY * (1.0 - (nowValue - this.minChannelValue) / height) + offsetY)
+                        new Point(interfaceOffset.Width + (i - 1) * stepX, interfaceOffset.Height + stepY * (1.0 - (prevValue - this.minChannelValue) / height) + offsetY),
+                        new Point(interfaceOffset.Width + i * stepX, interfaceOffset.Height + stepY * (1.0 - (nowValue - this.minChannelValue) / height) + offsetY)
                     );
                     prevValue = nowValue;
                 }
             }
+            #endregion [Chart] Draw
 
+            #region [SelectInterval] Draw
             if (enableSelectInterval)
             {
                 if (optimization)
@@ -279,61 +376,7 @@ namespace CGProject1
                     );
                 }
             }
-
-            if (this.GridDraw)
-            {
-                for (int i = 0; i < 8; i++)
-                {
-                    double x = (i + 1) * this.ActualWidth / 9;
-                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(x, 0), new Point(x, this.ActualHeight));
-                    int idx;
-                    if (optimization)
-                    {
-                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
-                    }
-                    else
-                    {
-                        idx = (int)Math.Round(x / stepX + this.Begin);
-                    }
-
-                    var t = this.channel.StartDateTime + TimeSpan.FromSeconds(this.channel.DeltaTime * idx);
-
-                    var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + idx.ToString() + ")",
-                        CultureInfo.GetCultureInfo("en-us"),
-                        FlowDirection.LeftToRight,
-                        new Typeface("Times New Roman"),
-                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
-                    );
-                    formText1.TextAlignment = TextAlignment.Center;
-
-                    dc.DrawText(formText1, new Point(x, 0));
-                }
-
-                for (int i = 0; i < 5; i++)
-                {
-                    double y = (i + 1) * this.ActualHeight / 6;
-                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(0, y), new Point(this.ActualWidth, y));
-
-                    var formText1 = new FormattedText(Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6).ToString(),
-                        CultureInfo.GetCultureInfo("en-us"),
-                        FlowDirection.LeftToRight,
-                        new Typeface("Times New Roman"),
-                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
-                    );
-
-                    dc.DrawText(formText1, new Point(0, y - formText1.Height / 2));
-                }
-            }
-
-            var formText = new FormattedText(channel.Name,
-                CultureInfo.GetCultureInfo("en-us"),
-                FlowDirection.LeftToRight,
-                new Typeface("Times New Roman"),
-                14, Brushes.Red, VisualTreeHelper.GetDpi(this).PixelsPerDip);
-
-            dc.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Gray, 1.0), new Rect(0, 0, formText.Width, formText.Height));
-
-            dc.DrawText(formText, new Point(0, 0));
+            #endregion [SelectInterval] Draw
         }
 
         public void EnableSelectInterval()
