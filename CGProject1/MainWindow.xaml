@@ -20,7 +20,7 @@
                 <MenuItem Header="Файл">
                     <MenuItem Header="Открыть" Click="OpenFileClick"></MenuItem>
                 </MenuItem>
-                <MenuItem Header="Моделирование"></MenuItem>
+                <MenuItem Header="Моделирование" Click="ModelingClick"></MenuItem>
                 <MenuItem Header="Инструменты">
                     <MenuItem Header="Информация о сигнале" Click="AboutSignalClick"></MenuItem>
                     <MenuItem Header="Осциллограммы" Click="OscillogramsClick"></MenuItem>

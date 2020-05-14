@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -25,6 +26,7 @@ namespace CGProject1 {
                 result.fileName = Path.GetFileName(filePath);
 
                 int curRow = 0;
+                int channelsNum = 0;
 
                 while (!file.EndOfStream) {
                     string curLine;
@@ -37,15 +39,16 @@ namespace CGProject1 {
 
                     switch (curState) {
                         case ParseState.NeedChannelNumber: {
-                                int channelsNum = Int32.Parse(trimmed);
-                                result.channels = new Channel[channelsNum];
+                                channelsNum = Int32.Parse(trimmed);
+                                result.channels = new List<Channel>();
                                 break;
                             }
                         case ParseState.NeedSamplesNumber: {
                                 int samplesCount = Int32.Parse(trimmed);
 
-                                for (int i = 0; i < result.channels.Length; i++) {
-                                    result.channels[i] = new Channel(samplesCount, result.fileName);
+                                for (int i = 0; i < channelsNum; i++) {
+                                    result.channels.Add(new Channel(samplesCount));
+                                    result.channels[i].Source = result.fileName;
                                 }
 
                                 break;
@@ -60,7 +63,7 @@ namespace CGProject1 {
                             }
                         case ParseState.NeedTime: {
                                 var ts = TimeSpan.ParseExact(trimmed, "hh\\:mm\\:ss\\.fff", CultureInfo.InvariantCulture);
-                                result.StartDateTime = result.StartDateTime + ts;
+                                result.StartDateTime += ts;
                                 break;
                             }
                         case ParseState.NeedChannelsNames: {
@@ -104,6 +107,7 @@ namespace CGProject1 {
                 }
             }
 
+            result.channels.Add(SignalProcessing.Modelling.discreteModels[0].CreateChannel(result.SamplesCount, new double[] { 1000 }, result.SamplingFrq, result.StartDateTime));
             result.UpdateChannelsInfo();
             return result;
         }

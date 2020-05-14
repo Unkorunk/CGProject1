@@ -11,9 +11,11 @@ namespace CGProject1 {
     public partial class MainWindow : Window {
         private AboutSignal aboutSignalWindow;
         private Oscillograms oscillogramWindow;
+        private ModelingWindow modelingWindow;
 
         private bool showing = false;
         private bool isOscillogramShowing = false;
+        private bool isModelingWindowShowing = false;
         private Signal currentSignal;
 
         private List<Chart> charts = new List<Chart>();
@@ -30,6 +32,15 @@ namespace CGProject1 {
                 "Калинин Владислав\r\n" +
                 "29.02.2020",
                 "О программе", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void ModelingClick(object sender, RoutedEventArgs e) {
+            if (!this.isModelingWindowShowing) {
+                this.modelingWindow = new ModelingWindow(currentSignal);
+                this.modelingWindow.Closed += (object sender, System.EventArgs e) => this.isModelingWindowShowing = false;
+                this.modelingWindow.Show();
+                this.isModelingWindowShowing = true;
+            }
         }
 
         private void OpenFileClick(object sender, RoutedEventArgs e) {
@@ -57,7 +68,7 @@ namespace CGProject1 {
                     oscillogramWindow.Update(currentSignal);
                 }
 
-                for (int i = 0; i < currentSignal.channels.Length; i++)
+                for (int i = 0; i < currentSignal.channels.Count; i++)
                 {
                     var chart = new Chart(currentSignal.channels[i]);
                     chart.Height = 100;
@@ -106,7 +117,7 @@ namespace CGProject1 {
                 row++;
             }
 
-            if (currentSignal == null || row >= currentSignal.channels.Length) {
+            if (currentSignal == null || row >= currentSignal.channels.Count) {
                 return;
             }
 

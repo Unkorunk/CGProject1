@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CGProject1 {
     public class Signal {
         public string fileName;
-        public Channel[] channels;
+        public List<Channel> channels;
 
         /// <summary>
         /// Sampling rate (frequency)
@@ -22,7 +23,7 @@ namespace CGProject1 {
         /// </summary>
         public int SamplesCount {
             get {
-                if (channels.Length == 0) {
+                if (channels.Count == 0) {
                     return 0;
                 }
 

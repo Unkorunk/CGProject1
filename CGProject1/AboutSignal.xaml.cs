@@ -41,7 +41,7 @@ namespace CGProject1 {
                 return;
             }
 
-            channelNumberText.Content = signal.channels.Length;
+            channelNumberText.Content = signal.channels.Count;
             samplesNumberText.Content = signal.SamplesCount;
             samplingFrqText.Content = $"{signal.SamplingFrq} Гц (шаг между отсчетами {signal.DeltaTime} сек)";
             startDateTimeText.Content = signal.StartDateTime.ToString("dd-MM-yyyy hh\\:mm\\:ss\\.fff");
