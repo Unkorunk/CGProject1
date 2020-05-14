@@ -21,7 +21,7 @@ namespace CGProject1
         private void ButtonOK_Click(object sender, RoutedEventArgs e)
         {
             Status = true;
-            if (int.TryParse(TextBoxFrom.Text, out _from) && int.TryParse(TextBoxTo.Text, out _to))
+            if (int.TryParse(TextBoxFrom.Text, out _from) && int.TryParse(TextBoxTo.Text, out _to) && _from < _to)
             {
                 this.Close();
             } else
