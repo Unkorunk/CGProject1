@@ -20,8 +20,8 @@
 
         <Label Grid.Row="0" Grid.Column="0" Content="From" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         <Label Grid.Row="1" Grid.Column="0" Content="To" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-        <TextBox Name="TextBoxFrom" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" TextWrapping="Wrap" TextAlignment="Center"/>
-        <TextBox Name="TextBoxTo" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" TextWrapping="Wrap" TextAlignment="Center"/>
+        <TextBox Name="TextBoxFrom" PreviewTextInput="TextBoxFrom_PreviewTextInput" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" TextWrapping="Wrap" TextAlignment="Center"/>
+        <TextBox Name="TextBoxTo" PreviewTextInput="TextBoxTo_PreviewTextInput" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" TextWrapping="Wrap" TextAlignment="Center"/>
         <Button Name="ButtonOK" Click="ButtonOK_Click" Grid.Row="2" Grid.Column="0" Content="OK"/>
         <Button Name="ButtonCancel" Click="ButtonCancel_Click" Grid.Row="2" Grid.Column="2" Content="Cancel"/>
     </Grid>

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Linq;
+using System.Windows;
 
 namespace CGProject1
 {
@@ -20,14 +21,28 @@ namespace CGProject1
         private void ButtonOK_Click(object sender, RoutedEventArgs e)
         {
             Status = true;
-            if (int.TryParse(TextBoxFrom.Text, out _from) && int.TryParse(TextBoxTo.Text, out _to) &&
-                _from >= 0 && _to >= 0)
+            if (int.TryParse(TextBoxFrom.Text, out _from) && int.TryParse(TextBoxTo.Text, out _to))
             {
                 this.Close();
             } else
             {
                 MessageBox.Show("Invalid values", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private bool TextIsNumeric(string input)
+        {
+            return input.All(c => char.IsDigit(c) || char.IsControl(c));
+        }
+
+        private void TextBoxFrom_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = !TextIsNumeric(e.Text);
+        }
+
+        private void TextBoxTo_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = !TextIsNumeric(e.Text);
         }
 
         private void ButtonCancel_Click(object sender, RoutedEventArgs e)
