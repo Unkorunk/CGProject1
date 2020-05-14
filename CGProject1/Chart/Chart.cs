@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace CGProject1
@@ -65,6 +66,8 @@ namespace CGProject1
         private Channel channel;
 
         #region [SelectInterval] Variables
+        public bool IsMouseSelect { get; set; }
+
         private bool enableSelectInterval = false;
         private int selectIntervalBegin = 0;
         private int selectIntervalEnd = 0;
@@ -96,6 +99,11 @@ namespace CGProject1
 
         public int Length { get => End - Begin + 1; }
 
+        private Size interfaceOffset = new Size();
+        private bool optimization = false;
+        private double stepX = 1.0;
+        private int stepOptimization = 0;
+
         public Chart(in Channel channel)
         {
             this.channel = channel;
@@ -104,13 +112,15 @@ namespace CGProject1
 
         protected override void OnRender(DrawingContext dc)
         {
+            base.OnRender(dc);
+
             if (this.Length < 2) return;
 
             var clipGeomery = new RectangleGeometry(new Rect(0, 0, this.ActualWidth, this.ActualHeight));
             dc.PushClip(clipGeomery);
 
             #region [Interface] Reserve
-            Size interfaceOffset = new Size();
+            interfaceOffset = new Size();
 
             if (this.GridDraw) {
                 var formText1 = new FormattedText(DateTime.Now.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + int.MaxValue.ToString() + ")",
@@ -138,9 +148,9 @@ namespace CGProject1
             #region [Optimization]
             const double startOptimizationWith = 1.0;
 
-            double stepX = actSize.Width / (this.Length - 1);
+            stepX = actSize.Width / (this.Length - 1);
             bool optimization = (stepX < startOptimizationWith);
-            int stepOptimization = 0;
+            stepOptimization = 0;
             if (optimization)
             {
                 stepOptimization = (int)Math.Ceiling(startOptimizationWith * this.Length / actSize.Width);
@@ -220,7 +230,7 @@ namespace CGProject1
             #region Background
             dc.DrawRectangle(this.Selected ? Brushes.LightBlue : Brushes.LightGray,
                 new Pen(Brushes.DarkGray, 2.0),
-                new Rect(interfaceOffset.Width, interfaceOffset.Height, ActualWidth, ActualHeight)
+                new Rect(interfaceOffset.Width, interfaceOffset.Height, actSize.Width, actSize.Height)
             );
             #endregion Background
 
@@ -358,42 +368,131 @@ namespace CGProject1
             #region [SelectInterval] Draw
             if (enableSelectInterval)
             {
+                var brush = new SolidColorBrush(Color.FromArgb(100, 255, 153, 51));
                 if (optimization)
                 {
-                    dc.DrawRectangle(Brushes.LightCoral,
+                    dc.DrawRectangle(brush,
                         new Pen(Brushes.Transparent, 2.0),
-                        new Rect(2.0 * stepX * (selectIntervalBegin - this.Begin) / stepOptimization, 0,
-                                 2.0 * stepX * (selectIntervalEnd - selectIntervalBegin) / stepOptimization, ActualHeight
+                        new Rect(interfaceOffset.Width + 2.0 * stepX * (selectIntervalBegin - this.Begin) / stepOptimization,
+                                 interfaceOffset.Height,
+                                 2.0 * stepX * (selectIntervalEnd - selectIntervalBegin) / stepOptimization,
+                                 actSize.Height
                         )
                     );
                 }
                 else
                 {
-                    dc.DrawRectangle(Brushes.LightCoral,
+                    dc.DrawRectangle(brush,
                         new Pen(Brushes.Transparent, 2.0),
-                        new Rect(stepX * (selectIntervalBegin - this.Begin), 0,
-                        (selectIntervalEnd - selectIntervalBegin) * stepX, ActualHeight)
+                        new Rect(interfaceOffset.Width + stepX * (selectIntervalBegin - this.Begin),
+                                 interfaceOffset.Height,
+                                 (selectIntervalEnd - selectIntervalBegin) * stepX,
+                                 actSize.Height)
                     );
                 }
             }
             #endregion [SelectInterval] Draw
         }
 
-        public void EnableSelectInterval()
+        protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            enableSelectInterval = true;
-            InvalidateVisual();
+            base.OnMouseDown(e);
+
+            var position = e.GetPosition(this);
+            if (e.ChangedButton == MouseButton.Left && this.IsMouseSelect &&
+                position.X >= interfaceOffset.Width &&
+                position.Y >= interfaceOffset.Height)
+            {
+                int idx = GetIdx(position);
+                selectIntervalBegin = selectIntervalEnd = Math.Clamp(idx, this.Begin, this.End);
+
+                enableSelectInterval = true;
+                InvalidateVisual();
+            }
         }
-        public void DisableSelectInterval()
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
         {
-            enableSelectInterval = false;
-            InvalidateVisual();
+            base.OnMouseUp(e);
+
+            var position = e.GetPosition(this);
+            if (e.ChangedButton == MouseButton.Left && this.IsMouseSelect &&
+                position.X >= interfaceOffset.Width &&
+                position.Y >= interfaceOffset.Height)
+            {
+                int idx = GetIdx(position);
+                selectIntervalEnd = Math.Clamp(idx, selectIntervalBegin, this.End);
+                enableSelectInterval = false;
+
+                if (selectIntervalEnd > selectIntervalBegin)
+                {
+                    this.Begin = selectIntervalBegin;
+                    this.End = selectIntervalEnd;
+                }
+
+                InvalidateVisual();
+            }
         }
-        public void SetSelectInterval(int begin, int end)
+
+        protected override void OnMouseMove(MouseEventArgs e)
         {
-            selectIntervalBegin = Math.Clamp(begin, this.Begin, this.End);
-            selectIntervalEnd = Math.Clamp(end, this.Begin, this.End);
-            InvalidateVisual();
+            base.OnMouseMove(e);
+
+            var position = e.GetPosition(this);
+            if (position.X >= interfaceOffset.Width &&
+                position.Y >= interfaceOffset.Height &&
+                enableSelectInterval && this.IsMouseSelect)
+            {
+                int idx = GetIdx(position);
+                selectIntervalEnd = Math.Clamp(idx, selectIntervalBegin, this.End);
+
+                InvalidateVisual();
+            }
         }
+
+        protected override void OnMouseLeave(MouseEventArgs e)
+        {
+            base.OnMouseLeave(e);
+
+            if (this.IsMouseSelect)
+            {
+                enableSelectInterval = false;
+                InvalidateVisual();
+            }
+        }
+
+        private int GetIdx(Point position)
+        {
+            position.X -= interfaceOffset.Width;
+            position.Y -= interfaceOffset.Height;
+
+            int idx;
+            if (optimization)
+            {
+                idx = (int)Math.Round(position.X * stepOptimization / (2.0 * stepX) + this.Begin);
+            }
+            else
+            {
+                idx = (int)Math.Round(position.X / stepX + this.Begin);
+            }
+            return idx;
+        }
+
+        //public void EnableSelectInterval()
+        //{
+        //    enableSelectInterval = true;
+        //    InvalidateVisual();
+        //}
+        //public void DisableSelectInterval()
+        //{
+        //    enableSelectInterval = false;
+        //    InvalidateVisual();
+        //}
+        //public void SetSelectInterval(int begin, int end)
+        //{
+        //    selectIntervalBegin = Math.Clamp(begin, this.Begin, this.End);
+        //    selectIntervalEnd = Math.Clamp(end, this.Begin, this.End);
+        //    InvalidateVisual();
+        //}
     }
 }
