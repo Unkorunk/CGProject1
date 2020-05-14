@@ -19,6 +19,7 @@
             <Menu Grid.Row="0" Name="menu" VerticalAlignment="Top">
                 <MenuItem Header="Файл">
                     <MenuItem Header="Открыть" Click="OpenFileClick"></MenuItem>
+                    <MenuItem Header="Сохранить как"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Моделирование" Click="ModelingClick"></MenuItem>
                 <MenuItem Header="Инструменты">

@@ -5,9 +5,6 @@ using System.Windows.Input;
 using Microsoft.Win32;
 
 namespace CGProject1 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window {
         public static MainWindow instance = null;
 
@@ -115,11 +112,6 @@ namespace CGProject1 {
             }
             charts.Clear();
 
-            //if (channels.RowDefinitions.Count > 1)
-            //{
-            //    channels.RowDefinitions.RemoveRange(1, channels.RowDefinitions.Count - 1);
-            //}
-
             SignalProcessing.Modelling.ResetCounters();
 
             this.currentSignal = newSignal;
@@ -147,15 +139,6 @@ namespace CGProject1 {
                 };
 
                 chart.ContextMenu.Items.Add(item1);
-
-                //if (channels.RowDefinitions.Count < i + 1)
-                //{
-
-                //    channels.RowDefinitions.Add(new RowDefinition());
-                //}
-
-                //Grid.SetRow(chart, i);
-                //Grid.SetColumn(chart, 0);
 
                 chart.Begin = 0;
                 chart.End = currentSignal.SamplesCount;
@@ -223,6 +206,10 @@ namespace CGProject1 {
                 oscillogramWindow.Update(currentSignal);
                 oscillogramWindow.Show();
             }
+        }
+
+        private void SaveAs_Click(object sender, RoutedEventArgs e) {
+
         }
     }
 }
