@@ -9,6 +9,9 @@ namespace CGProject1
 {
     class Chart : FrameworkElement
     {
+        public delegate void OnMouseSelectDel(Chart sender, int newBegin, int newEnd);
+        public OnMouseSelectDel OnMouseSelect = (a, b, c) => { };
+
         public enum ScalingMode
         {
             Global,
@@ -149,7 +152,7 @@ namespace CGProject1
             const double startOptimizationWith = 1.0;
 
             stepX = actSize.Width / (this.Length - 1);
-            bool optimization = (stepX < startOptimizationWith);
+            optimization = (stepX < startOptimizationWith);
             stepOptimization = 0;
             if (optimization)
             {
@@ -428,6 +431,7 @@ namespace CGProject1
                 {
                     this.Begin = selectIntervalBegin;
                     this.End = selectIntervalEnd;
+                    OnMouseSelect(this, this.Begin, this.End);
                 }
 
                 InvalidateVisual();
