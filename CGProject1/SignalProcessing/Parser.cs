@@ -107,7 +107,6 @@ namespace CGProject1 {
                 }
             }
 
-            result.channels.Add(SignalProcessing.Modelling.discreteModels[0].CreateChannel(result.SamplesCount, new double[] { 1000 }, result.SamplingFrq, result.StartDateTime));
             result.UpdateChannelsInfo();
             return result;
         }

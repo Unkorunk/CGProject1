@@ -1,9 +1,10 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-
+using System.Windows.Media.Animation;
 using CGProject1.SignalProcessing;
 
 
@@ -51,6 +52,7 @@ namespace CGProject1 {
 
             if (btnModel != this.currentModel) {
                 this.currentModel = btnModel;
+                ParamsHeader.Content = $"Параметры {this.currentModel.ModelName}";
 
                 ArgumentsPanel.Children.Clear();
                 argumentsFields = new TextBox[btnModel.ArgsNames.Length + 2];
@@ -64,7 +66,7 @@ namespace CGProject1 {
                 DataObject.AddPastingHandler(samplesCountField, previewPasting);
                 samplesCountField.PreviewTextInput += previewTextInput;
 
-                samplesCountField.Text = this.samplesCount.ToString();
+                samplesCountField.Text = this.samplesCount.ToString(CultureInfo.InvariantCulture);
                 argumentsFields[btnModel.ArgsNames.Length] = samplesCountField;
                 ArgumentsPanel.Children.Add(samplesCountField);
 
@@ -77,7 +79,7 @@ namespace CGProject1 {
                 DataObject.AddPastingHandler(samplingFrqField, previewPasting);
                 samplingFrqField.PreviewTextInput += previewTextInput;
 
-                samplingFrqField.Text = this.samplingFrq.ToString();
+                samplingFrqField.Text = this.samplingFrq.ToString(CultureInfo.InvariantCulture);
                 argumentsFields[btnModel.ArgsNames.Length + 1] = samplingFrqField;
                 ArgumentsPanel.Children.Add(samplingFrqField);
 
@@ -86,11 +88,11 @@ namespace CGProject1 {
                     string header = btnModel.ArgsNames[i];
 
                     if (btnModel.MinArgValues[i] != double.MinValue) {
-                        header += $" from {btnModel.MinArgValues[i]}";
+                        header += $" от {btnModel.MinArgValues[i]}";
                     }
 
                     if (btnModel.MaxArgValues[i] != double.MaxValue) {
-                        header += $" to {btnModel.MaxArgValues[i]}";
+                        header += $" до {btnModel.MaxArgValues[i]}";
                     }
 
                     label.Content = header;
@@ -152,6 +154,25 @@ namespace CGProject1 {
 
             chart.Begin = 0;
             chart.End = this.samplesCount;
+        }
+
+        private void OnSave_Click(object sender, RoutedEventArgs e) {
+            var args = ValidateArguments();
+            var channel = this.currentModel.CreateChannel(this.samplesCount, args, this.samplingFrq, Modelling.defaultStartDateTime);
+
+            var curSignal = MainWindow.instance.currentSignal;
+
+            if (curSignal == null || Math.Abs(curSignal.SamplingFrq - this.samplingFrq) > 1e-8 || curSignal.SamplesCount != this.samplesCount) {
+                var newSignal = new Signal("Model signal");
+                newSignal.SamplingFrq = this.samplingFrq;
+                newSignal.StartDateTime = Modelling.defaultStartDateTime;
+                newSignal.channels.Add(channel);
+                newSignal.UpdateChannelsInfo();
+                MainWindow.instance.ResetSignal(newSignal);
+                return;
+            }
+
+            MainWindow.instance.AddChannel(channel);
         }
 
         private void previewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e) {

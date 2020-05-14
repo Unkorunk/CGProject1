@@ -52,11 +52,14 @@ namespace CGProject1 {
 
         public Signal() {
             this.fileName = "НовыйФайл.txt";
-            this.StartDateTime = DateTime.Now;
+            this.StartDateTime = SignalProcessing.Modelling.defaultStartDateTime;
+            this.channels = new List<Channel>();
         }
 
         public Signal(string name) {
             this.fileName = name;
+            this.StartDateTime = SignalProcessing.Modelling.defaultStartDateTime;
+            this.channels = new List<Channel>();
         }
 
         public void UpdateChannelsInfo() {
