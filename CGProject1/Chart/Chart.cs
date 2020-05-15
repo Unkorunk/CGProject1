@@ -284,14 +284,21 @@ namespace CGProject1
                     double y = (i + 1) * actSize.Height / 6;
                     dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width, interfaceOffset.Height + y),
                         new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
-                    var formText1 = new FormattedText(Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6).ToString(),
+                    string val = Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6, 5).ToString(CultureInfo.InvariantCulture);
+                    if (val.Length > 8) {
+                        val = val.Substring(0, 8);
+                    }
+
+                    var formText1 = new FormattedText(val,
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
                         new Typeface("Times New Roman"),
                         12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
                     );
 
-                    dc.DrawText(formText1, new Point(0, interfaceOffset.Height + y - formText1.Height / 2));
+                    formText1.TextAlignment = TextAlignment.Right;
+
+                    dc.DrawText(formText1, new Point(interfaceOffset.Width - 5, interfaceOffset.Height + y - formText1.Height / 2));
                 }
             }
 
@@ -513,6 +520,12 @@ namespace CGProject1
                 idx = (int)Math.Round(position.X / stepX + this.Begin);
             }
             return idx;
+        }
+
+        private string Reverse(string s) {
+            char[] charArray = s.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
         }
 
         //public void EnableSelectInterval()

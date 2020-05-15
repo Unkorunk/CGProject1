@@ -118,7 +118,11 @@ namespace CGProject1 {
         private double[] ValidateArguments() {
             var args = new double[currentModel.MinArgValues.Length];
             for (int i = 0; i < currentModel.MinArgValues.Length; i++) {
-                double val = double.Parse(argumentsFields[i].Text, CultureInfo.InvariantCulture);
+                double val = 0;
+                if (!double.TryParse(argumentsFields[i].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out val)) {
+                    MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return null;
+                }
 
                 if (val < currentModel.MinArgValues[i]) {
                     val = currentModel.MinArgValues[i];
@@ -149,6 +153,10 @@ namespace CGProject1 {
 
         private void OnPreview_Click(object sender, RoutedEventArgs e) {
             var args = ValidateArguments();
+            if (args == null) {
+                return;
+            }
+
             var channel = this.currentModel.CreatePreviewChannel(this.samplesCount, args, this.samplingFrq, Modelling.defaultStartDateTime);
 
             ChartPreview.Children.Clear();
@@ -164,6 +172,10 @@ namespace CGProject1 {
 
         private void OnSave_Click(object sender, RoutedEventArgs e) {
             var args = ValidateArguments();
+            if (args == null) {
+                return;
+            }
+
             var channel = this.currentModel.CreateChannel(this.samplesCount, args, this.samplingFrq, Modelling.defaultStartDateTime);
 
             var curSignal = MainWindow.instance.currentSignal;
@@ -183,13 +195,19 @@ namespace CGProject1 {
 
         private void previewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e) {
             bool approvedDecimalPoint = false;
+            bool approvedMinus = false;
 
             if (e.Text == ".") {
                 if (!((TextBox)sender).Text.Contains("."))
                     approvedDecimalPoint = true;
             }
 
-            if (!(char.IsDigit(e.Text, e.Text.Length - 1) || approvedDecimalPoint))
+            if (e.Text == "-") {
+                if (!((TextBox)sender).Text.Contains("-"))
+                    approvedDecimalPoint = true;
+            }
+
+            if (!(char.IsDigit(e.Text, e.Text.Length - 1) || approvedDecimalPoint || approvedMinus))
                 e.Handled = true;
         }
 

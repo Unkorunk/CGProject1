@@ -1,0 +1,47 @@
+﻿<Window x:Class="CGProject1.SaveWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CGProject1"
+        mc:Ignorable="d"
+        Title="SaveWindow" Height="450" Width="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="150"/>
+        </Grid.ColumnDefinitions>
+        
+        <Border BorderBrush="Black" BorderThickness="2">
+            <Grid x:Name="ChannelsGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="25"/>
+                </Grid.RowDefinitions>
+                <Label FontWeight="Bold">Каналы</Label>
+                <Border BorderBrush="Black" BorderThickness="1"></Border>
+                <Border Grid.Column="1" BorderBrush="Black" BorderThickness="1"></Border>
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Column="1">
+            <Label FontWeight="Bold">Отсчеты:</Label>
+            <StackPanel Orientation="Horizontal">
+                <Label Width="30">От:</Label>
+                <TextBox x:Name="BeginField" MaxLength="8" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" Width="120"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Width="30">До:</Label>
+                <TextBox x:Name="EndField" MaxLength="8" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" Width="120"></TextBox>
+            </StackPanel>
+            <Button Content="Весь сигнал" Click="FullSignalClick"></Button>
+            <Separator></Separator>
+            <Button Content="Сохранить" Click="SaveClick"></Button>
+            
+        </StackPanel>
+        
+    </Grid>
+</Window>

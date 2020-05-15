@@ -5,19 +5,19 @@ using System.Windows.Input;
 using Microsoft.Win32;
 
 namespace CGProject1 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window {
         public static MainWindow instance = null;
 
         private AboutSignal aboutSignalWindow;
         private Oscillograms oscillogramWindow;
         private ModelingWindow modelingWindow;
+        private SaveWindow savingWindow;
 
         private bool showing = false;
         private bool isOscillogramShowing = false;
         private bool isModelingWindowShowing = false;
+        private bool isSavingWindowShowing = false;
+
         public Signal currentSignal;
 
         private List<Chart> charts = new List<Chart>();
@@ -37,6 +37,10 @@ namespace CGProject1 {
 
                 if (isOscillogramShowing) {
                     oscillogramWindow.Close();
+                }
+
+                if (isSavingWindowShowing) {
+                    savingWindow.Close();
                 }
             };
         }
@@ -66,11 +70,15 @@ namespace CGProject1 {
             this.currentSignal.channels.Add(channel);
 
             if (aboutSignalWindow != null) {
-                aboutSignalWindow.UpdateInfo(this.currentSignal);
+                aboutSignalWindow.Close();
             }
 
             if (modelingWindow != null) {
                 modelingWindow.Close();
+            }
+
+            if (isSavingWindowShowing) {
+                savingWindow.Close();
             }
 
             var chart = new Chart(channel);
@@ -110,15 +118,14 @@ namespace CGProject1 {
                 oscillogramWindow.Close();
             }
 
+            if (isSavingWindowShowing) {
+                savingWindow.Close();
+            }
+
             foreach (var chart in charts) {
                 channels.Children.Remove(chart);
             }
             charts.Clear();
-
-            //if (channels.RowDefinitions.Count > 1)
-            //{
-            //    channels.RowDefinitions.RemoveRange(1, channels.RowDefinitions.Count - 1);
-            //}
 
             SignalProcessing.Modelling.ResetCounters();
 
@@ -147,15 +154,6 @@ namespace CGProject1 {
                 };
 
                 chart.ContextMenu.Items.Add(item1);
-
-                //if (channels.RowDefinitions.Count < i + 1)
-                //{
-
-                //    channels.RowDefinitions.Add(new RowDefinition());
-                //}
-
-                //Grid.SetRow(chart, i);
-                //Grid.SetColumn(chart, 0);
 
                 chart.Begin = 0;
                 chart.End = currentSignal.SamplesCount;
@@ -220,6 +218,28 @@ namespace CGProject1 {
                 oscillogramWindow.Closed += (object sender, System.EventArgs e) => this.isOscillogramShowing = false;
                 oscillogramWindow.Update(currentSignal);
                 oscillogramWindow.Show();
+            }
+        }
+
+        private void SaveAs_Click(object sender, RoutedEventArgs e) {
+            if (this.currentSignal == null) {
+                MessageBox.Show("Нет сигнала для сохранения", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!this.isSavingWindowShowing) {
+                int begin = 0;
+                int end = this.currentSignal.SamplesCount - 1;
+
+                if (oscillogramWindow != null && isOscillogramShowing) {
+                    begin = oscillogramWindow.GetBegin();
+                    end = oscillogramWindow.GetEnd();
+                }
+
+                savingWindow = new SaveWindow(this.currentSignal, begin, end);
+                savingWindow.Closed += (object sender, System.EventArgs e) => this.isSavingWindowShowing = false;
+                savingWindow.Show();
+                this.isSavingWindowShowing = true;
             }
         }
     }

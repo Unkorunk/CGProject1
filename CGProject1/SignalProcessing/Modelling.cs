@@ -93,15 +93,15 @@ namespace CGProject1.SignalProcessing {
                     });
             continiousModels.Add(withTonicEnvelope);
 
-            var sin = new ChannelConstructor("Синусоида", 9,
-                    new string[] { "Амплитуда", "Частота несущей", "Нач. фаза" },
-                    new double[] { double.MinValue, 0, 0 },
-                    new double[] { double.MaxValue, double.MaxValue, Math.PI * 2 },
-                    (int n, double dt, double[] args) => {
-                        double t = n * dt;
-                        return args[0] * Math.Sin(t * args[1] + args[2]);
-                    });
-            continiousModels.Add(sin);
+            //var sin = new ChannelConstructor("Синусоида", 9,
+            //        new string[] { "Амплитуда", "Частота несущей", "Нач. фаза" },
+            //        new double[] { double.MinValue, 0, 0 },
+            //        new double[] { double.MaxValue, double.MaxValue, Math.PI * 2 },
+            //        (int n, double dt, double[] args) => {
+            //            double t = n * dt;
+            //            return args[0] * Math.Sin(t * args[1] + args[2]);
+            //        });
+            //continiousModels.Add(sin);
         }
 
         public static void ResetCounters() {
