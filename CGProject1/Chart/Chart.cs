@@ -144,6 +144,16 @@ namespace CGProject1
                     12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
                 );
                 interfaceOffset.Width = formText1.Width;
+            } else
+            {
+                var formText1 = new FormattedText("(" + int.MaxValue.ToString() + ")",
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                );
+                formText1.TextAlignment = TextAlignment.Center;
+                interfaceOffset.Height = formText1.Height;
             }
 
             Size actSize = new Size(this.ActualWidth - interfaceOffset.Width,
@@ -292,9 +302,8 @@ namespace CGProject1
                 new Typeface("Times New Roman"),
                 14, Brushes.Red, VisualTreeHelper.GetDpi(this).PixelsPerDip);
 
-            dc.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Gray, 1.0), new Rect(0, 0, formText.Width, formText.Height));
 
-            dc.DrawText(formText, new Point(0, 0));
+            dc.DrawText(formText, new Point(this.GridDraw ? 0 : this.ActualWidth / 2 - formText.Width / 2, 0));
             #endregion Channel Name
 
             #endregion [Interface] Draw
