@@ -48,6 +48,14 @@ namespace CGProject1 {
             ScalingChooser.Items.Add(uniformLocalScaling);
         }
 
+        public int GetBegin() {
+            return (int)BeginSlider.Value;
+        }
+
+        public int GetEnd() {
+            return (int)EndSlider.Value;
+        }
+
         public void Update(Signal signal) {
             BeginSlider.IsEnabled = signal != null;
             EndSlider.IsEnabled = signal != null;
@@ -62,11 +70,11 @@ namespace CGProject1 {
                 OscillogramsField.Children.Clear();
                 activeCharts.Clear();
 
-                BeginSlider.Maximum = samplesCount;
-                EndSlider.Maximum = samplesCount;
+                BeginSlider.Maximum = samplesCount - 1;
+                EndSlider.Maximum = samplesCount - 1;
 
                 BeginSlider.Value = 0;
-                EndSlider.Value = samplesCount;
+                EndSlider.Value = samplesCount - 1;
 
                 BeginBox.Text = 0.ToString();
                 EndBox.Text = samplesCount.ToString();

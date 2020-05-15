@@ -11,10 +11,13 @@ namespace CGProject1 {
         private AboutSignal aboutSignalWindow;
         private Oscillograms oscillogramWindow;
         private ModelingWindow modelingWindow;
+        private SaveWindow savingWindow;
 
         private bool showing = false;
         private bool isOscillogramShowing = false;
         private bool isModelingWindowShowing = false;
+        private bool isSavingWindowShowing = false;
+
         public Signal currentSignal;
 
         private List<Chart> charts = new List<Chart>();
@@ -34,6 +37,10 @@ namespace CGProject1 {
 
                 if (isOscillogramShowing) {
                     oscillogramWindow.Close();
+                }
+
+                if (isSavingWindowShowing) {
+                    savingWindow.Close();
                 }
             };
         }
@@ -63,11 +70,15 @@ namespace CGProject1 {
             this.currentSignal.channels.Add(channel);
 
             if (aboutSignalWindow != null) {
-                aboutSignalWindow.UpdateInfo(this.currentSignal);
+                aboutSignalWindow.Close();
             }
 
             if (modelingWindow != null) {
                 modelingWindow.Close();
+            }
+
+            if (isSavingWindowShowing) {
+                savingWindow.Close();
             }
 
             var chart = new Chart(channel);
@@ -105,6 +116,10 @@ namespace CGProject1 {
 
             if (isOscillogramShowing) {
                 oscillogramWindow.Close();
+            }
+
+            if (isSavingWindowShowing) {
+                savingWindow.Close();
             }
 
             foreach (var chart in charts) {
@@ -207,7 +222,25 @@ namespace CGProject1 {
         }
 
         private void SaveAs_Click(object sender, RoutedEventArgs e) {
+            if (this.currentSignal == null) {
+                MessageBox.Show("Нет сигнала для сохранения", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
+            if (!this.isSavingWindowShowing) {
+                int begin = 0;
+                int end = this.currentSignal.SamplesCount - 1;
+
+                if (oscillogramWindow != null && isOscillogramShowing) {
+                    begin = oscillogramWindow.GetBegin();
+                    end = oscillogramWindow.GetEnd();
+                }
+
+                savingWindow = new SaveWindow(this.currentSignal, begin, end);
+                savingWindow.Closed += (object sender, System.EventArgs e) => this.isSavingWindowShowing = false;
+                savingWindow.Show();
+                this.isSavingWindowShowing = true;
+            }
         }
     }
 }
