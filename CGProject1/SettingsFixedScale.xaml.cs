@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Windows;
 
 namespace CGProject1
@@ -9,9 +10,9 @@ namespace CGProject1
     public partial class SettingsFixedScale : Window
     {
         public bool Status { get; set; }
-        private int _from, _to;
-        public int From { get => _from; set => _from = value; }
-        public int To { get => _to; set => _to = value; }
+        private double _from, _to;
+        public double From { get => _from; set => _from = value; }
+        public double To { get => _to; set => _to = value; }
 
         public SettingsFixedScale()
         {
@@ -20,7 +21,8 @@ namespace CGProject1
 
         private void ButtonOK_Click(object sender, RoutedEventArgs e)
         {
-            if (int.TryParse(TextBoxFrom.Text, out _from) && int.TryParse(TextBoxTo.Text, out _to) && _from < _to)
+            if (double.TryParse(TextBoxFrom.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out _from)
+                && double.TryParse(TextBoxTo.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out _to) && _from < _to)
             {
                 Status = true;
                 this.Close();
@@ -32,7 +34,7 @@ namespace CGProject1
 
         private bool TextIsNumeric(string input)
         {
-            return input.All(c => char.IsDigit(c) || char.IsControl(c));
+            return input.All(c => char.IsDigit(c) || char.IsControl(c) || c == '.' || c == '-');
         }
 
         private void TextBoxFrom_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
