@@ -276,12 +276,12 @@ namespace CGProject1
                         new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
                     var formText1 = new FormattedText(Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6).ToString(),
                         CultureInfo.GetCultureInfo("en-us"),
-                        FlowDirection.LeftToRight,
+                        FlowDirection.RightToLeft,
                         new Typeface("Times New Roman"),
                         12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
                     );
 
-                    dc.DrawText(formText1, new Point(0, interfaceOffset.Height + y - formText1.Height / 2));
+                    dc.DrawText(formText1, new Point(interfaceOffset.Width - 5, interfaceOffset.Height + y - formText1.Height / 2));
                 }
             }
 
