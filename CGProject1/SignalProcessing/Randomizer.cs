@@ -26,7 +26,7 @@ namespace CGProject1.SignalProcessing {
 
         private static double NormalDouble() {
             double n = 0;
-            for (int i = 0; i < n; i++) {
+            for (int i = 0; i < 12; i++) {
                 n += rnd.NextDouble();
             }
             return n - 6;

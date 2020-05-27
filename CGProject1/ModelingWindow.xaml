@@ -28,6 +28,8 @@
                 <StackPanel  x:Name="DiscreteModelsPanel"></StackPanel>
                 <Label>Непрерывные модели:</Label>
                 <StackPanel  x:Name="ContinousModelPanel"></StackPanel>
+                <Label>Случайные модели:</Label>
+                <StackPanel  x:Name="RandomModelPanel"></StackPanel>
             </StackPanel>
         </ScrollViewer>
         

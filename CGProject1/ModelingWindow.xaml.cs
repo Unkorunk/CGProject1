@@ -40,6 +40,15 @@ namespace CGProject1 {
                 ContinousModelPanel.Children.Add(modelBtn);
             }
 
+            foreach (var model in Modelling.randomModels) {
+                var modelBtn = new Button();
+                modelBtn.Content = model.ModelName;
+                modelBtn.Tag = model;
+                modelBtn.Click += OpenModel;
+
+                RandomModelPanel.Children.Add(modelBtn);
+            }
+
             PreviewButton.IsEnabled = false;
             ChannelSaveBtn.IsEnabled = false;
         }

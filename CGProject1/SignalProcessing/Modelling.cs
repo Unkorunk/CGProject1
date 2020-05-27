@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Security.Policy;
 using System.Windows.Navigation;
 
 namespace CGProject1.SignalProcessing {
@@ -93,16 +94,77 @@ namespace CGProject1.SignalProcessing {
                     });
             continiousModels.Add(withTonicEnvelope);
 
-            //var sin = new ChannelConstructor("Синусоида", 9,
-            //        new string[] { "Амплитуда", "Частота несущей", "Нач. фаза" },
-            //        new double[] { double.MinValue, 0, 0 },
-            //        new double[] { double.MaxValue, double.MaxValue, Math.PI * 2 },
-            //        (int n, double dt, double[] args) => {
-            //            double t = n * dt;
-            //            return args[0] * Math.Sin(t * args[1] + args[2]);
-            //        });
-            //continiousModels.Add(sin);
+            randomModels = new List<ChannelConstructor>();
+
+            var testUniform = new ChannelConstructor("Проверка равномерного распределения", 1,
+                    new string[] { "Величина выборки", "Нижняя граница", "Верхняя граница" },
+                    new double[] { 0, 0, 0 }, new double[] { 1000000000, 1000000000, 1000000000 },
+                    (int n, double dt, double[] args) => {
+                        int a = (int)args[1];
+                        int b = (int)args[2];
+                        if (n == 0) {
+                            int t = (int)args[0];
+                            randomVals = new Dictionary<int, int>();
+
+                            for (int i = 0; i < t; i++) {
+                                int cur = Randomizer.UniformRand(a, b);
+                                if (!randomVals.ContainsKey(cur)) {
+                                    randomVals.Add(cur, 0);
+                                }
+
+                                randomVals[cur]++;
+                            }
+                        }
+
+                        if (randomVals.ContainsKey(n)) {
+                            return randomVals[n];
+                        }
+
+                        return 0;
+
+                    });
+            randomModels.Add(testUniform);
+
+            var testNormal = new ChannelConstructor("Проверка нормального распределения", 1,
+                    new string[] { "Величина выборки", "Медиана", "Дисперсия" },
+                    new double[] { 0, 0, 0 }, new double[] { 1000000000, 1000000000, 1000000000 },
+                    (int n, double dt, double[] args) => {
+                        int m = (int)args[1];
+                        int d = (int)args[2];
+                        if (n == 0) {
+                            int t = (int)args[0];
+                            randomVals = new Dictionary<int, int>();
+
+                            for (int i = 0; i < t; i++) {
+                                int cur = Randomizer.NormalRand(m, d);
+                                if (!randomVals.ContainsKey(cur)) {
+                                    randomVals.Add(cur, 0);
+                                }
+
+                                randomVals[cur]++;
+                            }
+                        }
+
+                        if (randomVals.ContainsKey(n)) {
+                            return randomVals[n];
+                        }
+
+                        return 0;
+
+                    });
+            randomModels.Add(testNormal);
         }
+
+        public static List<ChannelConstructor> discreteModels;
+
+        public static List<ChannelConstructor> continiousModels;
+
+        public static List<ChannelConstructor> randomModels;
+
+        public static DateTime defaultStartDateTime = new DateTime(2000, 1, 1, 0, 0, 0, 0);
+
+        private static Dictionary<int, int> randomVals = null;
+        private static int tmpCounter = 0;
 
         public static void ResetCounters() {
             foreach (var model in discreteModels) {
@@ -112,12 +174,10 @@ namespace CGProject1.SignalProcessing {
             foreach (var model in continiousModels) {
                 model.ResetCounter();
             }
-        }
 
-        public static List<ChannelConstructor> discreteModels;
-
-        public static List<ChannelConstructor> continiousModels;
-
-        public static DateTime defaultStartDateTime = new DateTime(2000, 1, 1, 0, 0, 0, 0);
+            foreach (var model in randomModels) {
+                model.ResetCounter();
+            }
+        } 
     }
 }
