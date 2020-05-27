@@ -14,7 +14,7 @@ namespace CGProject1.SignalProcessing {
             return rnd.Next(a, b);
         }
 
-        public static int NormalRand(int a, int d) {
+        public static int NormalRand(int a, double d) {
             double n = NormalDouble();
             return a + (int)Math.Round(d * n);
         }

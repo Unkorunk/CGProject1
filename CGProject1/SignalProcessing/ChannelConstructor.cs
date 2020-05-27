@@ -13,7 +13,7 @@ namespace CGProject1.SignalProcessing {
             this.MaxArgValues = maxValues;
 
             if (modelingRule == null) {
-                modelingRule = (int n, double deltaTime, double[] args) => {
+                modelingRule = (int n, double deltaTime, double[] args, double[] signalVals) => {
                     return Math.Cos(n * deltaTime) * 10;
                 };
             }
@@ -32,7 +32,7 @@ namespace CGProject1.SignalProcessing {
         public double[] MinArgValues { get; }
         public double[] MaxArgValues { get; }
 
-        public delegate double Model(int n, double deltaTime, double[] args);
+        public delegate double Model(int n, double deltaTime, double[] args, double[] signalVals);
 
         public void ResetCounter() {
             channelCounter = 0;
@@ -66,7 +66,7 @@ namespace CGProject1.SignalProcessing {
             channel.Source = this.ModelName;
 
             for (int i = 0; i < samplesCount; i++) {
-                channel.values[i] = modelDelegate(i, channel.DeltaTime, args);
+                channel.values[i] = modelDelegate(i, channel.DeltaTime, args, channel.values);
             }
 
             return channel;
