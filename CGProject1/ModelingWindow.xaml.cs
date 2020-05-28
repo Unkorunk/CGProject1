@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using CGProject1.SignalProcessing;
@@ -55,6 +57,8 @@ namespace CGProject1 {
 
         private ChannelConstructor currentModel = null;
         private TextBox[] argumentsFields = null;
+        private List<TextBox>[] varargFields = null;
+        private StackPanel[] varargPanels = null;
         private int samplesCount;
         private double samplingFrq;
 
@@ -111,12 +115,54 @@ namespace CGProject1 {
                     ArgumentsPanel.Children.Add(label);
 
                     var field = new TextBox();
-                    field.Text = "0";
+                    field.Text = btnModel.LastValues[i].ToString();
                     field.PreviewTextInput += previewTextInput;
                     DataObject.AddPastingHandler(field, previewPasting);
 
                     ArgumentsPanel.Children.Add(field);
                     argumentsFields[i] = field;
+                }
+
+                varargFields = new List<TextBox>[btnModel.VarArgNames.Length];
+                varargPanels = new StackPanel[btnModel.VarArgNames.Length];
+
+                for (int i = 0; i < btnModel.VarArgNames.Length; i++) {
+                    varargFields[i] = new List<TextBox>();
+
+                    var label = new Label();
+                    string header = btnModel.VarArgNames[i];
+                    label.Content = header + ":";
+                    ArgumentsPanel.Children.Add(label);
+
+                    var argPanel = new StackPanel();
+                    var field = new TextBox();
+                    field.Text = "0";
+                    varargFields[i].Add(field);
+                    argPanel.Children.Add(field);
+                    ArgumentsPanel.Children.Add(argPanel);
+                    varargPanels[i] = argPanel;
+
+                    var addBtn = new Button();
+                    int indx = i;
+                    addBtn.Click += (object sender, RoutedEventArgs e) => {
+                        var field = new TextBox();
+                        field.Text = "0";
+                        varargFields[indx].Add(field);
+                        varargPanels[indx].Children.Add(field);
+                    };
+                    addBtn.Content = "Добавить значение";
+                    ArgumentsPanel.Children.Add(addBtn);
+
+                    var removeBtn = new Button();
+                    removeBtn.Click += (object sender, RoutedEventArgs e) => {
+                        if (varargPanels[indx].Children.Count > 0) {
+                            int size = varargFields[indx].Count;
+                            varargFields[indx].RemoveAt(size - 1);
+                            varargPanels[indx].Children.RemoveAt(size - 1);
+                        }
+                    };
+                    removeBtn.Content = "Удалить значение";
+                    ArgumentsPanel.Children.Add(removeBtn);
                 }
 
                 PreviewButton.IsEnabled = true;
@@ -160,13 +206,41 @@ namespace CGProject1 {
             return args;
         }
 
+        private double[][] ValidateVarArgs() {
+            var varargs = new double[currentModel.VarArgNames.Length][];
+
+            for (int i = 0; i < currentModel.VarArgNames.Length; i++) {
+                int size = varargFields[i].Count;
+                varargs[i] = new double[size];
+
+                for (int j = 0; j < size; j++) {
+                    double val = 0;
+
+                    if (!double.TryParse(varargFields[i][j].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out val)) {
+                        MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return null;
+                    }
+
+                    varargs[i][j] = val;
+                    varargFields[i][j].Text = val.ToString(CultureInfo.InvariantCulture);
+                }
+            }
+
+            return varargs;
+        }
+
         private void OnPreview_Click(object sender, RoutedEventArgs e) {
-            var args = ValidateArguments();
+            double[] args = ValidateArguments();
             if (args == null) {
                 return;
             }
 
-            var channel = this.currentModel.CreatePreviewChannel(this.samplesCount, args, this.samplingFrq, Modelling.defaultStartDateTime);
+            double[][] varargs = ValidateVarArgs();
+            if (varargs == null) {
+                return;
+            }
+
+            var channel = this.currentModel.CreatePreviewChannel(this.samplesCount, args, varargs, this.samplingFrq, Modelling.defaultStartDateTime);
 
             ChartPreview.Children.Clear();
 
@@ -184,8 +258,9 @@ namespace CGProject1 {
             if (args == null) {
                 return;
             }
+            var varargs = ValidateVarArgs();
 
-            var channel = this.currentModel.CreateChannel(this.samplesCount, args, this.samplingFrq, Modelling.defaultStartDateTime);
+            var channel = this.currentModel.CreateChannel(this.samplesCount, args, varargs, this.samplingFrq, Modelling.defaultStartDateTime);
 
             var curSignal = MainWindow.instance.currentSignal;
 
