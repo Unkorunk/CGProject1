@@ -105,6 +105,8 @@ namespace CGProject1
 
         public int Length { get => End - Begin + 1; }
 
+        public bool ShowCurrentXY { get; set; }
+
         private Size interfaceOffset = new Size();
         private bool optimization = false;
         private double stepX = 1.0;
@@ -495,12 +497,15 @@ namespace CGProject1
             var position = e.GetPosition(this);
             if (position.X >= interfaceOffset.Width &&
                 position.Y >= interfaceOffset.Height) {
-                this.curSelected = GetIdx(position);
+                
 
-                this.tooltip.IsOpen = true;
-                this.tooltip.HorizontalOffset = position.X;
-                this.tooltip.VerticalOffset = position.Y - 20;
-                this.tooltip.Content = this.channel.values[this.curSelected];
+                if (ShowCurrentXY) {
+                    this.curSelected = GetIdx(position);
+                    this.tooltip.IsOpen = true;
+                    this.tooltip.HorizontalOffset = 1;//position.X;
+                    this.tooltip.VerticalOffset = this.ActualHeight - 26;// position.Y - 20;
+                    this.tooltip.Content = $"X: {this.curSelected}; Y: {this.channel.values[this.curSelected]}";
+                }
 
                 if (enableSelectInterval && this.IsMouseSelect) {
                     int idx = GetIdx(position);
@@ -513,23 +518,27 @@ namespace CGProject1
                     }
 
                     selectIntervalBegin = Math.Clamp(selectIntervalBegin, this.Begin, this.End);
-                    selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End);
-
-                    
+                    selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End); 
                 }
-            } else {
+
+                InvalidateVisual();
+            } else if (this.curSelected != -1) {
                 this.tooltip.IsOpen = false;
                 this.curSelected = -1;
+                InvalidateVisual();
             }
-            InvalidateVisual();
         }
 
         protected override void OnMouseLeave(MouseEventArgs e)
         {
             base.OnMouseLeave(e);
-
-            this.tooltip.IsOpen = false;
-            this.curSelected = -1;
+            if (ShowCurrentXY) {
+                if (this.curSelected != -1) {
+                    this.tooltip.IsOpen = false;
+                    this.curSelected = -1;
+                }
+            }
+            
 
             if (this.IsMouseSelect)
             {

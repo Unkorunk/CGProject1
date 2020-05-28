@@ -91,9 +91,8 @@ namespace CGProject1 {
         }
 
         public void AddChannel(Channel channel) {
-            var newChart = new Chart(channel)
-            {
-                IsMouseSelect = true
+            var newChart = new Chart(channel) {
+                IsMouseSelect = true, ShowCurrentXY = true
             };
 
             newChart.Begin = (int)BeginSlider.Value;

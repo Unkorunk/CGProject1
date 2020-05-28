@@ -399,6 +399,7 @@ namespace CGProject1 {
 
             var chart = new Chart(channel);
             chart.Height = 100;
+            chart.ShowCurrentXY = true;
 
             ChartPreview.Children.Add(chart);
 
