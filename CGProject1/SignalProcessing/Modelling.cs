@@ -220,6 +220,9 @@ namespace CGProject1.SignalProcessing {
 
         private static double[] whiteNoise_ARMA = null;
 
+        private static int superposCounter = 0;
+        private static int multCounter = 0;
+
         public static void ResetCounters() {
             foreach (var model in discreteModels) {
                 model.ResetCounter();
@@ -232,6 +235,59 @@ namespace CGProject1.SignalProcessing {
             foreach (var model in randomModels) {
                 model.ResetCounter();
             }
-        } 
+
+            superposCounter = 0;
+            multCounter = 0;
+        }
+
+        public static Channel LinearSuperpos(double[] a, Channel[] channels, bool isPreview) {
+            if (a.Length != channels.Length + 1 || channels.Length == 0) {
+                throw new Exception("Not enough arguments");
+            }
+
+            var res = new Channel(channels[0].SamplesCount);
+            res.SamplingFrq = channels[0].SamplingFrq;
+            res.StartDateTime = channels[0].StartDateTime;
+            res.Source = "Суперпозиция";
+            res.Name = "Суперпозиция_" + superposCounter.ToString();
+
+            if (!isPreview) {
+                superposCounter++;
+            }
+
+            for (int i = 0; i < res.SamplesCount; i++) {
+                res.values[i] = a[0];
+                for (int j = 0; j < channels.Length; j++) {
+                    res.values[i] += channels[j].values[i] * a[j + 1];
+                }
+            }
+
+            return res;
+        }
+
+        public static Channel MultiplicativeSuperpos(double[] a, Channel[] channels, bool isPreview) {
+            if (a.Length != channels.Length + 1 || channels.Length == 0) {
+                throw new Exception("Not enough arguments");
+            }
+
+            var res = new Channel(channels[0].SamplesCount);
+            res.SamplingFrq = channels[0].SamplingFrq;
+            res.StartDateTime = channels[0].StartDateTime;
+            res.Source = "Произведение";
+            res.Name = "Произведение_" + superposCounter.ToString();
+
+            if (!isPreview) {
+                multCounter++;
+            }
+
+            for (int i = 0; i < res.SamplesCount; i++) {
+                res.values[i] = a[0];
+                for (int j = 0; j < channels.Length; j++) {
+                    res.values[i] *= Math.Pow(channels[j].values[i], a[j + 1]);
+                }
+            }
+
+            return res;
+        }
     }
 }
