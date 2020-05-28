@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -109,10 +110,17 @@ namespace CGProject1
         private double stepX = 1.0;
         private int stepOptimization = 0;
 
+        private ToolTip tooltip;
+
+        private int curSelected = -1;
+
         public Chart(in Channel channel)
         {
             this.channel = channel;
             this._groupedCharts = new List<Chart>() { this };
+            this.tooltip = new ToolTip();
+            this.tooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
+            this.tooltip.PlacementTarget = this;
         }
 
         protected override void OnRender(DrawingContext dc)
@@ -387,6 +395,18 @@ namespace CGProject1
             #endregion [Chart] Draw
 
             #region [SelectInterval] Draw
+            if (this.curSelected != -1) {
+                if (optimization) {
+                    dc.DrawLine(new Pen(Brushes.Green, 2.0),
+                        new Point(interfaceOffset.Width + 2.0 * stepX * (this.curSelected - this.Begin) / stepOptimization, interfaceOffset.Height),
+                        new Point(interfaceOffset.Width + 2.0 * stepX * (this.curSelected - this.Begin) / stepOptimization, actSize.Height + interfaceOffset.Height));
+                } else {
+                    dc.DrawLine(new Pen(Brushes.Green, 2.0),
+                        new Point(interfaceOffset.Width + stepX * (this.curSelected - this.Begin), interfaceOffset.Height),
+                        new Point(interfaceOffset.Width + stepX * (this.curSelected - this.Begin), actSize.Height + interfaceOffset.Height));
+                }
+            }
+
             if (enableSelectInterval)
             {
                 var brush = new SolidColorBrush(Color.FromArgb(100, 255, 153, 51));
@@ -474,35 +494,48 @@ namespace CGProject1
 
             var position = e.GetPosition(this);
             if (position.X >= interfaceOffset.Width &&
-                position.Y >= interfaceOffset.Height &&
-                enableSelectInterval && this.IsMouseSelect)
-            {
-                int idx = GetIdx(position);
+                position.Y >= interfaceOffset.Height) {
+                this.curSelected = GetIdx(position);
 
-                selectIntervalEnd = idx;
-                selectIntervalBegin = fakeBegin;
-                if (selectIntervalEnd < selectIntervalBegin)
-                {
-                    selectIntervalBegin = idx;
-                    selectIntervalEnd = fakeBegin;
+                this.tooltip.IsOpen = true;
+                this.tooltip.HorizontalOffset = position.X;
+                this.tooltip.VerticalOffset = position.Y - 20;
+                this.tooltip.Content = this.channel.values[this.curSelected];
+
+                if (enableSelectInterval && this.IsMouseSelect) {
+                    int idx = GetIdx(position);
+
+                    selectIntervalEnd = idx;
+                    selectIntervalBegin = fakeBegin;
+                    if (selectIntervalEnd < selectIntervalBegin) {
+                        selectIntervalBegin = idx;
+                        selectIntervalEnd = fakeBegin;
+                    }
+
+                    selectIntervalBegin = Math.Clamp(selectIntervalBegin, this.Begin, this.End);
+                    selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End);
+
+                    
                 }
-
-                selectIntervalBegin = Math.Clamp(selectIntervalBegin, this.Begin, this.End);
-                selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End);
-
-                InvalidateVisual();
+            } else {
+                this.tooltip.IsOpen = false;
+                this.curSelected = -1;
             }
+            InvalidateVisual();
         }
 
         protected override void OnMouseLeave(MouseEventArgs e)
         {
             base.OnMouseLeave(e);
 
+            this.tooltip.IsOpen = false;
+            this.curSelected = -1;
+
             if (this.IsMouseSelect)
             {
                 enableSelectInterval = false;
-                InvalidateVisual();
             }
+            InvalidateVisual();
         }
 
         private int GetIdx(Point position)
