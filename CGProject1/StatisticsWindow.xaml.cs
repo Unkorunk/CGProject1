@@ -43,55 +43,37 @@ namespace CGProject1
                 Label intervalLabel = new Label();
                 panel.Children.Add(intervalLabel);
 
-                Label avgLabel = new Label();
-                panel.Children.Add(avgLabel);
-                Label dispLabel = new Label();
-                panel.Children.Add(dispLabel);
-                Label mseLabel = new Label();
-                panel.Children.Add(mseLabel);
-                Label coefVarLabel = new Label();
-                panel.Children.Add(coefVarLabel);
-                Label coefAsimLabel = new Label();
-                panel.Children.Add(coefAsimLabel);
-                Label coefExcesLabel = new Label();
-                panel.Children.Add(coefExcesLabel);
-                Label minValueLabel = new Label();
-                panel.Children.Add(minValueLabel);
-                Label maxValueLabel = new Label();
-                panel.Children.Add(maxValueLabel);
-                Label kvantZFLabel = new Label();
-                panel.Children.Add(kvantZFLabel);
-                Label kvantNFLabel = new Label();
-                panel.Children.Add(kvantNFLabel);
-                Label medianLabel = new Label();
-                panel.Children.Add(medianLabel);
+                Label statLabel = new Label();
+                panel.Children.Add(statLabel);
 
                 Action<Chart> updateInfo = (sender) =>
                 {
                     channelNameLabel.Content = "Name: " + sender.Channel.Name;
                     intervalLabel.Content = "Begin: " + (sender.Begin + 1) + "; End: " + (sender.End + 1);
 
+                    statLabel.Content = "";
+
                     double avg = CalcAvg(sender);
-                    avgLabel.Content = "Среднее: " + Math.Round(avg, 2);
+                    statLabel.Content += "Среднее: " + Math.Round(avg, 2) + Environment.NewLine;
 
                     double disp = CalcDisp(sender);
-                    dispLabel.Content = "Дисперсия: " + Math.Round(disp, 2);
-                    mseLabel.Content = "Среднеквадратичное отклонение: " + Math.Round(Math.Sqrt(disp), 2);
+                    statLabel.Content += "Дисперсия: " + Math.Round(disp, 2) + Environment.NewLine;
+                    statLabel.Content += "Среднеквадратичное отклонение: " + Math.Round(Math.Sqrt(disp), 2) + Environment.NewLine;
 
-                    coefVarLabel.Content = "Коэффициент вариации: " + Math.Round(Math.Sqrt(disp) / avg, 2);
-                    coefAsimLabel.Content = "Коэффициент асимметрии: " + Math.Round(CalcCoefAsim(sender), 2);
-                    coefExcesLabel.Content = "Коэффициент эксцесса: " + Math.Round(CalcCoefExces(sender), 2);
+                    statLabel.Content += "Коэффициент вариации: " + Math.Round(Math.Sqrt(disp) / avg, 2) + Environment.NewLine;
+                    statLabel.Content += "Коэффициент асимметрии: " + Math.Round(CalcCoefAsim(sender), 2) + Environment.NewLine;
+                    statLabel.Content += "Коэффициент эксцесса: " + Math.Round(CalcCoefExces(sender), 2) + Environment.NewLine;
 
-                    minValueLabel.Content = "Минимальное значение сигнала: " + Math.Round(sender.Channel.values
+                    statLabel.Content += "Минимальное значение сигнала: " + Math.Round(sender.Channel.values
                         .Where((_, idx) => idx >= sender.Begin && idx <= sender.End)
-                        .Min(), 2);
-                    maxValueLabel.Content = "Максимальное значение сигнала: " + Math.Round(sender.Channel.values
+                        .Min(), 2) + Environment.NewLine;
+                    statLabel.Content += "Максимальное значение сигнала: " + Math.Round(sender.Channel.values
                         .Where((_, idx) => idx >= sender.Begin && idx <= sender.End)
-                        .Max(), 2);
+                        .Max(), 2) + Environment.NewLine;
 
-                    kvantZFLabel.Content = "Квантиль порядка 0.05: " + Math.Round(CalcKvantil(sender, 0.05), 2);
-                    kvantNFLabel.Content = "Квантиль порядка 0.05: " + Math.Round(CalcKvantil(sender, 0.95), 2);
-                    medianLabel.Content = "Медиана: " + Math.Round(CalcKvantil(sender, 0.5), 2);
+                    statLabel.Content += "Квантиль порядка 0.05: " + Math.Round(CalcKvantil(sender, 0.05), 2) + Environment.NewLine;
+                    statLabel.Content += "Квантиль порядка 0.05: " + Math.Round(CalcKvantil(sender, 0.95), 2) + Environment.NewLine;
+                    statLabel.Content += "Медиана: " + Math.Round(CalcKvantil(sender, 0.5), 2) + Environment.NewLine;
                 };
 
                 updateInfo(chart);
