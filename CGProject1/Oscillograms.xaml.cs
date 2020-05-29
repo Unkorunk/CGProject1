@@ -183,9 +183,13 @@ namespace CGProject1 {
                     MainWindow.instance.statisticsWindow.Show();
                 }
 
-                MainWindow.instance.statisticsWindow.Update(newChart);
+                MainWindow.instance.statisticsWindow.Update(newChart, false);
             };
             newChart.ContextMenu.Items.Add(statisticsMenuItem);
+
+            if (MainWindow.instance.isStatisticShowing) {
+                MainWindow.instance.statisticsWindow.ReplaceChart(newChart);
+            }
         }
 
         private void BeginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {

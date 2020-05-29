@@ -110,19 +110,19 @@ namespace CGProject1 {
                 oscillogramWindow.AddChannel(currentSignal.channels[cur]);
             };
 
-            //var item2 = new MenuItem();
-            //item2.Header = "Статистики";
-            //item2.Click += (object sender, RoutedEventArgs args) => {
-            //    if (!isStatisticShowing) {
-            //        statisticsWindow = new StatisticsWindow();
-            //        isStatisticShowing = true;
-            //        statisticsWindow.Closed += (object sender, EventArgs e) => isStatisticShowing = false;
-            //        statisticsWindow.Show();
-            //    }
+            var item2 = new MenuItem();
+            item2.Header = "Статистики";
+            item2.Click += (object sender, RoutedEventArgs args) => {
+                if (!isStatisticShowing) {
+                    statisticsWindow = new StatisticsWindow();
+                    isStatisticShowing = true;
+                    statisticsWindow.Closed += (object sender, EventArgs e) => isStatisticShowing = false;
+                    statisticsWindow.Show();
+                }
 
-            //    statisticsWindow.Update(charts[cur]);
-            //};
-            //chart.ContextMenu.Items.Add(item2);
+                statisticsWindow.Update(charts[cur], true);
+            };
+            chart.ContextMenu.Items.Add(item2);
 
             chart.ContextMenu.Items.Add(item1);
 
@@ -184,19 +184,19 @@ namespace CGProject1 {
                 };
                 chart.ContextMenu.Items.Add(item1);
 
-                //var item2 = new MenuItem();
-                //item2.Header = "Статистики";
-                //item2.Click += (object sender, RoutedEventArgs args) => {
-                //    if (!isStatisticShowing) {
-                //        statisticsWindow = new StatisticsWindow();
-                //        isStatisticShowing = true;
-                //        statisticsWindow.Closed += (object sender, EventArgs e) => isStatisticShowing = false;
-                //        statisticsWindow.Show();
-                //    }
+                var item2 = new MenuItem();
+                item2.Header = "Статистики";
+                item2.Click += (object sender, RoutedEventArgs args) => {
+                    if (!isStatisticShowing) {
+                        statisticsWindow = new StatisticsWindow();
+                        isStatisticShowing = true;
+                        statisticsWindow.Closed += (object sender, EventArgs e) => isStatisticShowing = false;
+                        statisticsWindow.Show();
+                    }
 
-                //    statisticsWindow.Update(charts[cur]);
-                //};
-                //chart.ContextMenu.Items.Add(item2);
+                    statisticsWindow.Update(charts[cur], true);
+                };
+                chart.ContextMenu.Items.Add(item2);
 
                 chart.Begin = 0;
                 chart.End = currentSignal.SamplesCount;
