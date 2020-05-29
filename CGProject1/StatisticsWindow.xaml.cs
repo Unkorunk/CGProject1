@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
-using System.Xml.Linq;
 
 namespace CGProject1
 {
@@ -72,7 +69,7 @@ namespace CGProject1
                         .Max(), 2) + Environment.NewLine;
 
                     statLabel.Content += "Квантиль порядка 0.05: " + Math.Round(CalcKvantil(sender, 0.05), 2) + Environment.NewLine;
-                    statLabel.Content += "Квантиль порядка 0.05: " + Math.Round(CalcKvantil(sender, 0.95), 2) + Environment.NewLine;
+                    statLabel.Content += "Квантиль порядка 0.95: " + Math.Round(CalcKvantil(sender, 0.95), 2) + Environment.NewLine;
                     statLabel.Content += "Медиана: " + Math.Round(CalcKvantil(sender, 0.5), 2) + Environment.NewLine;
                 };
 
