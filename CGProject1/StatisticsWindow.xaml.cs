@@ -13,7 +13,7 @@ namespace CGProject1
     public partial class StatisticsWindow : Window
     {
         private List<string> subscribed = new List<string>();
-
+        
         public StatisticsWindow()
         {
             InitializeComponent();
@@ -44,8 +44,19 @@ namespace CGProject1
                 Label intervalLabel = new Label();
                 panel.Children.Add(intervalLabel);
 
+                Grid groupedStats = new Grid();
+                groupedStats.ColumnDefinitions.Add(new ColumnDefinition());
+                groupedStats.ColumnDefinitions.Add(new ColumnDefinition());
+
                 Label statLabel = new Label();
-                panel.Children.Add(statLabel);
+                groupedStats.Children.Add(statLabel);
+                Grid.SetColumn(statLabel, 0);
+
+                Label statLabel2 = new Label();
+                groupedStats.Children.Add(statLabel2);
+                Grid.SetColumn(statLabel2, 1);
+
+                panel.Children.Add(groupedStats);
 
                 Grid groupedKTextBox = new Grid();
                 groupedKTextBox.ColumnDefinitions.Add(new ColumnDefinition());
@@ -77,30 +88,31 @@ namespace CGProject1
                     intervalLabel.Content = "Begin: " + (sender.Begin + 1) + "; End: " + (sender.End + 1);
 
                     statLabel.Content = "";
+                    statLabel2.Content = "";
 
                     double avg = CalcAvg(sender);
                     statLabel.Content += "Среднее: " + Math.Round(avg, 2) + Environment.NewLine;
 
                     double disp = CalcDisp(sender);
                     statLabel.Content += "Дисперсия: " + Math.Round(disp, 2) + Environment.NewLine;
-                    statLabel.Content += "Среднеквадратичное отклонение: " + Math.Round(Math.Sqrt(disp), 2) + Environment.NewLine;
+                    statLabel.Content += "Ср.кв.откл: " + Math.Round(Math.Sqrt(disp), 2) + Environment.NewLine;
 
-                    statLabel.Content += "Коэффициент вариации: " + Math.Round(Math.Sqrt(disp) / avg, 2) + Environment.NewLine;
-                    statLabel.Content += "Коэффициент асимметрии: " + Math.Round(CalcCoefAsim(sender), 2) + Environment.NewLine;
-                    statLabel.Content += "Коэффициент эксцесса: " + Math.Round(CalcCoefExces(sender), 2) + Environment.NewLine;
+                    statLabel.Content += "Вариация: " + Math.Round(Math.Sqrt(disp) / avg, 2) + Environment.NewLine;
+                    statLabel.Content += "Асимметрия: " + Math.Round(CalcCoefAsim(sender), 2) + Environment.NewLine;
+                    statLabel.Content += "Эксцесс: " + Math.Round(CalcCoefExces(sender), 2);
 
                     double minValue = sender.Channel.values
                         .Where((_, idx) => idx >= sender.Begin && idx <= sender.End)
                         .Min();
-                    statLabel.Content += "Минимальное значение сигнала: " + Math.Round(minValue, 2) + Environment.NewLine;
+                    statLabel2.Content += "Минимум: " + Math.Round(minValue, 2) + Environment.NewLine;
                     double maxValue = sender.Channel.values
                         .Where((_, idx) => idx >= sender.Begin && idx <= sender.End)
                         .Max();
-                    statLabel.Content += "Максимальное значение сигнала: " + Math.Round(maxValue, 2) + Environment.NewLine;
+                    statLabel2.Content += "Максимум: " + Math.Round(maxValue, 2) + Environment.NewLine;
 
-                    statLabel.Content += "Квантиль порядка 0.05: " + Math.Round(CalcKvantil(sender, 0.05), 2) + Environment.NewLine;
-                    statLabel.Content += "Квантиль порядка 0.95: " + Math.Round(CalcKvantil(sender, 0.95), 2) + Environment.NewLine;
-                    statLabel.Content += "Медиана: " + Math.Round(CalcKvantil(sender, 0.5), 2) + Environment.NewLine;
+                    statLabel2.Content += "Квантиль 0.05: " + Math.Round(CalcKvantil(sender, 0.05), 2) + Environment.NewLine;
+                    statLabel2.Content += "Квантиль 0.95: " + Math.Round(CalcKvantil(sender, 0.95), 2) + Environment.NewLine;
+                    statLabel2.Content += "Медиана: " + Math.Round(CalcKvantil(sender, 0.5), 2);
 
                     histogram.Data.Clear();
 
