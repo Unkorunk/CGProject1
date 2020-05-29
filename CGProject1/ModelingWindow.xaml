@@ -28,7 +28,11 @@
                 <StackPanel  x:Name="DiscreteModelsPanel"></StackPanel>
                 <Label>Непрерывные модели:</Label>
                 <StackPanel  x:Name="ContinousModelPanel"></StackPanel>
-            </StackPanel>
+                <Label>Случайные модели:</Label>
+                <StackPanel  x:Name="RandomModelPanel"></StackPanel>
+                <Label>Суперпозиции:</Label>
+                <StackPanel x:Name="SuperpositionsPanel"></StackPanel>
+                </StackPanel>
         </ScrollViewer>
         
         <ScrollViewer Grid.Column="1" Grid.Row="1">

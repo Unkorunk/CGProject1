@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media.Animation;
+using System.Windows.Media;
 using CGProject1.SignalProcessing;
 
 
@@ -40,20 +40,56 @@ namespace CGProject1 {
                 ContinousModelPanel.Children.Add(modelBtn);
             }
 
+            foreach (var model in Modelling.randomModels) {
+                var modelBtn = new Button();
+                modelBtn.Content = model.ModelName;
+                modelBtn.Tag = model;
+                modelBtn.Click += OpenModel;
+
+                RandomModelPanel.Children.Add(modelBtn);
+            }
+
+            if (MainWindow.instance.currentSignal != null) {
+                var linearSuperposBtn = new Button();
+                linearSuperposBtn.Content = "Линейная суперпозиция";
+                linearSuperposBtn.Click += OpenLinearSuperpos;
+                SuperpositionsPanel.Children.Add(linearSuperposBtn);
+
+                var multSuperposBtn = new Button();
+                multSuperposBtn.Content = "Мультипликативная суперпозиция";
+                multSuperposBtn.Click += OpenMultiplicativeSuperpos;
+                SuperpositionsPanel.Children.Add(multSuperposBtn);
+            }
+
             PreviewButton.IsEnabled = false;
             ChannelSaveBtn.IsEnabled = false;
         }
 
+        private enum ModelType {
+            Empty,
+            Model,
+            LinearSuperpos,
+            MultSuperpos
+        }
+
+        private ModelType curModelType = ModelType.Empty;
+
         private ChannelConstructor currentModel = null;
         private TextBox[] argumentsFields = null;
+        private List<TextBox>[] varargFields = null;
+        private StackPanel[] varargPanels = null;
         private int samplesCount;
         private double samplingFrq;
+
+        private TextBox superposCoef = null;
+        private TextBox[] channelMultipliers = null;
 
         private void OpenModel(object sender, RoutedEventArgs e) {
             var btn = sender as Button;
             var btnModel = btn.Tag as ChannelConstructor;
 
             if (btnModel != this.currentModel) {
+                this.curModelType = ModelType.Model;
                 this.currentModel = btnModel;
                 ParamsHeader.Content = $"Параметры {this.currentModel.ModelName}";
 
@@ -102,7 +138,7 @@ namespace CGProject1 {
                     ArgumentsPanel.Children.Add(label);
 
                     var field = new TextBox();
-                    field.Text = "0";
+                    field.Text = btnModel.LastValues[i].ToString();
                     field.PreviewTextInput += previewTextInput;
                     DataObject.AddPastingHandler(field, previewPasting);
 
@@ -110,9 +146,147 @@ namespace CGProject1 {
                     argumentsFields[i] = field;
                 }
 
+                varargFields = new List<TextBox>[btnModel.VarArgNames.Length];
+                varargPanels = new StackPanel[btnModel.VarArgNames.Length];
+
+                for (int i = 0; i < btnModel.VarArgNames.Length; i++) {
+                    varargFields[i] = new List<TextBox>();
+
+                    var label = new Label();
+                    string header = btnModel.VarArgNames[i];
+                    label.Content = header + ":";
+                    ArgumentsPanel.Children.Add(label);
+
+                    var argPanel = new StackPanel();
+                    var field = new TextBox();
+                    field.Text = "0";
+                    varargFields[i].Add(field);
+                    argPanel.Children.Add(field);
+                    ArgumentsPanel.Children.Add(argPanel);
+                    varargPanels[i] = argPanel;
+
+                    var addBtn = new Button();
+                    int indx = i;
+                    addBtn.Click += (object sender, RoutedEventArgs e) => {
+                        var field = new TextBox();
+                        field.Text = "0";
+                        varargFields[indx].Add(field);
+                        varargPanels[indx].Children.Add(field);
+                    };
+                    addBtn.Content = "Добавить значение";
+                    ArgumentsPanel.Children.Add(addBtn);
+
+                    var removeBtn = new Button();
+                    removeBtn.Click += (object sender, RoutedEventArgs e) => {
+                        if (varargPanels[indx].Children.Count > 0) {
+                            int size = varargFields[indx].Count;
+                            varargFields[indx].RemoveAt(size - 1);
+                            varargPanels[indx].Children.RemoveAt(size - 1);
+                        }
+                    };
+                    removeBtn.Content = "Удалить значение";
+                    ArgumentsPanel.Children.Add(removeBtn);
+                }
+
                 PreviewButton.IsEnabled = true;
                 ChannelSaveBtn.IsEnabled = true;
             }
+        }
+
+        private void OpenLinearSuperpos(object sender, RoutedEventArgs e) {
+            if (this.curModelType != ModelType.LinearSuperpos) {
+                this.curModelType = ModelType.LinearSuperpos;
+                OpenSuperpos();
+            }
+        }
+
+        private void OpenMultiplicativeSuperpos(object sender, RoutedEventArgs e) {
+            if (this.curModelType != ModelType.MultSuperpos) {
+                this.curModelType = ModelType.MultSuperpos;
+                OpenSuperpos();
+            }
+        }
+
+        private void OpenSuperpos() {
+            this.currentModel = null;
+            ArgumentsPanel.Children.Clear();
+
+            var label = new Label();
+            label.Content = "Свободный коэффициент";
+            ArgumentsPanel.Children.Add(label);
+
+            superposCoef = new TextBox();
+            superposCoef.Text = "0";
+            superposCoef.PreviewTextInput += previewTextInput;
+            superposCoef.Margin = new Thickness(0, 0, 0, 5);
+            ArgumentsPanel.Children.Add(superposCoef);
+
+            var border = new Border();
+            border.BorderBrush = Brushes.Black;
+            border.BorderThickness = new Thickness(2);
+            ArgumentsPanel.Children.Add(border);
+
+            var channelSelector = new Grid();
+            var titleRow = new RowDefinition();
+            titleRow.Height = new GridLength(25);
+            channelSelector.RowDefinitions.Add(titleRow);
+
+            var channelColumn = new ColumnDefinition();
+            channelSelector.ColumnDefinitions.Add(channelColumn);
+
+            var checkColumn = new ColumnDefinition();
+            checkColumn.Width = new GridLength(100);
+            channelSelector.ColumnDefinitions.Add(checkColumn);
+
+            var titleBorder = new Border();
+            titleBorder.BorderBrush = Brushes.Black;
+            titleBorder.BorderThickness = new Thickness(1);
+            Grid.SetRow(titleBorder, 0);
+            Grid.SetColumn(titleBorder, 0);
+            var title1 = new Label();
+            title1.Content = "Канал";
+            titleBorder.Child = title1;
+
+            var emptyBorder = new Border();
+            emptyBorder.BorderBrush = Brushes.Black;
+            emptyBorder.BorderThickness = new Thickness(1);
+            Grid.SetRow(emptyBorder, 0);
+            Grid.SetColumn(emptyBorder, 1);
+            var title2 = new Label();
+            title2.Content = "Коэф.";
+            emptyBorder.Child = title2;
+
+            channelSelector.Children.Add(titleBorder);
+            channelSelector.Children.Add(emptyBorder);
+
+            channelMultipliers = new TextBox[MainWindow.instance.currentSignal.channels.Count];
+
+            for (int i = 0; i < channelMultipliers.Length; i++) {
+                var row = new RowDefinition();
+                row.Height = new GridLength(25);
+                channelSelector.RowDefinitions.Add(row);
+
+                var channel = MainWindow.instance.currentSignal.channels[i];
+
+                var channelLabel = new Label();
+                channelLabel.Content = channel.Name;
+                Grid.SetColumn(channelLabel, 0);
+                Grid.SetRow(channelLabel, i + 1);
+                channelSelector.Children.Add(channelLabel);
+
+                var channelMultiplier = new TextBox();
+                channelMultiplier.Text = "0";
+                channelMultipliers[i] = channelMultiplier;
+                channelMultiplier.PreviewTextInput += previewTextInput;
+                Grid.SetColumn(channelMultiplier, 1);
+                Grid.SetRow(channelMultiplier, i + 1);
+                channelSelector.Children.Add(channelMultiplier);
+            }
+
+            border.Child = channelSelector;
+
+            PreviewButton.IsEnabled = true;
+            ChannelSaveBtn.IsEnabled = true;
         }
 
         private double[] ValidateArguments() {
@@ -151,18 +325,81 @@ namespace CGProject1 {
             return args;
         }
 
-        private void OnPreview_Click(object sender, RoutedEventArgs e) {
-            var args = ValidateArguments();
-            if (args == null) {
-                return;
+        private double[][] ValidateVarArgs() {
+            var varargs = new double[currentModel.VarArgNames.Length][];
+
+            for (int i = 0; i < currentModel.VarArgNames.Length; i++) {
+                int size = varargFields[i].Count;
+                varargs[i] = new double[size];
+
+                for (int j = 0; j < size; j++) {
+                    double val = 0;
+
+                    if (!double.TryParse(varargFields[i][j].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out val)) {
+                        MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return null;
+                    }
+
+                    varargs[i][j] = val;
+                    varargFields[i][j].Text = val.ToString(CultureInfo.InvariantCulture);
+                }
             }
 
-            var channel = this.currentModel.CreatePreviewChannel(this.samplesCount, args, this.samplingFrq, Modelling.defaultStartDateTime);
+            return varargs;
+        }
+
+        private double[] GetSuperposArgs() {
+            double[] args = new double[this.channelMultipliers.Length + 1];
+
+            if (!double.TryParse(superposCoef.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out args[0])) {
+                MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return null;
+            }
+
+            for (int i = 0; i < this.channelMultipliers.Length; i++) {
+                if (!double.TryParse(channelMultipliers[i].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out args[i + 1])) {
+                    MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return null;
+                }
+            }
+
+            return args;
+        }
+
+        private void OnPreview_Click(object sender, RoutedEventArgs e) {
+            Channel channel = null;
+
+            if (this.curModelType != ModelType.Model) {
+                double[] a = GetSuperposArgs();
+                
+                if (a == null) {
+                    return;
+                }
+
+                if (this.curModelType == ModelType.LinearSuperpos) {
+                    channel = Modelling.LinearSuperpos(a, MainWindow.instance.currentSignal.channels.ToArray(), true);
+                } else {
+                    channel = Modelling.MultiplicativeSuperpos(a, MainWindow.instance.currentSignal.channels.ToArray(), true);
+                }
+            } else {
+                double[] args = ValidateArguments();
+                if (args == null) {
+                    return;
+                }
+
+                double[][] varargs = ValidateVarArgs();
+                if (varargs == null) {
+                    return;
+                }
+
+                channel = this.currentModel.CreatePreviewChannel(this.samplesCount, args, varargs, this.samplingFrq, Modelling.defaultStartDateTime);
+            }
 
             ChartPreview.Children.Clear();
 
             var chart = new Chart(channel);
             chart.Height = 100;
+            chart.ShowCurrentXY = true;
 
             ChartPreview.Children.Add(chart);
 
@@ -171,12 +408,29 @@ namespace CGProject1 {
         }
 
         private void OnSave_Click(object sender, RoutedEventArgs e) {
-            var args = ValidateArguments();
-            if (args == null) {
-                return;
-            }
+            Channel channel = null;
 
-            var channel = this.currentModel.CreateChannel(this.samplesCount, args, this.samplingFrq, Modelling.defaultStartDateTime);
+            if (this.curModelType != ModelType.Model) {
+                double[] a = GetSuperposArgs();
+
+                if (a == null) {
+                    return;
+                }
+
+                if (this.curModelType == ModelType.LinearSuperpos) {
+                    channel = Modelling.LinearSuperpos(a, MainWindow.instance.currentSignal.channels.ToArray(), false);
+                } else {
+                    channel = Modelling.MultiplicativeSuperpos(a, MainWindow.instance.currentSignal.channels.ToArray(), false);
+                }
+            } else {
+                var args = ValidateArguments();
+                if (args == null) {
+                    return;
+                }
+                var varargs = ValidateVarArgs();
+
+                channel = this.currentModel.CreateChannel(this.samplesCount, args, varargs, this.samplingFrq, Modelling.defaultStartDateTime);
+            }
 
             var curSignal = MainWindow.instance.currentSignal;
 

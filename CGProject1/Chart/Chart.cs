@@ -2,15 +2,18 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
 namespace CGProject1
 {
-    class Chart : FrameworkElement
+    public class Chart : FrameworkElement
     {
         public delegate void OnMouseSelectDel(Chart sender, int newBegin, int newEnd);
         public OnMouseSelectDel OnMouseSelect = (a, b, c) => { };
+        public delegate void OnChangeIntervalDel(Chart sender);
+        public OnChangeIntervalDel OnChangeInterval = (sender) => { };
 
         public enum ScalingMode
         {
@@ -67,6 +70,7 @@ namespace CGProject1
         }
 
         private Channel channel;
+        public Channel Channel { get => channel; }
 
         #region [SelectInterval] Variables
         public bool IsMouseSelect { get; set; }
@@ -88,6 +92,7 @@ namespace CGProject1
             {
                 begin = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
                 InvalidateVisual();
+                OnChangeInterval(this);
             }
         }
         public int End
@@ -97,6 +102,7 @@ namespace CGProject1
             {
                 end = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
                 InvalidateVisual();
+                OnChangeInterval(this);
             }
         }
 
@@ -104,15 +110,24 @@ namespace CGProject1
 
         public int Length { get => End - Begin + 1; }
 
+        public bool ShowCurrentXY { get; set; }
+
         private Size interfaceOffset = new Size();
         private bool optimization = false;
         private double stepX = 1.0;
         private int stepOptimization = 0;
 
+        private ToolTip tooltip;
+
+        private int curSelected = -1;
+
         public Chart(in Channel channel)
         {
             this.channel = channel;
             this._groupedCharts = new List<Chart>() { this };
+            this.tooltip = new ToolTip();
+            this.tooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
+            this.tooltip.PlacementTarget = this;
         }
 
         protected override void OnRender(DrawingContext dc)
@@ -387,6 +402,18 @@ namespace CGProject1
             #endregion [Chart] Draw
 
             #region [SelectInterval] Draw
+            if (this.curSelected != -1) {
+                if (optimization) {
+                    dc.DrawLine(new Pen(Brushes.Green, 2.0),
+                        new Point(interfaceOffset.Width + 2.0 * stepX * (this.curSelected - this.Begin) / stepOptimization, interfaceOffset.Height),
+                        new Point(interfaceOffset.Width + 2.0 * stepX * (this.curSelected - this.Begin) / stepOptimization, actSize.Height + interfaceOffset.Height));
+                } else {
+                    dc.DrawLine(new Pen(Brushes.Green, 2.0),
+                        new Point(interfaceOffset.Width + stepX * (this.curSelected - this.Begin), interfaceOffset.Height),
+                        new Point(interfaceOffset.Width + stepX * (this.curSelected - this.Begin), actSize.Height + interfaceOffset.Height));
+                }
+            }
+
             if (enableSelectInterval)
             {
                 var brush = new SolidColorBrush(Color.FromArgb(100, 255, 153, 51));
@@ -474,22 +501,35 @@ namespace CGProject1
 
             var position = e.GetPosition(this);
             if (position.X >= interfaceOffset.Width &&
-                position.Y >= interfaceOffset.Height &&
-                enableSelectInterval && this.IsMouseSelect)
-            {
-                int idx = GetIdx(position);
+                position.Y >= interfaceOffset.Height) {
+                
 
-                selectIntervalEnd = idx;
-                selectIntervalBegin = fakeBegin;
-                if (selectIntervalEnd < selectIntervalBegin)
-                {
-                    selectIntervalBegin = idx;
-                    selectIntervalEnd = fakeBegin;
+                if (ShowCurrentXY) {
+                    this.curSelected = GetIdx(position);
+                    this.tooltip.IsOpen = true;
+                    this.tooltip.HorizontalOffset = 1;//position.X;
+                    this.tooltip.VerticalOffset = this.ActualHeight - 26;// position.Y - 20;
+                    this.tooltip.Content = $"X: {this.curSelected}; Y: {this.channel.values[this.curSelected]}";
                 }
 
-                selectIntervalBegin = Math.Clamp(selectIntervalBegin, this.Begin, this.End);
-                selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End);
+                if (enableSelectInterval && this.IsMouseSelect) {
+                    int idx = GetIdx(position);
 
+                    selectIntervalEnd = idx;
+                    selectIntervalBegin = fakeBegin;
+                    if (selectIntervalEnd < selectIntervalBegin) {
+                        selectIntervalBegin = idx;
+                        selectIntervalEnd = fakeBegin;
+                    }
+
+                    selectIntervalBegin = Math.Clamp(selectIntervalBegin, this.Begin, this.End);
+                    selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End); 
+                }
+
+                InvalidateVisual();
+            } else if (this.curSelected != -1) {
+                this.tooltip.IsOpen = false;
+                this.curSelected = -1;
                 InvalidateVisual();
             }
         }
@@ -497,12 +537,19 @@ namespace CGProject1
         protected override void OnMouseLeave(MouseEventArgs e)
         {
             base.OnMouseLeave(e);
+            if (ShowCurrentXY) {
+                if (this.curSelected != -1) {
+                    this.tooltip.IsOpen = false;
+                    this.curSelected = -1;
+                }
+            }
+            
 
             if (this.IsMouseSelect)
             {
                 enableSelectInterval = false;
-                InvalidateVisual();
             }
+            InvalidateVisual();
         }
 
         private int GetIdx(Point position)
