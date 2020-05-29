@@ -12,19 +12,27 @@ namespace CGProject1
     /// </summary>
     public partial class StatisticsWindow : Window
     {
-        private List<string> subscribed = new List<string>();
+        private Dictionary<string, Border> subscribed = new Dictionary<string, Border>();
+        //private List<string> subscribed = new List<string>();
+        private List<Border> borders = new List<Border>();
         
         public StatisticsWindow()
         {
             InitializeComponent();
         }
 
+        public void ReplaceChart(Chart chart) {
+            //for (int i = 0; i < subscribed.Count; i++) {
+            //    if (subscribed[i] == chart.Channel.Name) {
+                    
+            //    }
+            //}
+        }
+
         public void Update(Chart chart)
         {
-            if (!subscribed.Exists(chartName => chartName == chart.Channel.Name))
+            if (!subscribed.ContainsKey(chart.Channel.Name))
             {
-                subscribed.Add(chart.Channel.Name);
-
                 Border border = new Border();
                 border.BorderThickness = new Thickness(1.0);
                 border.BorderBrush = Brushes.Black;
@@ -173,6 +181,7 @@ namespace CGProject1
                 statisticGrid.ContextMenu.Items.Add(closeChannel);
 
                 ChannelsPanel.Children.Add(border);
+                subscribed.Add(chart.Channel.Name, border);
             }
         }
 

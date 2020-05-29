@@ -99,67 +99,67 @@ namespace CGProject1.SignalProcessing {
 
             randomModels = new List<ChannelConstructor>();
 
-            var testUniform = new ChannelConstructor("Проверка равномерного распределения", 9,
-                    new string[] { "Величина выборки", "Нижняя граница", "Верхняя граница" }, new string[0],
-                    new double[] { 0, 0, 0 }, new double[] { 1000000000, 1000000000, 1000000000 },
-                    new double[] { 1000000, 0, 10 },
-                    (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
-                        int a = (int)args[1];
-                        int b = (int)args[2];
-                        if (n == 0) {
-                            int t = (int)args[0];
-                            randomVals = new Dictionary<int, int>();
+            //var testUniform = new ChannelConstructor("Проверка равномерного распределения", 9,
+            //        new string[] { "Величина выборки", "Нижняя граница", "Верхняя граница" }, new string[0],
+            //        new double[] { 0, 0, 0 }, new double[] { 1000000000, 1000000000, 1000000000 },
+            //        new double[] { 1000000, 0, 10 },
+            //        (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
+            //            int a = (int)args[1];
+            //            int b = (int)args[2];
+            //            if (n == 0) {
+            //                int t = (int)args[0];
+            //                randomVals = new Dictionary<int, int>();
 
-                            for (int i = 0; i < t; i++) {
-                                int cur = Randomizer.UniformRand(a, b);
-                                if (!randomVals.ContainsKey(cur)) {
-                                    randomVals.Add(cur, 0);
-                                }
+            //                for (int i = 0; i < t; i++) {
+            //                    int cur = Randomizer.UniformRand(a, b);
+            //                    if (!randomVals.ContainsKey(cur)) {
+            //                        randomVals.Add(cur, 0);
+            //                    }
 
-                                randomVals[cur]++;
-                            }
-                        }
+            //                    randomVals[cur]++;
+            //                }
+            //            }
 
-                        if (randomVals.ContainsKey(n)) {
-                            return randomVals[n];
-                        }
+            //            if (randomVals.ContainsKey(n)) {
+            //                return randomVals[n];
+            //            }
 
-                        return 0;
+            //            return 0;
 
-                    });
-            randomModels.Add(testUniform);
+            //        });
+            //randomModels.Add(testUniform);
 
-            var testNormal = new ChannelConstructor("Проверка нормального распределения", 10,
-                    new string[] { "Величина выборки", "Медиана", "Дисперсия" }, new string[0],
-                    new double[] { 0, 0, 0 }, new double[] { 1000000000, 1000000000, 1000000000 },
-                    new double[] { 1000000, 5, 1 },
-                    (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
-                        int m = (int)args[1];
-                        int d = (int)args[2];
-                        if (n == 0) {
-                            int t = (int)args[0];
-                            randomVals = new Dictionary<int, int>();
+            //var testNormal = new ChannelConstructor("Проверка нормального распределения", 10,
+            //        new string[] { "Величина выборки", "Медиана", "Дисперсия" }, new string[0],
+            //        new double[] { 0, 0, 0 }, new double[] { 1000000000, 1000000000, 1000000000 },
+            //        new double[] { 1000000, 5, 1 },
+            //        (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
+            //            int m = (int)args[1];
+            //            int d = (int)args[2];
+            //            if (n == 0) {
+            //                int t = (int)args[0];
+            //                randomVals = new Dictionary<int, int>();
 
-                            for (int i = 0; i < t; i++) {
-                                int cur = Randomizer.NormalRand(m, d);
-                                if (!randomVals.ContainsKey(cur)) {
-                                    randomVals.Add(cur, 0);
-                                }
+            //                for (int i = 0; i < t; i++) {
+            //                    int cur = Randomizer.NormalRand(m, d);
+            //                    if (!randomVals.ContainsKey(cur)) {
+            //                        randomVals.Add(cur, 0);
+            //                    }
 
-                                randomVals[cur]++;
-                            }
-                        }
+            //                    randomVals[cur]++;
+            //                }
+            //            }
 
-                        if (randomVals.ContainsKey(n)) {
-                            return randomVals[n];
-                        }
+            //            if (randomVals.ContainsKey(n)) {
+            //                return randomVals[n];
+            //            }
 
-                        return 0;
+            //            return 0;
 
-                    });
-            randomModels.Add(testNormal);
+            //        });
+            //randomModels.Add(testNormal);
 
-            var uniformWhiteNoise = new ChannelConstructor("Белый шум (равномерный)", 11,
+            var uniformWhiteNoise = new ChannelConstructor("Белый шум (равномерный)", 9,
                     new string[] { "Нижняя граница интервала", "Верхняя граница интервала" }, new string[0],
                     new double[] { double.MinValue, double.MinValue }, new double[] { double.MaxValue, double.MaxValue },
                      new double[] { -5, 5 },
@@ -168,7 +168,7 @@ namespace CGProject1.SignalProcessing {
                     });
             randomModels.Add(uniformWhiteNoise);
 
-            var normalWhiteNoise = new ChannelConstructor("Белый шум (нормальный)", 11,
+            var normalWhiteNoise = new ChannelConstructor("Белый шум (нормальный)", 10,
                     new string[] { "Среднее", "Дисперсия" }, new string[0],
                     new double[] { double.MinValue, double.MinValue }, new double[] { double.MaxValue, double.MaxValue },
                      new double[] { 0, 1 },

@@ -387,6 +387,13 @@ namespace CGProject1 {
                     return;
                 }
 
+                if (this.currentModel == Modelling.randomModels[0]) {
+                    if (args[1] <= args[0]) {
+                        MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
                 double[][] varargs = ValidateVarArgs();
                 if (varargs == null) {
                     return;
@@ -426,6 +433,12 @@ namespace CGProject1 {
                 var args = ValidateArguments();
                 if (args == null) {
                     return;
+                }
+                if (this.currentModel == Modelling.randomModels[0]) {
+                    if (args[1] <= args[0]) {
+                        MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
                 }
                 var varargs = ValidateVarArgs();
 

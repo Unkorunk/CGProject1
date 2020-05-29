@@ -12,9 +12,6 @@ namespace CGProject1 {
     public partial class Oscillograms : Window {
         private HashSet<Chart> activeCharts;
 
-        public StatisticsWindow statisticsWindow;
-        public bool isStatisticsWindowShowing = false;
-
         private int samplesCount = 0;
 
         bool locked = false;
@@ -178,15 +175,15 @@ namespace CGProject1 {
             statisticsMenuItem.Header = "Статистика";
             statisticsMenuItem.Click += (object sender, RoutedEventArgs e) =>
             {
-                if (!isStatisticsWindowShowing)
+                if (!MainWindow.instance.isStatisticShowing)
                 {
-                    statisticsWindow = new StatisticsWindow();
-                    isStatisticsWindowShowing = true;
-                    statisticsWindow.Closed += (object sender, EventArgs e) => this.isStatisticsWindowShowing = false;
-                    statisticsWindow.Show();
+                    MainWindow.instance.statisticsWindow = new StatisticsWindow();
+                    MainWindow.instance.isStatisticShowing = true;
+                    MainWindow.instance.statisticsWindow.Closed += (object sender, EventArgs e) => MainWindow.instance.isStatisticShowing = false;
+                    MainWindow.instance.statisticsWindow.Show();
                 }
 
-                statisticsWindow.Update(newChart);
+                MainWindow.instance.statisticsWindow.Update(newChart);
             };
             newChart.ContextMenu.Items.Add(statisticsMenuItem);
         }
