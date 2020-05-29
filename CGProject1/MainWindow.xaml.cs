@@ -21,7 +21,6 @@ namespace CGProject1 {
         public Signal currentSignal;
 
         private List<Chart> charts = new List<Chart>();
-        private Chart activeChannelInGrid;
 
         public MainWindow() {
             instance = this;
@@ -37,6 +36,10 @@ namespace CGProject1 {
 
                 if (isOscillogramShowing) {
                     oscillogramWindow.Close();
+                }
+                if (oscillogramWindow != null && oscillogramWindow.isStatisticsWindowShowing)
+                {
+                    oscillogramWindow.statisticsWindow.Close();
                 }
 
                 if (isSavingWindowShowing) {
@@ -117,6 +120,10 @@ namespace CGProject1 {
             if (isOscillogramShowing) {
                 oscillogramWindow.Close();
             }
+            if (oscillogramWindow != null && oscillogramWindow.isStatisticsWindowShowing)
+            {
+                oscillogramWindow.statisticsWindow.Close();
+            }
 
             if (isSavingWindowShowing) {
                 savingWindow.Close();
@@ -190,7 +197,6 @@ namespace CGProject1 {
                 chart.InvalidateVisual();
             }
 
-            activeChannelInGrid = charts[row];
             charts[row].Selected = true;
             //charts[row].SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
             charts[row].InvalidateVisual();

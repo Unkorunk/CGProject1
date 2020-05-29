@@ -12,8 +12,8 @@ namespace CGProject1 {
     public partial class Oscillograms : Window {
         private HashSet<Chart> activeCharts;
 
-        private StatisticsWindow statisticsWindow;
-        private bool isStatisticsWindowShowing = false;
+        public StatisticsWindow statisticsWindow;
+        public bool isStatisticsWindowShowing = false;
 
         private int samplesCount = 0;
 
