@@ -8,10 +8,12 @@ using System.Windows.Media;
 
 namespace CGProject1
 {
-    class Chart : FrameworkElement
+    public class Chart : FrameworkElement
     {
         public delegate void OnMouseSelectDel(Chart sender, int newBegin, int newEnd);
         public OnMouseSelectDel OnMouseSelect = (a, b, c) => { };
+        public delegate void OnChangeIntervalDel(Chart sender);
+        public OnChangeIntervalDel OnChangeInterval = (sender) => { };
 
         public enum ScalingMode
         {
@@ -68,6 +70,7 @@ namespace CGProject1
         }
 
         private Channel channel;
+        public Channel Channel { get => channel; }
 
         #region [SelectInterval] Variables
         public bool IsMouseSelect { get; set; }
@@ -89,6 +92,7 @@ namespace CGProject1
             {
                 begin = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
                 InvalidateVisual();
+                OnChangeInterval(this);
             }
         }
         public int End
@@ -98,6 +102,7 @@ namespace CGProject1
             {
                 end = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
                 InvalidateVisual();
+                OnChangeInterval(this);
             }
         }
 

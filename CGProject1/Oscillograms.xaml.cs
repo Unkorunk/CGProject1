@@ -12,6 +12,9 @@ namespace CGProject1 {
     public partial class Oscillograms : Window {
         private HashSet<Chart> activeCharts;
 
+        private StatisticsWindow statisticsWindow;
+        private bool isStatisticsWindowShowing = false;
+
         private int samplesCount = 0;
 
         bool locked = false;
@@ -170,6 +173,22 @@ namespace CGProject1 {
             };
             scaleMenu.Items.Add(uniformLocalScaling);
             #endregion Scale
+
+            var statisticsMenuItem = new MenuItem();
+            statisticsMenuItem.Header = "Статистика";
+            statisticsMenuItem.Click += (object sender, RoutedEventArgs e) =>
+            {
+                if (!isStatisticsWindowShowing)
+                {
+                    statisticsWindow = new StatisticsWindow();
+                    isStatisticsWindowShowing = true;
+                    statisticsWindow.Closed += (object sender, EventArgs e) => this.isStatisticsWindowShowing = false;
+                    statisticsWindow.Show();
+                }
+
+                statisticsWindow.Update(newChart);
+            };
+            newChart.ContextMenu.Items.Add(statisticsMenuItem);
         }
 
         private void BeginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {

@@ -23,9 +23,7 @@
             </StackPanel>
         </ScrollViewer>
         <Menu Grid.ColumnSpan="2" Height="20">
-            <MenuItem Name="ScalingChooser" Header="Масштабирование">
-                
-            </MenuItem>
+            <MenuItem Name="ScalingChooser" Header="Масштабирование"></MenuItem>
         </Menu>
         <StackPanel Grid.Row="2" Grid.Column="1">
             <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged" LargeChange="150" SmallChange="30"></ScrollBar>
