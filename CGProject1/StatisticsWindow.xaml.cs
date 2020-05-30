@@ -112,24 +112,18 @@ namespace CGProject1
                     histogram.Data.Clear();
 
                     if (sender.Length > 0) {
-                        double[] rawData = new double[sender.Length];
-                        for (int i = 0; i < sender.Length; i++) {
-                            rawData[i] = sender.Channel.values[sender.Begin + i];
-                        }
-                        Array.Sort(rawData);
+                        if (int.TryParse(kTextBox.Text, out int K))
+                        {
+                            K = Math.Max(1, K);
+                            int[] cnt = new int[K];
+                            for (int i = 0; i < sender.Length; i++)
+                            {
+                                double p = (sender.Channel.values[sender.Begin + i] - minValue) / (maxValue - minValue);
+                                cnt[(int)(K * p)]++;
+                            }
 
-                        if (int.TryParse(kTextBox.Text, out int K)) {
-                            K = Math.Max(0, K);
-                            for (int i = 0, j = 0; i < K; i++) {
-                                double toValue = minValue + (i + 1) * (maxValue - minValue) / K;
-
-                                int cnt = 0;
-                                while (j < rawData.Length && rawData[j] < toValue) {
-                                    j++;
-                                    cnt++;
-                                }
-
-                                histogram.Data.Add(cnt * 1.0 / rawData.Length);
+                            for (int i = 0; i < K; i++) {
+                                histogram.Data.Add(cnt[i] * 1.0 / sender.Length);
                             }
                         }
                     }
