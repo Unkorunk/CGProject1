@@ -119,7 +119,7 @@ namespace CGProject1
                             for (int i = 0; i < sender.Length; i++)
                             {
                                 double p = (sender.Channel.values[sender.Begin + i] - minValue) / (maxValue - minValue);
-                                cnt[(int)(K * p)]++;
+                                cnt[(int)((K - 1) * p)]++;
                             }
 
                             for (int i = 0; i < K; i++) {
