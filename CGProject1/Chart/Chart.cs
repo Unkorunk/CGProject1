@@ -90,9 +90,13 @@ namespace CGProject1
             get => begin;
             set
             {
-                begin = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
-                InvalidateVisual();
-                OnChangeInterval(this);
+                if (value <= end)
+                {
+                    begin = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
+
+                    InvalidateVisual();
+                    OnChangeInterval(this);
+                }
             }
         }
         public int End
@@ -100,9 +104,13 @@ namespace CGProject1
             get => end;
             set
             {
-                end = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
-                InvalidateVisual();
-                OnChangeInterval(this);
+                if (value >= begin)
+                {
+                    end = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
+
+                    InvalidateVisual();
+                    OnChangeInterval(this);
+                }
             }
         }
 
