@@ -16,6 +16,8 @@
             <ComboBox SelectedIndex="0" Name="ComboBoxMode" SelectionChanged="ComboBoxMode_SelectionChanged">
                 <ComboBoxItem Content="Спектральная плотность мощности"/>
                 <ComboBoxItem Content="Амплитудный спектр"/>
+                <ComboBoxItem Content="Логарифмический режим (СПМ)"/>
+                <ComboBoxItem Content="Логарифмический режим (Амп. спектр)"/>
             </ComboBox>
             
             <ComboBox SelectedIndex="0">
@@ -34,11 +36,11 @@
             
             <StackPanel Orientation="Horizontal">
                 <Label>BEGIN</Label>
-                <TextBox Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center"></TextBox>
+                <TextBox x:Name="BeginSelector" Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting"></TextBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Label>END</Label>
-                <TextBox Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center"></TextBox>
+                <TextBox x:Name="EndSelector" Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting"></TextBox>
             </StackPanel>
 
             <Button Content="Обновить диапазон" Margin="8,0,0,0"></Button>

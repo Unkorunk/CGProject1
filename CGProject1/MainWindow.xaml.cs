@@ -294,7 +294,20 @@ namespace CGProject1 {
         private void OpenAnalyzer() {
             if (!this.isAnalyzerShowing) {
                 isAnalyzerShowing = true;
-                analyzerWindow = new AnalyzerWindow();
+
+                int begin = 0;
+                int end = 0;
+
+                if (this.currentSignal != null) {
+                    end = this.currentSignal.SamplesCount - 1;
+                }
+
+                if (isOscillogramShowing) {
+                    begin = oscillogramWindow.GetBegin();
+                    end = oscillogramWindow.GetEnd();
+                }
+
+                analyzerWindow = new AnalyzerWindow(begin, end);
                 analyzerWindow.Closed += (object sender, System.EventArgs e) => this.isAnalyzerShowing = false;
                 analyzerWindow.Show();
             }
