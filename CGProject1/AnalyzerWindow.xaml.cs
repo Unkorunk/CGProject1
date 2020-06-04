@@ -85,16 +85,16 @@ namespace CGProject1 {
                     var item = charts[ComboBoxMode.SelectedIndex][i];
                     item.DisplayHAxisTitle = false;
                     item.DisplayHAxisInfo = false;
+                    item.HAxisAlligment = Chart.HAxisAlligmentEnum.Top;
 
-                    if (i == 0 /*|| i + 1 == charts[ComboBoxMode.SelectedIndex].Count*/)
+                    if (i == 0 || i + 1 == charts[ComboBoxMode.SelectedIndex].Count)
                     {
                         item.DisplayHAxisInfo = true;
                         item.DisplayHAxisTitle = true;
                     }
-
-                    if (i != 0 /*&& i + 1 != charts[ComboBoxMode.SelectedIndex].Count*/)
+                    if (i + 1 == charts[ComboBoxMode.SelectedIndex].Count)
                     {
-                        item.DisplayHAxisInfo = false;
+                        item.HAxisAlligment = Chart.HAxisAlligmentEnum.Bottom;
                     }
 
                     SpectrePanel.Children.Add(item);
