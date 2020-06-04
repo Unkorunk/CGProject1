@@ -10,6 +10,9 @@ namespace CGProject1.SignalProcessing {
 
         private static int bound = 4096;
 
+        private static double[] amps = null;
+        private static double[] psds = null;
+
         public static void SetupChannel(Channel channel, int begin, int end) {
             curChannel = channel;
             if (end - begin < bound) {
@@ -25,6 +28,19 @@ namespace CGProject1.SignalProcessing {
             
             if (ft.Length >= 2) {
                 ft[0] = ft[1];
+            }
+
+            amps = new double[ft.Length / 2];
+
+            for (int i = 0; i < ft.Length / 2; i++) {
+                amps[i] = curChannel.DeltaTime * Complex.Abs(ft[i]);
+            }
+
+            var sqrDt = curChannel.DeltaTime * curChannel.DeltaTime;
+            psds = new double[ft.Length / 2];
+
+            for (int i = 0; i < ft.Length / 2; i++) {
+                psds[i] = sqrDt * Math.Pow(Complex.Abs(ft[i]), 2);
             }
         }
 
@@ -45,53 +61,72 @@ namespace CGProject1.SignalProcessing {
             }
         }
 
-        public static Channel AmplitudeSpectre(int halfWindowSmooth) {
+        public static Channel LogarithmicSpectre(int halfWindow) {
             var res = new Channel(ft.Length / 2);
-            res.Name = "Амп. спектр " + curChannel.Name;
+            res.Name = "Лог. Спектр " + curChannel.Name;
             res.Source = "Analyzer";
 
             for (int i = 0; i < ft.Length / 2; i++) {
-                res.values[i] = curChannel.DeltaTime * Complex.Abs(ft[i]);
+                res.values[i] = 20 * Math.Log10(amps[i]);
             }
 
-            if (halfWindowSmooth != 0 && res.values.Length > 0) {
-                var q = new LinkedList<double>();
-                double curWindow = 0;
-
-                for (int i = 0; i < halfWindowSmooth * 2 + 1; i++) {
-                    double curVal = res.values[(res.values.Length * halfWindowSmooth - halfWindowSmooth + i) % res.values.Length];
-                    curWindow += curVal;
-                    q.AddLast(curVal);
-                }
-
-                res.values[0] = curWindow / (2 * halfWindowSmooth + 1);
-
-                for (int i = 1; i < res.values.Length; i++) {
-                    curWindow -= q.First.Value;
-                    q.RemoveFirst();
-                    double curVal = res.values[(i + halfWindowSmooth) % res.values.Length];
-                    curWindow += curVal;
-                    q.AddLast(curVal);
-
-                    res.values[i] = curWindow / (2 * halfWindowSmooth + 1);
-                }
-            }
+            WindowSmoothing(res, halfWindow);
 
             return res;
         }
 
-        public static Channel PowerSpectralDensity(int halfWindowSmooth) {
+        public static Channel AmplitudeSpectre(int halfWindow) {
             var res = new Channel(ft.Length / 2);
-            res.Name = "СПМ " + curChannel.Name;
+            res.Name = "Спектр " + curChannel.Name;
             res.Source = "Analyzer";
 
-            var sqrDt = curChannel.DeltaTime * curChannel.DeltaTime;
-
             for (int i = 0; i < ft.Length / 2; i++) {
-                res.values[i] = sqrDt * Math.Pow(Complex.Abs(ft[i]), 2);
+                res.values[i] = amps[i]; ;
             }
 
+            WindowSmoothing(res, halfWindow);
+
             return res;
+        }
+
+        public static Channel PowerSpectralDensity(int halfWindow) {
+            var res = new Channel(ft.Length / 2);
+            res.Name = "Спектр " + curChannel.Name;
+            res.Source = "Analyzer";
+
+
+            for (int i = 0; i < ft.Length / 2; i++) {
+                res.values[i] = psds[i]; ;
+            }
+
+            WindowSmoothing(res, halfWindow);
+
+            return res;
+        }
+
+        private static void WindowSmoothing(Channel channel, int halfWindow) {
+            if (halfWindow != 0 && channel.values.Length > 0) {
+                var q = new LinkedList<double>();
+                double curWindow = 0;
+
+                for (int i = 0; i < halfWindow * 2 + 1; i++) {
+                    double curVal = channel.values[(channel.values.Length * halfWindow - halfWindow + i) % channel.values.Length];
+                    curWindow += curVal;
+                    q.AddLast(curVal);
+                }
+
+                channel.values[0] = curWindow / (2 * halfWindow + 1);
+
+                for (int i = 1; i < channel.values.Length; i++) {
+                    curWindow -= q.First.Value;
+                    q.RemoveFirst();
+                    double curVal = channel.values[(i + halfWindow) % channel.values.Length];
+                    curWindow += curVal;
+                    q.AddLast(curVal);
+
+                    channel.values[i] = curWindow / (2 * halfWindow + 1);
+                }
+            }
         }
 
         private static Complex[] SlowFourierTransform(Channel channel, int begin, int end) {

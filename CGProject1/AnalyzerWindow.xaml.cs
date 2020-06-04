@@ -35,10 +35,20 @@ namespace CGProject1 {
                 var psdChart = new Chart(psd);
                 psdChart.Height = 200;
                 psdChart.Begin = 0;
-                psdChart.End = amp.SamplesCount;
+                psdChart.End = psd.SamplesCount;
                 psdChart.Margin = new Thickness(0, 2, 0, 2);
                 psdChart.GridDraw = true;
                 charts[0].Add(psdChart);
+
+                //var lg = Analyzer.LogarithmicSpectre(0);
+                //lg.SamplingFrq = 1.0 / newDx;
+                //var logChart = new Chart(lg);
+                //logChart.Height = 200;
+                //logChart.Begin = 0;
+                //logChart.End = lg.SamplesCount;
+                //logChart.Margin = new Thickness(0, 2, 0, 2);
+                //logChart.GridDraw = true;
+                //charts[0].Add(logChart);
 
                 UpdatePanel();
             }
