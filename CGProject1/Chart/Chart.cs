@@ -149,6 +149,12 @@ namespace CGProject1
             DisplayTitle = true;
         }
 
+        public Func<int, Chart, string> MappingXAxis = (idx, chart) => {
+
+            var t = chart.Channel.StartDateTime + TimeSpan.FromSeconds(chart.Channel.DeltaTime * idx);
+            return t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss") + "\n(" + idx.ToString() + ")";
+        };  
+
         protected override void OnRender(DrawingContext dc)
         {
             base.OnRender(dc);
@@ -171,6 +177,7 @@ namespace CGProject1
                         new Typeface("Times New Roman"),
                         12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
                     );
+
                     formText1.TextAlignment = TextAlignment.Center;
                     interfaceOffset.Height = formText1.Height + 1;
                 }
@@ -293,26 +300,27 @@ namespace CGProject1
 
             if (GridDraw)
             {
-                if (DisplayHAxisInfo)
+
+                for (int i = 0; i < 8; i++)
                 {
-                    for (int i = 0; i < 8; i++)
+                    double x = (i + 1) * actSize.Width / 9;
+                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width + x, interfaceOffset.Height),
+                        new Point(interfaceOffset.Width + x, interfaceOffset.Height + actSize.Height));
+                    int idx;
+                    if (optimization)
                     {
-                        double x = (i + 1) * actSize.Width / 9;
-                        dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width + x, interfaceOffset.Height),
-                            new Point(interfaceOffset.Width + x, interfaceOffset.Height + actSize.Height));
-                        int idx;
-                        if (optimization)
-                        {
-                            idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
-                        }
-                        else
-                        {
-                            idx = (int)Math.Round(x / stepX + this.Begin);
-                        }
+                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
+                    }
+                    else
+                    {
+                        idx = (int)Math.Round(x / stepX + this.Begin);
+                    }
 
-                        var t = this.Channel.StartDateTime + TimeSpan.FromSeconds(this.Channel.DeltaTime * idx);
+                    if (DisplayHAxisInfo)
+                    {
+                        string XAxisText = MappingXAxis(idx, this);
 
-                        var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss") + "\n(" + idx.ToString() + ")",
+                        var formText1 = new FormattedText(XAxisText,
                             CultureInfo.GetCultureInfo("en-us"),
                             FlowDirection.LeftToRight,
                             new Typeface("Times New Roman"),
@@ -324,19 +332,18 @@ namespace CGProject1
                     }
                 }
 
-                if (DisplayVAxisInfo)
+                for (int i = 0; i < 5; i++)
                 {
-                    for (int i = 0; i < 5; i++)
+                    double y = (i + 1) * actSize.Height / 6;
+                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width, interfaceOffset.Height + y),
+                        new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
+                    string val = Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6, 5).ToString(CultureInfo.InvariantCulture);
+                    if (val.Length > 8)
                     {
-                        double y = (i + 1) * actSize.Height / 6;
-                        dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width, interfaceOffset.Height + y),
-                            new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
-                        string val = Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6, 5).ToString(CultureInfo.InvariantCulture);
-                        if (val.Length > 8)
-                        {
-                            val = val.Substring(0, 8);
-                        }
-
+                        val = val.Substring(0, 8);
+                    }
+                    if (DisplayVAxisInfo)
+                    {
                         var formText1 = new FormattedText(val,
                             CultureInfo.GetCultureInfo("en-us"),
                             FlowDirection.LeftToRight,
