@@ -12,11 +12,13 @@ namespace CGProject1 {
         private Oscillograms oscillogramWindow;
         private ModelingWindow modelingWindow;
         private SaveWindow savingWindow;
+        private AnalyzerWindow analyzerWindow;
 
         private bool showing = false;
         private bool isOscillogramShowing = false;
         private bool isModelingWindowShowing = false;
         private bool isSavingWindowShowing = false;
+        private bool isAnalyzerShowing = false;
 
         public Signal currentSignal;
 
@@ -41,6 +43,10 @@ namespace CGProject1 {
 
                 if (isSavingWindowShowing) {
                     savingWindow.Close();
+                }
+
+                if (isAnalyzerShowing) {
+                    analyzerWindow.Close();
                 }
             };
         }
@@ -81,6 +87,10 @@ namespace CGProject1 {
                 savingWindow.Close();
             }
 
+            if (isAnalyzerShowing) {
+                analyzerWindow.Close();
+            }
+
             var chart = new Chart(channel);
             chart.Height = 100;
 
@@ -97,8 +107,15 @@ namespace CGProject1 {
 
                 oscillogramWindow.AddChannel(currentSignal.channels[cur]);
             };
-
             chart.ContextMenu.Items.Add(item1);
+
+            var item2 = new MenuItem();
+            item2.Header = "Анализ";
+            item2.Click += (object sender, RoutedEventArgs args) => {
+                OpenAnalyzer();
+                analyzerWindow.AddChannel(currentSignal.channels[cur]);
+            };
+            chart.ContextMenu.Items.Add(item2);
 
             chart.Begin = 0;
             chart.End = currentSignal.SamplesCount;
@@ -120,6 +137,10 @@ namespace CGProject1 {
 
             if (isSavingWindowShowing) {
                 savingWindow.Close();
+            }
+
+            if (isAnalyzerShowing) {
+                analyzerWindow.Close();
             }
 
             foreach (var chart in charts) {
@@ -152,8 +173,15 @@ namespace CGProject1 {
 
                     oscillogramWindow.AddChannel(currentSignal.channels[cur]);
                 };
-
                 chart.ContextMenu.Items.Add(item1);
+
+                var item2 = new MenuItem();
+                item2.Header = "Анализ";
+                item2.Click += (object sender, RoutedEventArgs args) => {
+                    OpenAnalyzer();
+                    analyzerWindow.AddChannel(currentSignal.channels[cur]);
+                };
+                chart.ContextMenu.Items.Add(item2);
 
                 chart.Begin = 0;
                 chart.End = currentSignal.SamplesCount;
@@ -218,6 +246,15 @@ namespace CGProject1 {
                 oscillogramWindow.Closed += (object sender, System.EventArgs e) => this.isOscillogramShowing = false;
                 oscillogramWindow.Update(currentSignal);
                 oscillogramWindow.Show();
+            }
+        }
+
+        private void OpenAnalyzer() {
+            if (!this.isAnalyzerShowing) {
+                isAnalyzerShowing = true;
+                analyzerWindow = new AnalyzerWindow();
+                analyzerWindow.Closed += (object sender, System.EventArgs e) => this.isAnalyzerShowing = false;
+                analyzerWindow.Show();
             }
         }
 

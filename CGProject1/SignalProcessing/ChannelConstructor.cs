@@ -64,6 +64,10 @@ namespace CGProject1.SignalProcessing {
 
             return channel;
         }
+        
+        public void IncCounter() {
+            this.channelCounter++;
+        }
 
         private Channel ConstructChannel(int samplesCount, double[] args, double[][] varargs, double samplingFrq, DateTime startDateTime) {
             if (args.Length < ArgsNames.Length || varargs.Length < VarArgNames.Length) {

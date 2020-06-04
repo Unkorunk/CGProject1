@@ -441,6 +441,7 @@ namespace CGProject1 {
                 newSignal.channels.Add(channel);
                 newSignal.UpdateChannelsInfo();
                 MainWindow.instance.ResetSignal(newSignal);
+                this.currentModel.IncCounter();
                 return;
             }
 
