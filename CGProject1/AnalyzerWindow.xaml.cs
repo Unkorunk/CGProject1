@@ -1,11 +1,16 @@
-﻿using System.Windows;
-
+﻿using System.Collections.Generic;
+using System.Windows;
 using CGProject1.SignalProcessing;
 
 namespace CGProject1 {
     public partial class AnalyzerWindow : Window {
+
+        private List<List<Chart>> charts = new List<List<Chart>>();
+
         public AnalyzerWindow() {
             InitializeComponent();
+
+            for (int i = 0; i < ComboBoxMode.Items.Count; i++) charts.Add(new List<Chart>());
         }
 
         public void AddChannel(Channel channel) {
@@ -23,7 +28,7 @@ namespace CGProject1 {
                 ampChart.End = amp.SamplesCount;
                 ampChart.Margin = new Thickness(0, 2, 0, 2);
                 ampChart.GridDraw = true;
-                SpectrePanel.Children.Add(ampChart);
+                charts[1].Add(ampChart);
 
                 var psd = Analyzer.PowerSpectralDensity(0);
                 psd.SamplingFrq = 1.0 / newDx;
@@ -33,7 +38,9 @@ namespace CGProject1 {
                 psdChart.End = amp.SamplesCount;
                 psdChart.Margin = new Thickness(0, 2, 0, 2);
                 psdChart.GridDraw = true;
-                SpectrePanel.Children.Add(psdChart);
+                charts[0].Add(psdChart);
+
+                UpdatePanel();
             }
 
 
@@ -63,6 +70,31 @@ namespace CGProject1 {
             //    psdChart.GridDraw = true;
             //    SpectrePanel.Children.Add(psdChart);
             //}
+        }
+
+        void UpdatePanel()
+        {
+            if (SpectrePanel != null) SpectrePanel.Children.Clear();
+            
+            if (ComboBoxMode.SelectedIndex >= 0 && ComboBoxMode.SelectedIndex < charts.Count)
+            {
+                for (int i = 0; i < charts[ComboBoxMode.SelectedIndex].Count; i++)
+                {
+                    var item = charts[ComboBoxMode.SelectedIndex][i];
+
+                    if (i != 0 /*&& i + 1 != charts[ComboBoxMode.SelectedIndex].Count*/)
+                    {
+                        item.DisplayHAxisInfo = false;
+                    }
+
+                    SpectrePanel.Children.Add(item);
+                }
+            }
+        }
+
+        private void ComboBoxMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            UpdatePanel();
         }
     }
 }

@@ -7,7 +7,19 @@
         mc:Ignorable="d"
         Title="AnalyzerWindow" Height="450" Width="800">
     <Grid>
-        <ScrollViewer>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        
+        <Menu Grid.Row="0">
+            <ComboBox SelectedIndex="0" Width="Auto" Name="ComboBoxMode" SelectionChanged="ComboBoxMode_SelectionChanged">
+                <ComboBoxItem Content="Спектральная плотность мощности"/>
+                <ComboBoxItem Content="Амплитудный спектр"/>
+            </ComboBox>
+        </Menu>
+        
+        <ScrollViewer Grid.Row="1">
             <StackPanel x:Name="SpectrePanel"></StackPanel>
         </ScrollViewer>
     </Grid>
