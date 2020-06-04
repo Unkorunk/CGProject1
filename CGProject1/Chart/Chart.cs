@@ -28,7 +28,8 @@ namespace CGProject1
         private double maxChannelValue = 0;
 
         private ScalingMode _scaling;
-        public ScalingMode Scaling {
+        public ScalingMode Scaling
+        {
             get => _scaling;
             set
             {
@@ -62,15 +63,16 @@ namespace CGProject1
             }
         }
         private List<Chart> _groupedCharts;
-        public List<Chart> GroupedCharts { get => _groupedCharts; set
+        public List<Chart> GroupedCharts
+        {
+            get => _groupedCharts; set
             {
                 _groupedCharts = value;
                 InvalidateVisual();
             }
         }
 
-        private Channel channel;
-        public Channel Channel { get => channel; }
+        public Channel Channel { get; }
 
         #region [SelectInterval] Variables
         public bool IsMouseSelect { get; set; }
@@ -92,7 +94,7 @@ namespace CGProject1
             {
                 if (value <= end)
                 {
-                    begin = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
+                    begin = Math.Max(0, Math.Min(value, this.Channel.values.Length - 1));
 
                     InvalidateVisual();
                     OnChangeInterval(this);
@@ -106,7 +108,7 @@ namespace CGProject1
             {
                 if (value >= begin)
                 {
-                    end = Math.Max(0, Math.Min(value, this.channel.values.Length - 1));
+                    end = Math.Max(0, Math.Min(value, this.Channel.values.Length - 1));
 
                     InvalidateVisual();
                     OnChangeInterval(this);
@@ -131,7 +133,7 @@ namespace CGProject1
 
         public Chart(in Channel channel)
         {
-            this.channel = channel;
+            this.Channel = channel;
             this._groupedCharts = new List<Chart>() { this };
             this.tooltip = new ToolTip();
             this.tooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
@@ -150,7 +152,8 @@ namespace CGProject1
             #region [Interface] Reserve
             interfaceOffset = new Size();
 
-            if (this.GridDraw) {
+            if (this.GridDraw)
+            {
                 var formText1 = new FormattedText(DateTime.Now.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + int.MaxValue.ToString() + ")",
                     CultureInfo.GetCultureInfo("en-us"),
                     FlowDirection.LeftToRight,
@@ -167,7 +170,8 @@ namespace CGProject1
                     12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
                 );
                 interfaceOffset.Width = formText1.Width;
-            } else
+            }
+            else
             {
                 var formText1 = new FormattedText("(" + int.MaxValue.ToString() + ")",
                     CultureInfo.GetCultureInfo("en-us"),
@@ -205,53 +209,53 @@ namespace CGProject1
             {
                 case ScalingMode.Global:
                     {
-                        this.minChannelValue = this.channel.MinValue;
-                        this.maxChannelValue = this.channel.MaxValue;
+                        this.minChannelValue = this.Channel.MinValue;
+                        this.maxChannelValue = this.Channel.MaxValue;
 
                         break;
                     }
                 case ScalingMode.Local:
                     {
-                        this.minChannelValue = this.channel.MaxValue;
-                        this.maxChannelValue = this.channel.MinValue;
+                        this.minChannelValue = this.Channel.MaxValue;
+                        this.maxChannelValue = this.Channel.MinValue;
 
                         for (int i = this.Begin; i <= this.End; i++)
                         {
-                            this.minChannelValue = Math.Min(this.minChannelValue, this.channel.values[i]);
-                            this.maxChannelValue = Math.Max(this.maxChannelValue, this.channel.values[i]);
+                            this.minChannelValue = Math.Min(this.minChannelValue, this.Channel.values[i]);
+                            this.maxChannelValue = Math.Max(this.maxChannelValue, this.Channel.values[i]);
                         }
 
                         break;
                     }
                 case ScalingMode.UniformGlobal:
                     {
-                        this.minChannelValue = this.channel.MinValue;
-                        this.maxChannelValue = this.channel.MaxValue;
-                        foreach(var chart in GroupedCharts)
+                        this.minChannelValue = this.Channel.MinValue;
+                        this.maxChannelValue = this.Channel.MaxValue;
+                        foreach (var chart in GroupedCharts)
                         {
-                            this.minChannelValue = Math.Min(this.minChannelValue, chart.channel.MinValue);
-                            this.maxChannelValue = Math.Max(this.maxChannelValue, chart.channel.MaxValue);
+                            this.minChannelValue = Math.Min(this.minChannelValue, chart.Channel.MinValue);
+                            this.maxChannelValue = Math.Max(this.maxChannelValue, chart.Channel.MaxValue);
                         }
 
                         break;
                     }
                 case ScalingMode.UniformLocal:
                     {
-                        this.minChannelValue = this.channel.MaxValue;
-                        this.maxChannelValue = this.channel.MinValue;
+                        this.minChannelValue = this.Channel.MaxValue;
+                        this.maxChannelValue = this.Channel.MinValue;
 
                         for (int i = this.Begin; i <= this.End; i++)
                         {
-                            this.minChannelValue = Math.Min(this.minChannelValue, this.channel.values[i]);
-                            this.maxChannelValue = Math.Max(this.maxChannelValue, this.channel.values[i]);
+                            this.minChannelValue = Math.Min(this.minChannelValue, this.Channel.values[i]);
+                            this.maxChannelValue = Math.Max(this.maxChannelValue, this.Channel.values[i]);
                         }
 
                         foreach (var chart in GroupedCharts)
                         {
                             for (int i = chart.Begin; i <= chart.End; i++)
                             {
-                                this.minChannelValue = Math.Min(this.minChannelValue, chart.channel.values[i]);
-                                this.maxChannelValue = Math.Max(this.maxChannelValue, chart.channel.values[i]);
+                                this.minChannelValue = Math.Min(this.minChannelValue, chart.Channel.values[i]);
+                                this.maxChannelValue = Math.Max(this.maxChannelValue, chart.Channel.values[i]);
                             }
                         }
 
@@ -289,7 +293,7 @@ namespace CGProject1
                         idx = (int)Math.Round(x / stepX + this.Begin);
                     }
 
-                    var t = this.channel.StartDateTime + TimeSpan.FromSeconds(this.channel.DeltaTime * idx);
+                    var t = this.Channel.StartDateTime + TimeSpan.FromSeconds(this.Channel.DeltaTime * idx);
 
                     var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss") + "\n(" + idx.ToString() + ")",
                         CultureInfo.GetCultureInfo("en-us"),
@@ -308,7 +312,8 @@ namespace CGProject1
                     dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width, interfaceOffset.Height + y),
                         new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
                     string val = Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6, 5).ToString(CultureInfo.InvariantCulture);
-                    if (val.Length > 8) {
+                    if (val.Length > 8)
+                    {
                         val = val.Substring(0, 8);
                     }
 
@@ -326,7 +331,7 @@ namespace CGProject1
             }
 
             #region Channel Name
-            var formText = new FormattedText(channel.Name,
+            var formText = new FormattedText(Channel.Name,
                 CultureInfo.GetCultureInfo("en-us"),
                 FlowDirection.LeftToRight,
                 new Typeface("Times New Roman"),
@@ -339,83 +344,37 @@ namespace CGProject1
             #endregion [Interface] Draw
 
             #region [Chart] Draw
-            if (optimization)
             {
-                double prevValueMin = double.MaxValue;
-                double prevValueMax = double.MinValue;
-
-                for (int i = 0; i < stepOptimization; i++)
+                int idx = 0;
+                double prevValue = double.NaN;
+                foreach(var nowValue in Optimize(stepOptimization))
                 {
-                    int idx = this.Begin + i;
-                    if (idx >= this.channel.values.Length) break;
-                    prevValueMin = Math.Min(prevValueMin, this.channel.values[idx]);
-                    prevValueMax = Math.Max(prevValueMax, this.channel.values[idx]);
-                }
-                dc.DrawLine(
-                    new Pen(Brushes.Black, 1.0),
-                    new Point(interfaceOffset.Width, interfaceOffset.Height + stepY * (1.0 - (prevValueMin - this.minChannelValue) / height) + offsetY),
-                    new Point(interfaceOffset.Width + stepX, interfaceOffset.Height + stepY * (1.0 - (prevValueMax - this.minChannelValue) / height) + offsetY)
-                );
-
-                int n = (this.Length + stepOptimization - 1) / stepOptimization;
-
-                for (int i = 1; i < n; i++)
-                {
-                    double nowValueMin = double.MaxValue;
-                    double nowValueMax = double.MinValue;
-                    for (int j = 0; j < stepOptimization; j++)
+                    if (idx != 0)
                     {
-                        int idx = this.Begin + i * stepOptimization + j;
-                        if (idx >= this.channel.values.Length) break;
-
-                        nowValueMin = Math.Min(nowValueMin, this.channel.values[idx]);
-                        nowValueMax = Math.Max(nowValueMax, this.channel.values[idx]);
-                    }
-                    if (Math.Abs(nowValueMax - prevValueMax) < Math.Abs(nowValueMin - prevValueMax))
-                    {
-                        double t = nowValueMax;
-                        nowValueMax = nowValueMin;
-                        nowValueMin = t;
+                        dc.DrawLine(
+                            new Pen(Brushes.Black, 1.0),
+                            new Point(interfaceOffset.Width + (idx - 1) * stepX, interfaceOffset.Height + stepY * (1.0 - (prevValue - this.minChannelValue) / height) + offsetY),
+                            new Point(interfaceOffset.Width + idx * stepX, interfaceOffset.Height + stepY * (1.0 - (nowValue - this.minChannelValue) / height) + offsetY)
+                        );
                     }
 
-                    int lineX = 1 + 2 * (i - 1);
-                    dc.DrawLine(
-                        new Pen(Brushes.Black, 1.0),
-                        new Point(interfaceOffset.Width + lineX * stepX, interfaceOffset.Height + stepY * (1.0 - (prevValueMax - this.minChannelValue) / height) + offsetY),
-                        new Point(interfaceOffset.Width + (lineX + 1) * stepX, interfaceOffset.Height + stepY * (1.0 - (nowValueMin - this.minChannelValue) / height) + offsetY)
-                    );
-                    dc.DrawLine(
-                        new Pen(Brushes.Black, 1.0),
-                        new Point(interfaceOffset.Width + (lineX + 1) * stepX, interfaceOffset.Height + stepY * (1.0 - (nowValueMin - this.minChannelValue) / height) + offsetY),
-                        new Point(interfaceOffset.Width + (lineX + 2) * stepX, interfaceOffset.Height + stepY * (1.0 - (nowValueMax - this.minChannelValue) / height) + offsetY)
-                    );
-
-                    prevValueMax = nowValueMax;
-                }
-            }
-            else
-            {
-                double prevValue = this.channel.values[this.Begin];
-                for (int i = 1; i < this.Length; i++)
-                {
-                    double nowValue = this.channel.values[this.Begin + i];
-                    dc.DrawLine(
-                        new Pen(Brushes.Black, 1.0),
-                        new Point(interfaceOffset.Width + (i - 1) * stepX, interfaceOffset.Height + stepY * (1.0 - (prevValue - this.minChannelValue) / height) + offsetY),
-                        new Point(interfaceOffset.Width + i * stepX, interfaceOffset.Height + stepY * (1.0 - (nowValue - this.minChannelValue) / height) + offsetY)
-                    );
                     prevValue = nowValue;
+                    idx++;
                 }
             }
             #endregion [Chart] Draw
 
             #region [SelectInterval] Draw
-            if (this.curSelected != -1) {
-                if (optimization) {
+            if (this.curSelected != -1)
+            {
+                if (optimization)
+                {
                     dc.DrawLine(new Pen(Brushes.Green, 2.0),
                         new Point(interfaceOffset.Width + 2.0 * stepX * (this.curSelected - this.Begin) / stepOptimization, interfaceOffset.Height),
                         new Point(interfaceOffset.Width + 2.0 * stepX * (this.curSelected - this.Begin) / stepOptimization, actSize.Height + interfaceOffset.Height));
-                } else {
+                }
+                else
+                {
                     dc.DrawLine(new Pen(Brushes.Green, 2.0),
                         new Point(interfaceOffset.Width + stepX * (this.curSelected - this.Begin), interfaceOffset.Height),
                         new Point(interfaceOffset.Width + stepX * (this.curSelected - this.Begin), actSize.Height + interfaceOffset.Height));
@@ -509,33 +468,39 @@ namespace CGProject1
 
             var position = e.GetPosition(this);
             if (position.X >= interfaceOffset.Width &&
-                position.Y >= interfaceOffset.Height) {
-                
+                position.Y >= interfaceOffset.Height)
+            {
 
-                if (ShowCurrentXY) {
+
+                if (ShowCurrentXY)
+                {
                     this.curSelected = GetIdx(position);
                     this.tooltip.IsOpen = true;
                     this.tooltip.HorizontalOffset = 1;//position.X;
                     this.tooltip.VerticalOffset = this.ActualHeight - 26;// position.Y - 20;
-                    this.tooltip.Content = $"X: {this.curSelected}; Y: {this.channel.values[this.curSelected]}";
+                    this.tooltip.Content = $"X: {this.curSelected}; Y: {this.Channel.values[this.curSelected]}";
                 }
 
-                if (enableSelectInterval && this.IsMouseSelect) {
+                if (enableSelectInterval && this.IsMouseSelect)
+                {
                     int idx = GetIdx(position);
 
                     selectIntervalEnd = idx;
                     selectIntervalBegin = fakeBegin;
-                    if (selectIntervalEnd < selectIntervalBegin) {
+                    if (selectIntervalEnd < selectIntervalBegin)
+                    {
                         selectIntervalBegin = idx;
                         selectIntervalEnd = fakeBegin;
                     }
 
                     selectIntervalBegin = Math.Clamp(selectIntervalBegin, this.Begin, this.End);
-                    selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End); 
+                    selectIntervalEnd = Math.Clamp(selectIntervalEnd, this.Begin, this.End);
                 }
 
                 InvalidateVisual();
-            } else if (this.curSelected != -1) {
+            }
+            else if (this.curSelected != -1)
+            {
                 this.tooltip.IsOpen = false;
                 this.curSelected = -1;
                 InvalidateVisual();
@@ -545,13 +510,15 @@ namespace CGProject1
         protected override void OnMouseLeave(MouseEventArgs e)
         {
             base.OnMouseLeave(e);
-            if (ShowCurrentXY) {
-                if (this.curSelected != -1) {
+            if (ShowCurrentXY)
+            {
+                if (this.curSelected != -1)
+                {
                     this.tooltip.IsOpen = false;
                     this.curSelected = -1;
                 }
             }
-            
+
 
             if (this.IsMouseSelect)
             {
@@ -577,27 +544,44 @@ namespace CGProject1
             return idx;
         }
 
-        private string Reverse(string s) {
-            char[] charArray = s.ToCharArray();
-            Array.Reverse(charArray);
-            return new string(charArray);
-        }
+        public IEnumerable<double> Optimize(int step)
+        {
+            if (step < 3)
+            {
+                for (int i = this.Begin; i <= this.End; i++)
+                {
+                    yield return this.Channel.values[i];
+                }
+                yield break;
+            }
 
-        //public void EnableSelectInterval()
-        //{
-        //    enableSelectInterval = true;
-        //    InvalidateVisual();
-        //}
-        //public void DisableSelectInterval()
-        //{
-        //    enableSelectInterval = false;
-        //    InvalidateVisual();
-        //}
-        //public void SetSelectInterval(int begin, int end)
-        //{
-        //    selectIntervalBegin = Math.Clamp(begin, this.Begin, this.End);
-        //    selectIntervalEnd = Math.Clamp(end, this.Begin, this.End);
-        //    InvalidateVisual();
-        //}
+            double prevMaxValue = double.NaN;
+
+            int iterations = (this.Length + step - 1) / step;
+            for (int i = 0; i < iterations; i++)
+            {
+                double minValue = double.MaxValue;
+                double maxValue = double.MinValue;
+                for (int j = 0; j < step; j++)
+                {
+                    int idx = this.Begin + i * step + j;
+                    if (idx > this.End) break;
+
+                    minValue = Math.Min(minValue, this.Channel.values[idx]);
+                    maxValue = Math.Max(maxValue, this.Channel.values[idx]);
+                }
+
+                if (i != 0 && Math.Abs(maxValue - prevMaxValue) < Math.Abs(minValue - prevMaxValue))
+                {
+                    double t = maxValue;
+                    maxValue = minValue;
+                    minValue = t;
+                }
+                prevMaxValue = maxValue;
+
+                yield return minValue;
+                yield return maxValue;
+            }
+        }
     }
 }
