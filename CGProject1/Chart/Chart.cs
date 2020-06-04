@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -72,6 +73,10 @@ namespace CGProject1
             }
         }
 
+        public bool DisplayHAxisInfo { get; set; }
+        public bool DisplayVAxisInfo { get; set; }
+        public bool DisplayTitle { get; set; }
+
         public Channel Channel { get; }
 
         #region [SelectInterval] Variables
@@ -138,6 +143,10 @@ namespace CGProject1
             this.tooltip = new ToolTip();
             this.tooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
             this.tooltip.PlacementTarget = this;
+
+            DisplayHAxisInfo = true;
+            DisplayVAxisInfo = true;
+            DisplayTitle = true;
         }
 
         protected override void OnRender(DrawingContext dc)
@@ -152,28 +161,34 @@ namespace CGProject1
             #region [Interface] Reserve
             interfaceOffset = new Size();
 
-            if (this.GridDraw)
+            if (GridDraw)
             {
-                var formText1 = new FormattedText(DateTime.Now.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + int.MaxValue.ToString() + ")",
-                    CultureInfo.GetCultureInfo("en-us"),
-                    FlowDirection.LeftToRight,
-                    new Typeface("Times New Roman"),
-                    12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
-                );
-                formText1.TextAlignment = TextAlignment.Center;
-                interfaceOffset.Height = formText1.Height + 1;
+                if (DisplayHAxisInfo)
+                {
+                    var formText1 = new FormattedText(DateTime.Now.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + int.MaxValue.ToString() + ")",
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                    );
+                    formText1.TextAlignment = TextAlignment.Center;
+                    interfaceOffset.Height = formText1.Height + 1;
+                }
 
-                formText1 = new FormattedText(int.MaxValue.ToString(),
-                    CultureInfo.GetCultureInfo("en-us"),
-                    FlowDirection.LeftToRight,
-                    new Typeface("Times New Roman"),
-                    12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
-                );
-                interfaceOffset.Width = formText1.Width;
+                if (DisplayVAxisInfo)
+                {
+                    var formText2 = new FormattedText(int.MaxValue.ToString(),
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                    );
+                    interfaceOffset.Width = formText2.Width;
+                }
             }
-            else
+            else if (DisplayTitle)
             {
-                var formText1 = new FormattedText("(" + int.MaxValue.ToString() + ")",
+                var formText1 = new FormattedText(this.Channel.Name,
                     CultureInfo.GetCultureInfo("en-us"),
                     FlowDirection.LeftToRight,
                     new Typeface("Times New Roman"),
@@ -276,69 +291,78 @@ namespace CGProject1
             );
             #endregion Background
 
-            if (this.GridDraw)
+            if (GridDraw)
             {
-                for (int i = 0; i < 8; i++)
+                if (DisplayHAxisInfo)
                 {
-                    double x = (i + 1) * actSize.Width / 9;
-                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width + x, interfaceOffset.Height),
-                        new Point(interfaceOffset.Width + x, interfaceOffset.Height + actSize.Height));
-                    int idx;
-                    if (optimization)
+                    for (int i = 0; i < 8; i++)
                     {
-                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
+                        double x = (i + 1) * actSize.Width / 9;
+                        dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width + x, interfaceOffset.Height),
+                            new Point(interfaceOffset.Width + x, interfaceOffset.Height + actSize.Height));
+                        int idx;
+                        if (optimization)
+                        {
+                            idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + this.Begin);
+                        }
+                        else
+                        {
+                            idx = (int)Math.Round(x / stepX + this.Begin);
+                        }
+
+                        var t = this.Channel.StartDateTime + TimeSpan.FromSeconds(this.Channel.DeltaTime * idx);
+
+                        var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss") + "\n(" + idx.ToString() + ")",
+                            CultureInfo.GetCultureInfo("en-us"),
+                            FlowDirection.LeftToRight,
+                            new Typeface("Times New Roman"),
+                            12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                        );
+                        formText1.TextAlignment = TextAlignment.Center;
+
+                        dc.DrawText(formText1, new Point(interfaceOffset.Width + x, 0));
                     }
-                    else
-                    {
-                        idx = (int)Math.Round(x / stepX + this.Begin);
-                    }
-
-                    var t = this.Channel.StartDateTime + TimeSpan.FromSeconds(this.Channel.DeltaTime * idx);
-
-                    var formText1 = new FormattedText(t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss") + "\n(" + idx.ToString() + ")",
-                        CultureInfo.GetCultureInfo("en-us"),
-                        FlowDirection.LeftToRight,
-                        new Typeface("Times New Roman"),
-                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
-                    );
-                    formText1.TextAlignment = TextAlignment.Center;
-
-                    dc.DrawText(formText1, new Point(interfaceOffset.Width + x, 0));
                 }
 
-                for (int i = 0; i < 5; i++)
+                if (DisplayVAxisInfo)
                 {
-                    double y = (i + 1) * actSize.Height / 6;
-                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width, interfaceOffset.Height + y),
-                        new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
-                    string val = Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6, 5).ToString(CultureInfo.InvariantCulture);
-                    if (val.Length > 8)
+                    for (int i = 0; i < 5; i++)
                     {
-                        val = val.Substring(0, 8);
+                        double y = (i + 1) * actSize.Height / 6;
+                        dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width, interfaceOffset.Height + y),
+                            new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
+                        string val = Math.Round(this.maxChannelValue - (i + 1) * (this.maxChannelValue - this.minChannelValue) / 6, 5).ToString(CultureInfo.InvariantCulture);
+                        if (val.Length > 8)
+                        {
+                            val = val.Substring(0, 8);
+                        }
+
+                        var formText1 = new FormattedText(val,
+                            CultureInfo.GetCultureInfo("en-us"),
+                            FlowDirection.LeftToRight,
+                            new Typeface("Times New Roman"),
+                            12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                        );
+
+                        formText1.TextAlignment = TextAlignment.Right;
+
+                        dc.DrawText(formText1, new Point(interfaceOffset.Width - 5, interfaceOffset.Height + y - formText1.Height / 2));
                     }
-
-                    var formText1 = new FormattedText(val,
-                        CultureInfo.GetCultureInfo("en-us"),
-                        FlowDirection.LeftToRight,
-                        new Typeface("Times New Roman"),
-                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
-                    );
-
-                    formText1.TextAlignment = TextAlignment.Right;
-
-                    dc.DrawText(formText1, new Point(interfaceOffset.Width - 5, interfaceOffset.Height + y - formText1.Height / 2));
                 }
             }
 
             #region Channel Name
-            var formText = new FormattedText(Channel.Name,
-                CultureInfo.GetCultureInfo("en-us"),
-                FlowDirection.LeftToRight,
-                new Typeface("Times New Roman"),
-                14, Brushes.Red, VisualTreeHelper.GetDpi(this).PixelsPerDip);
+            if (DisplayTitle)
+            {
+                var formText = new FormattedText(Channel.Name,
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    14, Brushes.Red, VisualTreeHelper.GetDpi(this).PixelsPerDip);
 
 
-            dc.DrawText(formText, new Point(this.GridDraw ? 0 : this.ActualWidth / 2 - formText.Width / 2, 0));
+                dc.DrawText(formText, new Point(this.GridDraw ? 0 : this.ActualWidth / 2 - formText.Width / 2, 0));
+            }
             #endregion Channel Name
 
             #endregion [Interface] Draw
