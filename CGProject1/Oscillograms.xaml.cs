@@ -170,6 +170,26 @@ namespace CGProject1 {
             };
             scaleMenu.Items.Add(uniformLocalScaling);
             #endregion Scale
+
+            var statisticsMenuItem = new MenuItem();
+            statisticsMenuItem.Header = "Статистика";
+            statisticsMenuItem.Click += (object sender, RoutedEventArgs e) =>
+            {
+                if (!MainWindow.instance.isStatisticShowing)
+                {
+                    MainWindow.instance.statisticsWindow = new StatisticsWindow();
+                    MainWindow.instance.isStatisticShowing = true;
+                    MainWindow.instance.statisticsWindow.Closed += (object sender, EventArgs e) => MainWindow.instance.isStatisticShowing = false;
+                    MainWindow.instance.statisticsWindow.Show();
+                }
+
+                MainWindow.instance.statisticsWindow.Update(newChart, false);
+            };
+            newChart.ContextMenu.Items.Add(statisticsMenuItem);
+
+            if (MainWindow.instance.isStatisticShowing) {
+                MainWindow.instance.statisticsWindow.ReplaceChart(newChart);
+            }
         }
 
         private void BeginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {

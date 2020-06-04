@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,16 +15,19 @@ namespace CGProject1 {
         private SaveWindow savingWindow;
         private AnalyzerWindow analyzerWindow;
 
+        public StatisticsWindow statisticsWindow;
+
         private bool showing = false;
         private bool isOscillogramShowing = false;
         private bool isModelingWindowShowing = false;
         private bool isSavingWindowShowing = false;
         private bool isAnalyzerShowing = false;
 
+        public bool isStatisticShowing = false;
+
         public Signal currentSignal;
 
         private List<Chart> charts = new List<Chart>();
-        private Chart activeChannelInGrid;
 
         public MainWindow() {
             instance = this;
@@ -40,6 +44,10 @@ namespace CGProject1 {
                 if (isOscillogramShowing) {
                     oscillogramWindow.Close();
                 }
+                //if (oscillogramWindow != null && oscillogramWindow.isStatisticsWindowShowing)
+                //{
+                //    oscillogramWindow.statisticsWindow.Close();
+                //}
 
                 if (isSavingWindowShowing) {
                     savingWindow.Close();
@@ -47,6 +55,9 @@ namespace CGProject1 {
 
                 if (isAnalyzerShowing) {
                     analyzerWindow.Close();
+                }
+                if (isStatisticShowing) {
+                    statisticsWindow.Close();
                 }
             };
         }
@@ -110,12 +121,26 @@ namespace CGProject1 {
             chart.ContextMenu.Items.Add(item1);
 
             var item2 = new MenuItem();
-            item2.Header = "Анализ";
+            item2.Header = "Статистики";
             item2.Click += (object sender, RoutedEventArgs args) => {
+                if (!isStatisticShowing) {
+                    statisticsWindow = new StatisticsWindow();
+                    isStatisticShowing = true;
+                    statisticsWindow.Closed += (object sender, EventArgs e) => isStatisticShowing = false;
+                    statisticsWindow.Show();
+                }
+
+                statisticsWindow.Update(charts[cur], true);
+            };
+            chart.ContextMenu.Items.Add(item2);
+
+            var item3 = new MenuItem();
+            item3.Header = "Анализ";
+            item3.Click += (object sender, RoutedEventArgs args) => {
                 OpenAnalyzer();
                 analyzerWindow.AddChannel(currentSignal.channels[cur]);
             };
-            chart.ContextMenu.Items.Add(item2);
+            chart.ContextMenu.Items.Add(item3);
 
             chart.Begin = 0;
             chart.End = currentSignal.SamplesCount;
@@ -133,6 +158,10 @@ namespace CGProject1 {
 
             if (isOscillogramShowing) {
                 oscillogramWindow.Close();
+            }
+            if (isStatisticShowing)
+            {
+                statisticsWindow.Close();
             }
 
             if (isSavingWindowShowing) {
@@ -176,12 +205,26 @@ namespace CGProject1 {
                 chart.ContextMenu.Items.Add(item1);
 
                 var item2 = new MenuItem();
-                item2.Header = "Анализ";
+                item2.Header = "Статистики";
                 item2.Click += (object sender, RoutedEventArgs args) => {
+                    if (!isStatisticShowing) {
+                        statisticsWindow = new StatisticsWindow();
+                        isStatisticShowing = true;
+                        statisticsWindow.Closed += (object sender, EventArgs e) => isStatisticShowing = false;
+                        statisticsWindow.Show();
+                    }
+
+                    statisticsWindow.Update(charts[cur], true);
+                };
+                chart.ContextMenu.Items.Add(item2);
+
+                var item3 = new MenuItem();
+                item3.Header = "Анализ";
+                item3.Click += (object sender, RoutedEventArgs args) => {
                     OpenAnalyzer();
                     analyzerWindow.AddChannel(currentSignal.channels[cur]);
                 };
-                chart.ContextMenu.Items.Add(item2);
+                chart.ContextMenu.Items.Add(item3);
 
                 chart.Begin = 0;
                 chart.End = currentSignal.SamplesCount;
@@ -218,7 +261,6 @@ namespace CGProject1 {
                 chart.InvalidateVisual();
             }
 
-            activeChannelInGrid = charts[row];
             charts[row].Selected = true;
             //charts[row].SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
             charts[row].InvalidateVisual();

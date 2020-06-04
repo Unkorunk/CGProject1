@@ -16,12 +16,12 @@ namespace CGProject1.SignalProcessing {
 
         public static int NormalRand(int a, double d) {
             double n = NormalDouble();
-            return a + (int)Math.Round(d * n);
+            return a + (int)Math.Round(Math.Sqrt(d) * n);
         }
 
         public static double NormalRand(double a, double d) {
             double n = NormalDouble();
-            return a + d * n;
+            return a + Math.Sqrt(d) * n;
         }
 
         private static double NormalDouble() {

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
-        Title="Oscillograms" Height="600" Width="1200">
+        Title="Осциллограммы" Height="600" Width="1200">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="125"></ColumnDefinition>
@@ -23,9 +23,7 @@
             </StackPanel>
         </ScrollViewer>
         <Menu Grid.ColumnSpan="2" Height="20">
-            <MenuItem Name="ScalingChooser" Header="Масштабирование">
-                
-            </MenuItem>
+            <MenuItem Name="ScalingChooser" Header="Масштабирование"></MenuItem>
         </Menu>
         <StackPanel Grid.Row="2" Grid.Column="1">
             <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged" LargeChange="150" SmallChange="30"></ScrollBar>
