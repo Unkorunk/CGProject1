@@ -35,10 +35,10 @@ namespace CGProject1 {
                 psdChart.GridDraw = true;
                 SpectrePanel.Children.Add(psdChart);
             }
-            
+
 
             //{
-            //    Analyzer.SetupChannelSlow(channel, 0, channel.SamplesCount - 1);
+            //    Analyzer.SetupSlowChannel(channel, 0, channel.SamplesCount - 1);
 
             //    Channel amp = Analyzer.AmplitudeSpectre(0);
 

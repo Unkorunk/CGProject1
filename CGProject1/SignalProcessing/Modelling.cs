@@ -216,8 +216,6 @@ namespace CGProject1.SignalProcessing {
 
         public static DateTime defaultStartDateTime = new DateTime(2000, 1, 1, 0, 0, 0, 0);
 
-        private static Dictionary<int, int> randomVals = null;
-
         private static double[] whiteNoise_ARMA = null;
 
         private static int superposCounter = 0;

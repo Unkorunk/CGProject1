@@ -8,27 +8,42 @@ namespace CGProject1.SignalProcessing {
         private static Channel curChannel;
         private static Complex[] ft;
 
+        private static int bound = 4096;
+
         public static void SetupChannel(Channel channel, int begin, int end) {
             curChannel = channel;
-            //if (end - begin < 4096) {
-            //    SlowFourierTransform(channel, begin, end);
-            //}
-            ft = SlowFourierTransform(channel, begin, end);
+            if (end - begin < bound) {
+                ft = SlowFourierTransform(channel, begin, end);
+            } else {
+                int len = end - begin + 1;
+                int closestPowerOfTwo = (int)Math.Pow(2, (int)Math.Log2(len));
+                begin += (len - closestPowerOfTwo) / 2;
+                end = begin + closestPowerOfTwo - 1;
+
+                ft = FastFourierTransform(channel, begin, end);
+            }
+            
             if (ft.Length >= 2) {
                 ft[0] = ft[1];
             }
         }
 
-        //public static void SetupChannelSlow(Channel channel, int begin, int end) {
-        //    curChannel = channel;
-        //    //if (end - begin < 4096) {
-        //    //    SlowFourierTransform(channel, begin, end);
-        //    //}
-        //    ft = SlowFourierTransform(channel, begin, end);
-        //    if (ft.Length >= 2) {
-        //        ft[0] = ft[1];
-        //    }
-        //}
+        /// <summary>
+        /// DEPRECATED! Debug only
+        /// </summary>
+        /// <param name="channel"></param>
+        /// <param name="begin"></param>
+        /// <param name="end"></param>
+        public static void SetupSlowChannel(Channel channel, int begin, int end) {
+            curChannel = channel;
+
+                ft = SlowFourierTransform(channel, begin, end);
+
+
+            if (ft.Length >= 2) {
+                ft[0] = ft[1];
+            }
+        }
 
         public static Channel AmplitudeSpectre(int halfWindowSmooth) {
             var res = new Channel(ft.Length / 2);
@@ -80,7 +95,7 @@ namespace CGProject1.SignalProcessing {
         }
 
         private static Complex[] SlowFourierTransform(Channel channel, int begin, int end) {
-            int n = end - begin;
+            int n = end - begin + 1;
             var res = new Complex[n];
 
             for (int i = 0; i < n; i++) {
@@ -94,37 +109,21 @@ namespace CGProject1.SignalProcessing {
             }
 
             return res;
-
-            //int n = channel.SamplesCount;
-            //var res = new Complex[n];
-
-            //for (int i = 0; i < n; i++) {
-            //    res[i] = channel.values[i];
-            //}
-
-            //InnerSlowFourierTransform(ref res);
-
-            //return res;
         }
 
-        private static Complex[] FastFourierTransform(Channel channel) {
-            int n = channel.SamplesCount;
-
-            int closestPowerOfTwo = (int) Math.Pow(2, (int) Math.Log2(n));
-            var a = new Complex[closestPowerOfTwo];
-
-            for (int i = 0; i < closestPowerOfTwo; i++) {
-                a[i] = channel.values[i];
-            }
-            for (int i = n; i < closestPowerOfTwo; i++) {
-                a[i] = Complex.Zero;
-            }
-
-            InnerFastFourierTransform(ref a);
+        private static Complex[] FastFourierTransform(Channel channel, int begin, int end) {
+            int n = end - begin + 1;
 
             var res = new Complex[n];
+
             for (int i = 0; i < n; i++) {
-                res[i] = a[i];
+                res[i] = channel.values[begin + i];
+            }
+
+            InnerFastFourierTransform(ref res);
+
+            for (int i = 0; i < n; i++) {
+                res[i] *= channel.DeltaTime;
             }
 
             return res;
@@ -159,25 +158,25 @@ namespace CGProject1.SignalProcessing {
             }
         }
 
-        private static void InnerSlowFourierTransform(ref Complex[] a) {
-            int n = a.Length;
-            var res = new Complex[n];
+        //private static void InnerSlowFourierTransform(ref Complex[] a) {
+        //    int n = a.Length;
+        //    var res = new Complex[n];
 
-            for (int i = 0; i < n; i++) {
-                var val = Complex.Zero;
+        //    for (int i = 0; i < n; i++) {
+        //        var val = Complex.Zero;
 
-                for (int j = 0; j < n; j++) {
-                    val += a[j] * Complex.Exp(-Complex.ImaginaryOne * 2 * Math.PI * j * i / n);
-                }
+        //        for (int j = 0; j < n; j++) {
+        //            val += a[j] * Complex.Exp(-Complex.ImaginaryOne * 2 * Math.PI * j * i / n);
+        //        }
 
-                res[i] = val;
-            }
+        //        res[i] = val;
+        //    }
 
-            for (int i = 0; i < n; i++) {
-                a[i] = res[i];
-            }
+        //    for (int i = 0; i < n; i++) {
+        //        a[i] = res[i];
+        //    }
 
-            return;
-        }
+        //    return;
+        //}
     }
 }
