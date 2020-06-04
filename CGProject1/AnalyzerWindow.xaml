@@ -13,10 +13,37 @@
         </Grid.RowDefinitions>
         
         <Menu Grid.Row="0">
-            <ComboBox SelectedIndex="0" Width="Auto" Name="ComboBoxMode" SelectionChanged="ComboBoxMode_SelectionChanged">
+            <ComboBox SelectedIndex="0" Name="ComboBoxMode" SelectionChanged="ComboBoxMode_SelectionChanged">
                 <ComboBoxItem Content="Спектральная плотность мощности"/>
                 <ComboBoxItem Content="Амплитудный спектр"/>
             </ComboBox>
+            
+            <ComboBox SelectedIndex="0">
+                <ComboBoxItem Content="X(0) = X(0)"/>
+                <ComboBoxItem Content="X(0) = 0"/>
+                <ComboBoxItem Content="X(0) = |X(1)|"/>
+            </ComboBox>
+
+            <StackPanel Orientation="Horizontal">
+                <Label>L:</Label>
+                <TextBox Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center"></TextBox>
+            </StackPanel>
+
+            <Border BorderThickness="1" BorderBrush="Black">
+            <StackPanel Orientation="Horizontal">
+            
+            <StackPanel Orientation="Horizontal">
+                <Label>BEGIN</Label>
+                <TextBox Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>END</Label>
+                <TextBox Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center"></TextBox>
+            </StackPanel>
+
+            <Button Content="Обновить диапазон" Margin="8,0,0,0"></Button>
+            </StackPanel>
+            </Border>
         </Menu>
         
         <ScrollViewer Grid.Row="1">

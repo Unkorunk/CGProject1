@@ -28,6 +28,7 @@ namespace CGProject1 {
                 ampChart.End = amp.SamplesCount;
                 ampChart.Margin = new Thickness(0, 2, 0, 2);
                 ampChart.GridDraw = true;
+                ampChart.HAxisTitle = "Частота (Гц)";
                 charts[1].Add(ampChart);
 
                 var psd = Analyzer.PowerSpectralDensity(0);
@@ -38,6 +39,7 @@ namespace CGProject1 {
                 psdChart.End = psd.SamplesCount;
                 psdChart.Margin = new Thickness(0, 2, 0, 2);
                 psdChart.GridDraw = true;
+                psdChart.HAxisTitle = "Частота (Гц)";
                 charts[0].Add(psdChart);
 
                 //var lg = Analyzer.LogarithmicSpectre(0);
@@ -91,10 +93,18 @@ namespace CGProject1 {
                 for (int i = 0; i < charts[ComboBoxMode.SelectedIndex].Count; i++)
                 {
                     var item = charts[ComboBoxMode.SelectedIndex][i];
+                    item.DisplayHAxisTitle = false;
+                    item.DisplayHAxisInfo = false;
+                    item.HAxisAlligment = Chart.HAxisAlligmentEnum.Top;
 
-                    if (i != 0 /*&& i + 1 != charts[ComboBoxMode.SelectedIndex].Count*/)
+                    if (i == 0 || i + 1 == charts[ComboBoxMode.SelectedIndex].Count)
                     {
-                        item.DisplayHAxisInfo = false;
+                        item.DisplayHAxisInfo = true;
+                        item.DisplayHAxisTitle = true;
+                    }
+                    if (i + 1 == charts[ComboBoxMode.SelectedIndex].Count)
+                    {
+                        item.HAxisAlligment = Chart.HAxisAlligmentEnum.Bottom;
                     }
 
                     SpectrePanel.Children.Add(item);

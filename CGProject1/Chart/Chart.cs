@@ -76,6 +76,16 @@ namespace CGProject1
         public bool DisplayHAxisInfo { get; set; }
         public bool DisplayVAxisInfo { get; set; }
         public bool DisplayTitle { get; set; }
+        public int MaxVAxisLength { get; set; }
+
+        public bool DisplayHAxisTitle { get; set; }
+        public string HAxisTitle { get; set; }
+        
+        public enum HAxisAlligmentEnum
+        {
+            Top, Bottom
+        }
+        public HAxisAlligmentEnum HAxisAlligment { get; set; }
 
         public Channel Channel { get; }
 
@@ -147,13 +157,16 @@ namespace CGProject1
             DisplayHAxisInfo = true;
             DisplayVAxisInfo = true;
             DisplayTitle = true;
+
+            MaxVAxisLength = 12;
         }
 
         public Func<int, Chart, string> MappingXAxis = (idx, chart) => {
 
             var t = chart.Channel.StartDateTime + TimeSpan.FromSeconds(chart.Channel.DeltaTime * idx);
             return t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss") + "\n(" + idx.ToString() + ")";
-        };  
+        };
+        public string MaxHeightXAxisString = DateTime.Now.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + int.MaxValue.ToString() + ")";
 
         protected override void OnRender(DrawingContext dc)
         {
@@ -169,9 +182,22 @@ namespace CGProject1
 
             if (GridDraw)
             {
+                if (DisplayHAxisTitle)
+                {
+                    var formText3 = new FormattedText(HAxisTitle,
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                    );
+
+                    formText3.TextAlignment = TextAlignment.Center;
+                    interfaceOffset.Height = formText3.Height + 1;
+                }
+
                 if (DisplayHAxisInfo)
                 {
-                    var formText1 = new FormattedText(DateTime.Now.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + int.MaxValue.ToString() + ")",
+                    var formText1 = new FormattedText(MaxHeightXAxisString,
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
                         new Typeface("Times New Roman"),
@@ -179,12 +205,12 @@ namespace CGProject1
                     );
 
                     formText1.TextAlignment = TextAlignment.Center;
-                    interfaceOffset.Height = formText1.Height + 1;
+                    interfaceOffset.Height += formText1.Height + 1;
                 }
 
                 if (DisplayVAxisInfo)
                 {
-                    var formText2 = new FormattedText(int.MaxValue.ToString(),
+                    var formText2 = new FormattedText(new string('7', this.MaxVAxisLength),
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
                         new Typeface("Times New Roman"),
@@ -207,6 +233,11 @@ namespace CGProject1
 
             Size actSize = new Size(this.ActualWidth - interfaceOffset.Width,
                 this.ActualHeight - interfaceOffset.Height);
+
+            if ((DisplayHAxisTitle || DisplayHAxisInfo) && HAxisAlligment == HAxisAlligmentEnum.Bottom)
+            {
+                interfaceOffset.Height = 0;
+            }
             #endregion [Interface] Reserve
 
             #region [Optimization]
@@ -300,7 +331,7 @@ namespace CGProject1
 
             if (GridDraw)
             {
-
+                var ht = 0.0;
                 for (int i = 0; i < 8; i++)
                 {
                     double x = (i + 1) * actSize.Width / 9;
@@ -328,8 +359,31 @@ namespace CGProject1
                         );
                         formText1.TextAlignment = TextAlignment.Center;
 
-                        dc.DrawText(formText1, new Point(interfaceOffset.Width + x, 0));
+                        if (HAxisAlligment == HAxisAlligmentEnum.Bottom)
+                        {
+                            var offsetY1 = actSize.Height;
+                            ht = Math.Max(ht, offsetY1 + formText1.Height);
+                            dc.DrawText(formText1, new Point(interfaceOffset.Width + x, offsetY1));
+                        }
+                        else
+                        {
+                            dc.DrawText(formText1, new Point(interfaceOffset.Width + x, interfaceOffset.Height - (formText1.Height + 1)));
+                        }  
                     }
+                }
+
+                if (DisplayHAxisTitle)
+                {
+                    var formText3 = new FormattedText(HAxisTitle,
+                        CultureInfo.GetCultureInfo("en-us"),
+                        FlowDirection.LeftToRight,
+                        new Typeface("Times New Roman"),
+                        12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                    );
+
+                    formText3.TextAlignment = TextAlignment.Center;
+                    
+                    dc.DrawText(formText3, new Point(interfaceOffset.Width + actSize.Width / 2, ht));
                 }
 
                 for (int i = 0; i < 5; i++)
@@ -344,6 +398,11 @@ namespace CGProject1
                     }
                     if (DisplayVAxisInfo)
                     {
+                        if (val.Length > 12)
+                        {
+                            val = val.Substring(0, 12);
+                        }
+
                         var formText1 = new FormattedText(val,
                             CultureInfo.GetCultureInfo("en-us"),
                             FlowDirection.LeftToRight,
