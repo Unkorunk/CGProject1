@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -99,6 +100,12 @@ namespace CGProject1 {
             ampChart.Margin = new Thickness(0, 2, 0, 2);
             ampChart.GridDraw = true;
             ampChart.HAxisTitle = "Частота (Гц)";
+            ampChart.MappingXAxis = (idx, chart) => {
+                double curVal = chart.Channel.DeltaTime * idx;
+                return curVal.ToString("N3", CultureInfo.InvariantCulture);
+            };
+            ampChart.MaxHeightXAxisString = double.MaxValue.ToString();
+            ampChart.ShowCurrentXY = true;
             charts[1].Add(ampChart);
 
             var psd = analyzer.PowerSpectralDensity();
@@ -109,6 +116,12 @@ namespace CGProject1 {
             psdChart.Margin = new Thickness(0, 2, 0, 2);
             psdChart.GridDraw = true;
             psdChart.HAxisTitle = "Частота (Гц)";
+            psdChart.MappingXAxis = (idx, chart) => {
+                double curVal = chart.Channel.DeltaTime * idx;
+                return curVal.ToString("N3", CultureInfo.InvariantCulture);
+            };
+            psdChart.MaxHeightXAxisString = double.MaxValue.ToString();
+            psdChart.ShowCurrentXY = true;
             charts[0].Add(psdChart);
 
             var lg = analyzer.LogarithmicSpectre();
@@ -119,6 +132,12 @@ namespace CGProject1 {
             logChart.Margin = new Thickness(0, 2, 0, 2);
             logChart.GridDraw = true;
             logChart.HAxisTitle = "Частота (Гц)";
+            logChart.MappingXAxis = (idx, chart) => {
+                double curVal = chart.Channel.DeltaTime * idx;
+                return curVal.ToString("N3", CultureInfo.InvariantCulture);
+            };
+            logChart.MaxHeightXAxisString = double.MaxValue.ToString();
+            logChart.ShowCurrentXY = true;
             charts[2].Add(logChart);
             charts[3].Add(logChart);
         }

@@ -74,11 +74,12 @@ namespace CGProject1.SignalProcessing {
         }
 
         public Channel LogarithmicSpectre() {
-            var res = new Channel(ft.Length);
+            int n = ft.Length / 2;
+            var res = new Channel(n);
             res.Name = "Лог. Спектр " + curChannel.Name;
             res.Source = "Analyzer";
 
-            for (int i = 0; i < ft.Length; i++) {
+            for (int i = 0; i < n; i++) {
                 res.values[i] = 20 * Math.Log10(amps[i]);
             }
 
@@ -97,18 +98,18 @@ namespace CGProject1.SignalProcessing {
 
             WindowSmoothing(res, HalfWindowSmoothing);
 
-            var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
-            res.SamplingFrq = 1.0 / newDx;
+            res.SamplingFrq = 2.0 / (curChannel.SamplingFrq / res.SamplesCount);
 
             return res;
         }
 
         public Channel AmplitudeSpectre() {
-            var res = new Channel(ft.Length);
+            int n = ft.Length / 2;
+            var res = new Channel(n);
             res.Name = "Спектр " + curChannel.Name;
             res.Source = "Analyzer";
 
-            for (int i = 0; i < ft.Length; i++) {
+            for (int i = 0; i < n; i++) {
                 res.values[i] = amps[i];
             }
 
@@ -127,18 +128,21 @@ namespace CGProject1.SignalProcessing {
 
             WindowSmoothing(res, HalfWindowSmoothing);
 
-            var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
-            res.SamplingFrq = 1.0 / newDx;
+            //var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
+            //res.SamplingFrq = 1.0 / newDx;
+
+            res.SamplingFrq = 2.0 / (curChannel.SamplingFrq / res.SamplesCount);
 
             return res;
         }
 
         public Channel PowerSpectralDensity() {
-            var res = new Channel(ft.Length);
+            int n = ft.Length / 2;
+            var res = new Channel(n);
             res.Name = "Спектр " + curChannel.Name;
             res.Source = "Analyzer";
 
-            for (int i = 0; i < ft.Length; i++) {
+            for (int i = 0; i < n; i++) {
                 res.values[i] = psds[i]; ;
             }
 
@@ -157,8 +161,10 @@ namespace CGProject1.SignalProcessing {
 
             WindowSmoothing(res, HalfWindowSmoothing);
 
-            var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
-            res.SamplingFrq = 1.0 / newDx;
+            //var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
+            //res.SamplingFrq = 1.0 / newDx;
+
+            res.SamplingFrq = 2.0 / (curChannel.SamplingFrq / res.SamplesCount);
 
             return res;
         }
