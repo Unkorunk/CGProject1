@@ -103,6 +103,36 @@ namespace CGProject1.SignalProcessing {
             return res;
         }
 
+        public Channel LogarithmicPSD() {
+            int n = ft.Length / 2;
+            var res = new Channel(n);
+            res.Name = "Лог. Спектр " + curChannel.Name;
+            res.Source = "Analyzer";
+
+            for (int i = 0; i < n; i++) {
+                res.values[i] = 10 * Math.Log10(psds[i]);
+            }
+
+            switch (this.zeroMode) {
+                case ZeroMode.Smooth:
+                    if (res.values.Length > 1) {
+                        res.values[0] = res.values[1];
+                    }
+                    break;
+                case ZeroMode.Null:
+                    res.values[0] = 0;
+                    break;
+                default:
+                    break;
+            }
+
+            WindowSmoothing(res, HalfWindowSmoothing);
+
+            res.SamplingFrq = 2.0 / (curChannel.SamplingFrq / res.SamplesCount);
+
+            return res;
+        }
+
         public Channel AmplitudeSpectre() {
             int n = ft.Length / 2;
             var res = new Channel(n);
@@ -208,9 +238,9 @@ namespace CGProject1.SignalProcessing {
                 res[i] = val;
             }
 
-            for (int i = 0; i < n; i++) {
-                res[i] *= channel.DeltaTime;
-            }
+            //for (int i = 0; i < n; i++) {
+            //    res[i] *= channel.DeltaTime;
+            //}
 
             return res;
         }
@@ -226,9 +256,9 @@ namespace CGProject1.SignalProcessing {
 
             InnerFastFourierTransform(ref res);
 
-            for (int i = 0; i < n; i++) {
-                res[i] *= channel.DeltaTime;
-            }
+            //for (int i = 0; i < n; i++) {
+            //    res[i] *= channel.DeltaTime;
+            //}
 
             return res;
         }

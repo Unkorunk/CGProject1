@@ -124,6 +124,22 @@ namespace CGProject1 {
             psdChart.ShowCurrentXY = true;
             charts[0].Add(psdChart);
 
+            var lgPSD = analyzer.LogarithmicPSD();
+            var logPSDChart = new Chart(lgPSD);
+            logPSDChart.Height = 200;
+            logPSDChart.Begin = 0;
+            logPSDChart.End = lgPSD.SamplesCount;
+            logPSDChart.Margin = new Thickness(0, 2, 0, 2);
+            logPSDChart.GridDraw = true;
+            logPSDChart.HAxisTitle = "Частота (Гц)";
+            logPSDChart.MappingXAxis = (idx, chart) => {
+                double curVal = chart.Channel.DeltaTime * idx;
+                return curVal.ToString("N3", CultureInfo.InvariantCulture);
+            };
+            logPSDChart.MaxHeightXAxisString = double.MaxValue.ToString();
+            logPSDChart.ShowCurrentXY = true;
+            charts[2].Add(logPSDChart);
+
             var lg = analyzer.LogarithmicSpectre();
             var logChart = new Chart(lg);
             logChart.Height = 200;
@@ -138,7 +154,6 @@ namespace CGProject1 {
             };
             logChart.MaxHeightXAxisString = double.MaxValue.ToString();
             logChart.ShowCurrentXY = true;
-            charts[2].Add(logChart);
             charts[3].Add(logChart);
         }
 
