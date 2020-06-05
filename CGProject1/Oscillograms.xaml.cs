@@ -77,7 +77,7 @@ namespace CGProject1 {
                 EndSlider.Value = samplesCount - 1;
 
                 BeginBox.Text = 0.ToString();
-                EndBox.Text = samplesCount.ToString();
+                EndBox.Text = (samplesCount - 1).ToString();
 
                 OscillogramScroll.Minimum = 0;
                 OscillogramScroll.Maximum = signal.SamplesCount;

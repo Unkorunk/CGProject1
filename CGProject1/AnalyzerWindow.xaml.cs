@@ -49,6 +49,8 @@ namespace CGProject1 {
 
             if (!initilized) {
                 initilized = true;
+                samplesCount = analyzer.AmplitudeSpectre().SamplesCount - 1;
+
                 BeginSlider.Maximum = samplesCount - 1;
                 EndSlider.Maximum = samplesCount - 1;
 
@@ -56,7 +58,7 @@ namespace CGProject1 {
                 EndSlider.Value = samplesCount - 1;
 
                 BeginBox.Text = 0.ToString();
-                EndBox.Text = samplesCount.ToString();
+                EndBox.Text = (samplesCount - 1).ToString();
 
                 OscillogramScroll.Minimum = 0;
                 OscillogramScroll.Maximum = samplesCount;
@@ -65,7 +67,6 @@ namespace CGProject1 {
             }
 
             analyzers.Add(analyzer);
-
             SetupCharts(analyzer);
 
             UpdatePanel();
@@ -200,7 +201,7 @@ namespace CGProject1 {
         private string MappingXAxis(int idx, Chart chart)
         {
             double curVal = chart.Channel.DeltaTime * idx;
-            return curVal.ToString(CultureInfo.InvariantCulture);
+            return curVal.ToString("N6", CultureInfo.InvariantCulture);
         }
 
         private void OnMouseSelect(Chart sender, int newBegin, int newEnd)
@@ -372,7 +373,7 @@ namespace CGProject1 {
 
             if (end < begin)
             {
-                end = begin;
+                end = begin + 1;
             }
 
             double p = (end - begin + 1) * 1.0 / samplesCount;
