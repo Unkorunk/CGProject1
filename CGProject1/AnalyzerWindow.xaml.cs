@@ -36,10 +36,18 @@ namespace CGProject1 {
         }
 
         public void AddChannel(Channel channel) {
-            samplesCount = channel.SamplesCount;
+            if (namesSet.Contains(channel.Name)) {
+                return;
+            }
 
-            if (!initilized)
-            {
+            namesSet.Add(channel.Name);
+            var analyzer = new Analyzer(channel);
+
+            analyzer.SetupChannel(begin, end);
+
+            samplesCount = analyzer.SamplesCount;
+
+            if (!initilized) {
                 initilized = true;
                 BeginSlider.Maximum = samplesCount - 1;
                 EndSlider.Maximum = samplesCount - 1;
@@ -51,19 +59,10 @@ namespace CGProject1 {
                 EndBox.Text = samplesCount.ToString();
 
                 OscillogramScroll.Minimum = 0;
-                OscillogramScroll.Maximum = channel.SamplesCount;
+                OscillogramScroll.Maximum = samplesCount;
                 double p = 0.999;
-                OscillogramScroll.ViewportSize = channel.SamplesCount * p / (1.0 - p);
+                OscillogramScroll.ViewportSize = samplesCount * p / (1.0 - p);
             }
-
-            if (namesSet.Contains(channel.Name)) {
-                return;
-            }
-
-            namesSet.Add(channel.Name);
-            var analyzer = new Analyzer(channel);
-
-            analyzer.SetupChannel(begin, end);
 
             analyzers.Add(analyzer);
 
@@ -201,7 +200,7 @@ namespace CGProject1 {
         private string MappingXAxis(int idx, Chart chart)
         {
             double curVal = chart.Channel.DeltaTime * idx;
-            return curVal.ToString("N3", CultureInfo.InvariantCulture);
+            return curVal.ToString(CultureInfo.InvariantCulture);
         }
 
         private void OnMouseSelect(Chart sender, int newBegin, int newEnd)

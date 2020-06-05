@@ -23,6 +23,14 @@ namespace CGProject1.SignalProcessing {
 
         public ZeroMode zeroMode = ZeroMode.Nothing;
 
+        public int SamplesCount { get {
+                if (ft == null) {
+                    return 0; 
+                }
+                return ft.Length / 2; 
+            } 
+        }
+
         public Analyzer(Channel channel) {
             this.curChannel = channel;
         }
