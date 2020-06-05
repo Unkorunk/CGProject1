@@ -36,26 +36,6 @@ namespace CGProject1 {
         }
 
         public void AddChannel(Channel channel) {
-            samplesCount = channel.SamplesCount;
-
-            if (!initilized)
-            {
-                initilized = true;
-                BeginSlider.Maximum = samplesCount - 1;
-                EndSlider.Maximum = samplesCount - 1;
-
-                BeginSlider.Value = 0;
-                EndSlider.Value = samplesCount - 1;
-
-                BeginBox.Text = 0.ToString();
-                EndBox.Text = samplesCount.ToString();
-
-                OscillogramScroll.Minimum = 0;
-                OscillogramScroll.Maximum = channel.SamplesCount;
-                double p = 0.999;
-                OscillogramScroll.ViewportSize = channel.SamplesCount * p / (1.0 - p);
-            }
-
             if (namesSet.Contains(channel.Name)) {
                 return;
             }
@@ -66,6 +46,26 @@ namespace CGProject1 {
             analyzer.SetupChannel(begin, end);
 
             analyzers.Add(analyzer);
+
+            if (!initilized)
+            {
+                initilized = true;
+                samplesCount = analyzer.AmplitudeSpectre().SamplesCount - 1;
+
+                BeginSlider.Maximum = samplesCount - 1;
+                EndSlider.Maximum = samplesCount - 1;
+
+                BeginSlider.Value = 0;
+                EndSlider.Value = samplesCount - 1;
+
+                BeginBox.Text = 0.ToString();
+                EndBox.Text = (samplesCount - 1).ToString();
+
+                OscillogramScroll.Minimum = 0;
+                OscillogramScroll.Maximum = samplesCount - 1;
+                double p = 0.999;
+                OscillogramScroll.ViewportSize = (samplesCount - 1) * p / (1.0 - p);
+            }
 
             SetupCharts(analyzer);
 
