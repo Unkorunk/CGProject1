@@ -76,7 +76,7 @@ namespace CGProject1 {
 
         private ChannelConstructor currentModel = null;
         private TextBox[] argumentsFields = null;
-        private List<TextBox>[] varargFields = null;
+        private TextBox[] varargFields = null;
         private StackPanel[] varargPanels = null;
         private int samplesCount;
         private double samplingFrq;
@@ -146,46 +146,85 @@ namespace CGProject1 {
                     argumentsFields[i] = field;
                 }
 
-                varargFields = new List<TextBox>[btnModel.VarArgNames.Length];
+                varargFields = new TextBox[btnModel.VarArgNames.Length];
                 varargPanels = new StackPanel[btnModel.VarArgNames.Length];
 
                 for (int i = 0; i < btnModel.VarArgNames.Length; i++) {
-                    varargFields[i] = new List<TextBox>();
+                    varargFields[i] = new TextBox();
+                    string defaultVarargs = "";
+
+                    for (int j = 0; j < btnModel.LastVarargs[i].Length; j++) {
+                        defaultVarargs += btnModel.LastVarargs[i][j].ToString(CultureInfo.InvariantCulture) + ", ";
+                    }
+
+                    varargFields[i].Text = defaultVarargs[0..^2];
 
                     var label = new Label();
                     string header = btnModel.VarArgNames[i];
                     label.Content = header + ":";
                     ArgumentsPanel.Children.Add(label);
+                    ArgumentsPanel.Children.Add(varargFields[i]);
+                }
 
-                    var argPanel = new StackPanel();
-                    var field = new TextBox();
-                    field.Text = "0";
-                    varargFields[i].Add(field);
-                    argPanel.Children.Add(field);
-                    ArgumentsPanel.Children.Add(argPanel);
-                    varargPanels[i] = argPanel;
+                var savePresetBtn = new Button();
+                savePresetBtn.Content = "Сохранить набор значений";
+                savePresetBtn.Click += (object sender, RoutedEventArgs e) => {
+                    var args = ValidateArguments();
+                    var varargs = ValidateVarArgs();
 
-                    var addBtn = new Button();
-                    int indx = i;
-                    addBtn.Click += (object sender, RoutedEventArgs e) => {
-                        var field = new TextBox();
-                        field.Text = "0";
-                        varargFields[indx].Add(field);
-                        varargPanels[indx].Children.Add(field);
-                    };
-                    addBtn.Content = "Добавить значение";
-                    ArgumentsPanel.Children.Add(addBtn);
+                    btnModel.AddPreset(args, varargs);
 
-                    var removeBtn = new Button();
-                    removeBtn.Click += (object sender, RoutedEventArgs e) => {
-                        if (varargPanels[indx].Children.Count > 0) {
-                            int size = varargFields[indx].Count;
-                            varargFields[indx].RemoveAt(size - 1);
-                            varargPanels[indx].Children.RemoveAt(size - 1);
+                    var presetBtn = new Button();
+                    int idx = btnModel.presets.Count - 1;
+                    presetBtn.Content = "Пресет " + idx.ToString();
+                    var preset = btnModel.presets[idx];
+
+                    presetBtn.Click += (object sender, RoutedEventArgs e) => {
+                        var args = preset.Args;
+                        for (int j = 0; j < args.Length; j++) {
+                            argumentsFields[j].Text = args[j].ToString(CultureInfo.InvariantCulture);
+                        }
+
+                        var varargs = preset.VarArgs;
+                        for (int j = 0; j < varargs.Length; j++) {
+                            string curVarargs = "";
+                            for (int k = 0; k < varargs[j].Length; k++) {
+                                curVarargs += varargs[j][k].ToString(CultureInfo.InvariantCulture) + ", ";
+                            }
+
+                            varargFields[j].Text = curVarargs[0..^2];
                         }
                     };
-                    removeBtn.Content = "Удалить значение";
-                    ArgumentsPanel.Children.Add(removeBtn);
+
+                    ArgumentsPanel.Children.Add(presetBtn);
+                };
+                savePresetBtn.Margin = new Thickness(0, 2.5, 0, 2.5);
+                ArgumentsPanel.Children.Add(savePresetBtn);
+
+                for (int i = 0; i < btnModel.presets.Count; i++) {
+                    var presetBtn = new Button();
+                    int idx = i;
+                    presetBtn.Content = "Пресет " + idx.ToString();
+                    var preset = btnModel.presets[i];
+
+                    presetBtn.Click += (object sender, RoutedEventArgs e) => {
+                        var args = preset.Args;
+                        for (int j = 0; j < args.Length; j++) {
+                            argumentsFields[j].Text = args[j].ToString(CultureInfo.InvariantCulture);
+                        }
+
+                        var varargs = preset.VarArgs;
+                        for (int j = 0; j < varargs.Length; j++) {
+                            string curVarargs = "";
+                            for (int k = 0; k < varargs[j].Length; k++) {
+                                curVarargs += varargs[j][k].ToString(CultureInfo.InvariantCulture) + ", ";
+                            }
+
+                            varargFields[j].Text = curVarargs[0..^2];
+                        }
+                    };
+
+                    ArgumentsPanel.Children.Add(presetBtn);
                 }
 
                 PreviewButton.IsEnabled = true;
@@ -329,20 +368,21 @@ namespace CGProject1 {
             var varargs = new double[currentModel.VarArgNames.Length][];
 
             for (int i = 0; i < currentModel.VarArgNames.Length; i++) {
-                int size = varargFields[i].Count;
-                varargs[i] = new double[size];
+                string[] varargsStr = varargFields[i].Text.Split(',');
+                varargs[i] = new double[varargsStr.Length];
 
-                for (int j = 0; j < size; j++) {
-                    double val = 0;
+                string newVarargs = "";
 
-                    if (!double.TryParse(varargFields[i][j].Text, NumberStyles.Any, CultureInfo.InvariantCulture, out val)) {
+                for (int j = 0; j < varargsStr.Length; j++) {
+                    if (!double.TryParse(varargsStr[j], NumberStyles.Any, CultureInfo.InvariantCulture, out varargs[i][j])) {
                         MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         return null;
                     }
 
-                    varargs[i][j] = val;
-                    varargFields[i][j].Text = val.ToString(CultureInfo.InvariantCulture);
+                    newVarargs += varargs[i][j].ToString(CultureInfo.InvariantCulture) + ", ";
                 }
+
+                varargFields[i].Text = newVarargs[0..^2];
             }
 
             return varargs;

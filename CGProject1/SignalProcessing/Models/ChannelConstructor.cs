@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Linq;
-using System.Security.RightsManagement;
+using System.Collections.Generic;
 
 namespace CGProject1.SignalProcessing {
     public class ChannelConstructor {
         public ChannelConstructor(string modelName, int id, string[] argsNames, string[] varargNames,
-                double[] minValues, double[] maxValues, double[] defaultValues, Model modelingRule = null) {
+                double[] minValues, double[] maxValues, double[] defaultValues, double[][] defaultVarargs, Model modelingRule = null) {
             this.ModelId = id;
             this.ModelName = modelName;
             this.ArgsNames = argsNames;
@@ -13,7 +12,10 @@ namespace CGProject1.SignalProcessing {
             this.MinArgValues = minValues;
             this.MaxArgValues = maxValues;
             this.DefaultValues = defaultValues;
+            this.DefaultVarargValues = defaultVarargs;
+
             this.LastValues = this.DefaultValues;
+            this.LastVarargs = this.DefaultVarargValues;
 
             if (modelingRule == null) {
                 modelingRule = (int n, double deltaTime, double[] args, double[][] varargs, double[] signalVals) => {
@@ -23,6 +25,8 @@ namespace CGProject1.SignalProcessing {
 
             this.modelDelegate = modelingRule;
         }
+
+        public List<ModelPreset> presets = new List<ModelPreset>();
 
         private Model modelDelegate;
 
@@ -38,9 +42,19 @@ namespace CGProject1.SignalProcessing {
 
         public double[] DefaultValues { get; }
 
+        public double[][] DefaultVarargValues { get; }
+
         public double[] LastValues { get; set; }
 
+        public double[][] LastVarargs { get; set; }
+
+
         public delegate double Model(int n, double deltaTime, double[] args, double[][] varargs, double[] signalVals);
+
+        public void AddPreset(double[] args, double[][] varargs) {
+            var newPreset = new ModelPreset(this.ModelId, args, varargs);
+            presets.Add(newPreset);
+        }
 
         public void ResetCounter() {
             channelCounter = 0;
@@ -48,6 +62,7 @@ namespace CGProject1.SignalProcessing {
 
         public Channel CreatePreviewChannel(int samplesCount, double[] args, double[][] varargs, double samplingFrq, DateTime startDateTime) {
             this.LastValues = args;
+            this.LastVarargs = varargs;
             var channel = ConstructChannel(samplesCount, args, varargs, samplingFrq, startDateTime);
 
             channel.Name = "Model_" + this.ModelId.ToString() + "_" + this.channelCounter.ToString() + "_Preview";
@@ -57,6 +72,7 @@ namespace CGProject1.SignalProcessing {
 
         public Channel CreateChannel(int samplesCount, double[] args, double[][] varargs, double samplingFrq, DateTime startDateTime) {
             this.LastValues = args;
+            this.LastVarargs = varargs;
             var channel = ConstructChannel(samplesCount, args, varargs, samplingFrq, startDateTime);
 
             channel.Name = "Model_" + this.ModelId.ToString() + "_" + this.channelCounter.ToString();

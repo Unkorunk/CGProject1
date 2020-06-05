@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -40,6 +41,40 @@ namespace CGProject1.SignalProcessing {
                     }
 
                     sw.WriteLine(vals);
+                }
+            }
+        }
+
+        public static void SerializeModels(string path, List<ChannelConstructor>[] channelConstructors) {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            using (var sw = new StreamWriter(path, false)) {
+                foreach (List<ChannelConstructor> arr in channelConstructors) {
+                    foreach (ChannelConstructor cc in arr) {
+                        foreach(var preset in cc.presets) {
+                            sw.WriteLine(preset.ModelId);
+                            
+                            var args = preset.Args;
+                            sw.WriteLine(args.Length);
+
+                            for (int i = 0; i < args.Length; i++) {
+                                sw.WriteLine(args[i].ToString(CultureInfo.InvariantCulture));
+                            }
+
+                            var varargs = preset.VarArgs;
+                            sw.WriteLine(varargs.Length);
+
+                            for (int i = 0; i < varargs.Length; i++) {
+                                string curVarargs = "";
+                                for (int j = 0; j < varargs[i].Length; j++) {
+                                    curVarargs += varargs[i][j].ToString(CultureInfo.InvariantCulture) + ", ";
+                                }
+
+                                sw.WriteLine(curVarargs[0..^2]);
+                            }
+                            sw.WriteLine();
+                        }
+                    }
                 }
             }
         }

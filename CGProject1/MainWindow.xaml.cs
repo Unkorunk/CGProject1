@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CGProject1.SignalProcessing;
 using Microsoft.Win32;
 
 namespace CGProject1 {
@@ -59,6 +60,8 @@ namespace CGProject1 {
                 if (isStatisticShowing) {
                     statisticsWindow.Close();
                 }
+
+                Serializer.SerializeModels(Modelling.defaultPath, new List<ChannelConstructor>[] { Modelling.discreteModels, Modelling.continiousModels, Modelling.randomModels });
             };
         }
 
