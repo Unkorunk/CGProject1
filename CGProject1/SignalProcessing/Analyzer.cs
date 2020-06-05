@@ -202,10 +202,14 @@ namespace CGProject1.SignalProcessing {
                 var val = Complex.Zero;
 
                 for (int j = 0; j < n; j++) {
-                    val += channel.DeltaTime * channel.values[begin + j] * Complex.Exp(-Complex.ImaginaryOne * 2 * Math.PI * j * i / n);
+                    val += channel.values[begin + j] * Complex.Exp(-Complex.ImaginaryOne * 2 * Math.PI * j * i / n);
                 }
 
                 res[i] = val;
+            }
+
+            for (int i = 0; i < n; i++) {
+                res[i] *= channel.DeltaTime;
             }
 
             return res;
