@@ -56,9 +56,9 @@
 
         <StackPanel Grid.Row="2" Grid.Column="1">
             <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged" LargeChange="150" SmallChange="30"></ScrollBar>
-            <Label Name="BeginTimeLabel">Begin</Label>
+            <Label Name="BeginFrequencyLabel">Begin frequency: 0.0</Label>
             <Slider Name="BeginSlider" Minimum="0" Maximum="0" ValueChanged="BeginSlider_ValueChanged"></Slider>
-            <Label Name="EndTimeLabel">End</Label>
+            <Label Name="EndFrequencyLabel">End frequency: 0.0</Label>
             <Slider Name="EndSlider" Minimum="0" Maximum="0" ValueChanged="EndSlider_ValueChanged"></Slider>
         </StackPanel>
 

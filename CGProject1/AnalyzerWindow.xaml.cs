@@ -130,10 +130,7 @@ namespace CGProject1 {
             ampChart.Margin = new Thickness(0, 2, 0, 2);
             ampChart.GridDraw = true;
             ampChart.HAxisTitle = "Частота (Гц)";
-            ampChart.MappingXAxis = (idx, chart) => {
-                double curVal = chart.Channel.DeltaTime * idx;
-                return curVal.ToString("N3", CultureInfo.InvariantCulture);
-            };
+            ampChart.MappingXAxis = MappingXAxis;
             ampChart.MaxHeightXAxisString = double.MaxValue.ToString();
             ampChart.ShowCurrentXY = true;
             ampChart.IsMouseSelect = true;
@@ -153,10 +150,7 @@ namespace CGProject1 {
             psdChart.Margin = new Thickness(0, 2, 0, 2);
             psdChart.GridDraw = true;
             psdChart.HAxisTitle = "Частота (Гц)";
-            psdChart.MappingXAxis = (idx, chart) => {
-                double curVal = chart.Channel.DeltaTime * idx;
-                return curVal.ToString("N3", CultureInfo.InvariantCulture);
-            };
+            psdChart.MappingXAxis = MappingXAxis;
             psdChart.MaxHeightXAxisString = double.MaxValue.ToString();
             psdChart.ShowCurrentXY = true;
             psdChart.IsMouseSelect = true;
@@ -176,10 +170,7 @@ namespace CGProject1 {
             logPSDChart.Margin = new Thickness(0, 2, 0, 2);
             logPSDChart.GridDraw = true;
             logPSDChart.HAxisTitle = "Частота (Гц)";
-            logPSDChart.MappingXAxis = (idx, chart) => {
-                double curVal = chart.Channel.DeltaTime * idx;
-                return curVal.ToString("N3", CultureInfo.InvariantCulture);
-            };
+            logPSDChart.MappingXAxis = MappingXAxis;
             logPSDChart.MaxHeightXAxisString = double.MaxValue.ToString();
             logPSDChart.ShowCurrentXY = true;
             logPSDChart.IsMouseSelect = true;
@@ -199,15 +190,18 @@ namespace CGProject1 {
             logChart.Margin = new Thickness(0, 2, 0, 2);
             logChart.GridDraw = true;
             logChart.HAxisTitle = "Частота (Гц)";
-            logChart.MappingXAxis = (idx, chart) => {
-                double curVal = chart.Channel.DeltaTime * idx;
-                return curVal.ToString("N3", CultureInfo.InvariantCulture);
-            };
+            logChart.MappingXAxis = MappingXAxis;
             logChart.MaxHeightXAxisString = double.MaxValue.ToString();
             logChart.ShowCurrentXY = true;
             logChart.IsMouseSelect = true;
             logChart.OnMouseSelect += OnMouseSelect;
             charts[3].Add(logChart);
+        }
+
+        private string MappingXAxis(int idx, Chart chart)
+        {
+            double curVal = chart.Channel.DeltaTime * idx;
+            return curVal.ToString("N3", CultureInfo.InvariantCulture);
         }
 
         private void OnMouseSelect(Chart sender, int newBegin, int newEnd)
@@ -401,6 +395,11 @@ namespace CGProject1 {
             EndSlider.Value = end;
             BeginBox.Text = begin.ToString();
             EndBox.Text = end.ToString();
+            if (charts.Count != 0 && charts[0].Count != 0)
+            {
+                BeginFrequencyLabel.Content = "Begin frequency: " + MappingXAxis(charts[0][0].Begin, charts[0][0]);
+                EndFrequencyLabel.Content = "End frequency: " + MappingXAxis(charts[0][0].End, charts[0][0]);
+            }
         }
     }
 }
