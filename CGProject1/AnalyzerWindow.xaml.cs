@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -7,9 +8,14 @@ using CGProject1.SignalProcessing;
 namespace CGProject1 {
     public partial class AnalyzerWindow : Window {
 
+        private List<Analyzer> analyzers = new List<Analyzer>();
+        private HashSet<string> namesSet = new HashSet<string>();
+
         private List<List<Chart>> charts = new List<List<Chart>>();
         private int begin;
         private int end;
+
+        private int halfWindowSmoothing = 0;
 
         public AnalyzerWindow(int begin, int end) {
             InitializeComponent();
@@ -24,14 +30,18 @@ namespace CGProject1 {
         }
 
         public void AddChannel(Channel channel) {
-            
-            Analyzer.SetupChannel(channel, begin, end);
+            if (namesSet.Contains(channel.Name)) {
+                return;
+            }
 
-            Channel amp = Analyzer.AmplitudeSpectre(0);
+            namesSet.Add(channel.Name);
+            var analyzer = new Analyzer(channel);
 
-            var newDx = 1.0 / (2 * channel.DeltaTime * amp.SamplesCount);
-            amp.SamplingFrq = 1.0 / newDx;
+            analyzer.SetupChannel(begin, end);
 
+            analyzers.Add(analyzer);
+
+            Channel amp = analyzer.AmplitudeSpectre();
             var ampChart = new Chart(amp);
             ampChart.Height = 200;
             ampChart.Begin = 0;
@@ -41,8 +51,7 @@ namespace CGProject1 {
             ampChart.HAxisTitle = "Частота (Гц)";
             charts[1].Add(ampChart);
 
-            var psd = Analyzer.PowerSpectralDensity(0);
-            psd.SamplingFrq = 1.0 / newDx;
+            Channel psd = analyzer.PowerSpectralDensity();
             var psdChart = new Chart(psd);
             psdChart.Height = 200;
             psdChart.Begin = 0;
@@ -52,8 +61,7 @@ namespace CGProject1 {
             psdChart.HAxisTitle = "Частота (Гц)";
             charts[0].Add(psdChart);
 
-            var lg = Analyzer.LogarithmicSpectre(0);
-            lg.SamplingFrq = 1.0 / newDx;
+            Channel lg = analyzer.LogarithmicSpectre();
             var logChart = new Chart(lg);
             logChart.Height = 200;
             logChart.Begin = 0;
@@ -65,10 +73,9 @@ namespace CGProject1 {
             charts[3].Add(logChart);
 
             UpdatePanel();
-            
         }
 
-        void UpdatePanel()
+        private void UpdatePanel()
         {
             if (SpectrePanel != null) SpectrePanel.Children.Clear();
             
@@ -96,9 +103,79 @@ namespace CGProject1 {
             }
         }
 
+        private void UpdateAnalyzers() {
+            foreach(var chartList in charts) {
+                chartList.Clear();
+            }
+
+            foreach (var analyzer in analyzers) {
+                analyzer.HalfWindowSmoothing = this.halfWindowSmoothing;
+                analyzer.SetupChannel(this.begin, this.end);
+
+                Channel amp = analyzer.AmplitudeSpectre();
+
+                var ampChart = new Chart(amp);
+                ampChart.Height = 200;
+                ampChart.Begin = 0;
+                ampChart.End = amp.SamplesCount;
+                ampChart.Margin = new Thickness(0, 2, 0, 2);
+                ampChart.GridDraw = true;
+                ampChart.HAxisTitle = "Частота (Гц)";
+                charts[1].Add(ampChart);
+
+                var psd = analyzer.PowerSpectralDensity();
+                var psdChart = new Chart(psd);
+                psdChart.Height = 200;
+                psdChart.Begin = 0;
+                psdChart.End = psd.SamplesCount;
+                psdChart.Margin = new Thickness(0, 2, 0, 2);
+                psdChart.GridDraw = true;
+                psdChart.HAxisTitle = "Частота (Гц)";
+                charts[0].Add(psdChart);
+
+                var lg = analyzer.LogarithmicSpectre();
+                var logChart = new Chart(lg);
+                logChart.Height = 200;
+                logChart.Begin = 0;
+                logChart.End = lg.SamplesCount;
+                logChart.Margin = new Thickness(0, 2, 0, 2);
+                logChart.GridDraw = true;
+                logChart.HAxisTitle = "Частота (Гц)";
+                charts[2].Add(logChart);
+                charts[3].Add(logChart);
+            }
+
+            UpdatePanel();
+        }
+
         private void ComboBoxMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             UpdatePanel();
+        }
+
+        private void SelectInterval(object sender, RoutedEventArgs e) {
+            int newBegin = this.begin;
+            int newEnd = this.end;
+            int newL = this.halfWindowSmoothing;
+            if (!int.TryParse(HalfWindowTextBox.Text, out newL) || !int.TryParse(BeginSelector.Text, out newBegin) || !int.TryParse(EndSelector.Text, out newEnd)) {
+                MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (newEnd <= newBegin + 1) {
+                MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            HalfWindowTextBox.Text = newL.ToString();
+            BeginSelector.Text = newBegin.ToString();
+            EndSelector.Text = newEnd.ToString();
+
+            this.begin = newBegin;
+            this.end = newEnd;
+            this.halfWindowSmoothing = newL;
+
+            UpdateAnalyzers();
         }
 
         private void previewTextInput(object sender, TextCompositionEventArgs e) {

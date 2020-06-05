@@ -4,42 +4,47 @@ using System.Numerics;
 
 
 namespace CGProject1.SignalProcessing {
-    public static class Analyzer {
-        private static Channel curChannel;
-        private static Complex[] ft;
+    public class Analyzer {
+        private Channel curChannel;
+        private Complex[] ft;
 
-        private static int bound = 4096;
+        private int bound = 4096;
 
-        private static double[] amps = null;
-        private static double[] psds = null;
+        public int HalfWindowSmoothing { get; set; }
 
-        public static void SetupChannel(Channel channel, int begin, int end) {
-            curChannel = channel;
+        private double[] amps = null;
+        private double[] psds = null;
+
+        public Analyzer(Channel channel) {
+            this.curChannel = channel;
+        }
+
+        public void SetupChannel(int begin, int end) {
             if (end - begin < bound) {
-                ft = SlowFourierTransform(channel, begin, end);
+                ft = SlowFourierTransform(curChannel, begin, end);
             } else {
                 int len = end - begin + 1;
                 int closestPowerOfTwo = (int)Math.Pow(2, (int)Math.Log2(len));
                 begin += (len - closestPowerOfTwo) / 2;
                 end = begin + closestPowerOfTwo - 1;
 
-                ft = FastFourierTransform(channel, begin, end);
+                ft = FastFourierTransform(curChannel, begin, end);
             }
             
             if (ft.Length >= 2) {
                 ft[0] = ft[1];
             }
 
-            amps = new double[ft.Length / 2];
+            amps = new double[ft.Length];
 
-            for (int i = 0; i < ft.Length / 2; i++) {
+            for (int i = 0; i < ft.Length; i++) {
                 amps[i] = curChannel.DeltaTime * Complex.Abs(ft[i]);
             }
 
             var sqrDt = curChannel.DeltaTime * curChannel.DeltaTime;
-            psds = new double[ft.Length / 2];
+            psds = new double[ft.Length];
 
-            for (int i = 0; i < ft.Length / 2; i++) {
+            for (int i = 0; i < ft.Length; i++) {
                 psds[i] = sqrDt * Math.Pow(Complex.Abs(ft[i]), 2);
             }
         }
@@ -50,61 +55,68 @@ namespace CGProject1.SignalProcessing {
         /// <param name="channel"></param>
         /// <param name="begin"></param>
         /// <param name="end"></param>
-        public static void SetupSlowChannel(Channel channel, int begin, int end) {
+        public void SetupSlowChannel(Channel channel, int begin, int end) {
             curChannel = channel;
 
-                ft = SlowFourierTransform(channel, begin, end);
-
+            ft = SlowFourierTransform(channel, begin, end);
 
             if (ft.Length >= 2) {
                 ft[0] = ft[1];
             }
         }
 
-        public static Channel LogarithmicSpectre(int halfWindow) {
-            var res = new Channel(ft.Length / 2);
+        public Channel LogarithmicSpectre() {
+            var res = new Channel(ft.Length);
             res.Name = "Лог. Спектр " + curChannel.Name;
             res.Source = "Analyzer";
 
-            for (int i = 0; i < ft.Length / 2; i++) {
+            for (int i = 0; i < ft.Length; i++) {
                 res.values[i] = 20 * Math.Log10(amps[i]);
             }
 
-            WindowSmoothing(res, halfWindow);
+            WindowSmoothing(res, HalfWindowSmoothing);
+
+            var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
+            res.SamplingFrq = 1.0 / newDx;
 
             return res;
         }
 
-        public static Channel AmplitudeSpectre(int halfWindow) {
-            var res = new Channel(ft.Length / 2);
+        public Channel AmplitudeSpectre() {
+            var res = new Channel(ft.Length);
             res.Name = "Спектр " + curChannel.Name;
             res.Source = "Analyzer";
 
-            for (int i = 0; i < ft.Length / 2; i++) {
+            for (int i = 0; i < ft.Length; i++) {
                 res.values[i] = amps[i]; ;
             }
 
-            WindowSmoothing(res, halfWindow);
+            WindowSmoothing(res, HalfWindowSmoothing);
+
+            var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
+            res.SamplingFrq = 1.0 / newDx;
 
             return res;
         }
 
-        public static Channel PowerSpectralDensity(int halfWindow) {
-            var res = new Channel(ft.Length / 2);
+        public Channel PowerSpectralDensity() {
+            var res = new Channel(ft.Length);
             res.Name = "Спектр " + curChannel.Name;
             res.Source = "Analyzer";
 
-
-            for (int i = 0; i < ft.Length / 2; i++) {
+            for (int i = 0; i < ft.Length; i++) {
                 res.values[i] = psds[i]; ;
             }
 
-            WindowSmoothing(res, halfWindow);
+            WindowSmoothing(res, HalfWindowSmoothing);
+
+            var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
+            res.SamplingFrq = 1.0 / newDx;
 
             return res;
         }
 
-        private static void WindowSmoothing(Channel channel, int halfWindow) {
+        private void WindowSmoothing(Channel channel, int halfWindow) {
             if (halfWindow != 0 && channel.values.Length > 0) {
                 var q = new LinkedList<double>();
                 double curWindow = 0;
@@ -129,7 +141,7 @@ namespace CGProject1.SignalProcessing {
             }
         }
 
-        private static Complex[] SlowFourierTransform(Channel channel, int begin, int end) {
+        private Complex[] SlowFourierTransform(Channel channel, int begin, int end) {
             int n = end - begin + 1;
             var res = new Complex[n];
 
@@ -146,7 +158,7 @@ namespace CGProject1.SignalProcessing {
             return res;
         }
 
-        private static Complex[] FastFourierTransform(Channel channel, int begin, int end) {
+        private Complex[] FastFourierTransform(Channel channel, int begin, int end) {
             int n = end - begin + 1;
 
             var res = new Complex[n];
@@ -164,7 +176,7 @@ namespace CGProject1.SignalProcessing {
             return res;
         }
 
-        private static void InnerFastFourierTransform(ref Complex[] a) {
+        private void InnerFastFourierTransform(ref Complex[] a) {
             int n = a.Length;
             if (n == 1) {
                 return;
