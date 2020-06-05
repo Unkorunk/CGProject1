@@ -135,6 +135,7 @@ namespace CGProject1 {
             ampChart.ShowCurrentXY = true;
             ampChart.IsMouseSelect = true;
             ampChart.OnMouseSelect += OnMouseSelect;
+            ampChart.Scaling = Chart.ScalingMode.LocalZeroed;
             charts[1].Add(ampChart);
 
             var psd = analyzer.PowerSpectralDensity();
@@ -155,6 +156,7 @@ namespace CGProject1 {
             psdChart.ShowCurrentXY = true;
             psdChart.IsMouseSelect = true;
             psdChart.OnMouseSelect += OnMouseSelect;
+            psdChart.Scaling = Chart.ScalingMode.LocalZeroed;
             charts[0].Add(psdChart);
 
             var lgPSD = analyzer.LogarithmicPSD();
@@ -175,6 +177,7 @@ namespace CGProject1 {
             logPSDChart.ShowCurrentXY = true;
             logPSDChart.IsMouseSelect = true;
             logPSDChart.OnMouseSelect += OnMouseSelect;
+            logPSDChart.Scaling = Chart.ScalingMode.Local;
             charts[2].Add(logPSDChart);
 
             var lg = analyzer.LogarithmicSpectre();
@@ -195,6 +198,7 @@ namespace CGProject1 {
             logChart.ShowCurrentXY = true;
             logChart.IsMouseSelect = true;
             logChart.OnMouseSelect += OnMouseSelect;
+            logChart.Scaling = Chart.ScalingMode.Local;
             charts[3].Add(logChart);
         }
 
@@ -279,23 +283,6 @@ namespace CGProject1 {
                 }
 
                 UpdateAnalyzers();
-
-                //for (int i = 0; i < charts[ComboBoxMode.SelectedIndex].Count; i++) {
-                //    var item = charts[ComboBoxMode.SelectedIndex][i];
-                //    item.DisplayHAxisTitle = false;
-                //    item.DisplayHAxisInfo = false;
-                //    item.HAxisAlligment = Chart.HAxisAlligmentEnum.Top;
-
-                //    if (i == 0 || i + 1 == charts[ComboBoxMode.SelectedIndex].Count) {
-                //        item.DisplayHAxisInfo = true;
-                //        item.DisplayHAxisTitle = true;
-                //    }
-                //    if (i + 1 == charts[ComboBoxMode.SelectedIndex].Count) {
-                //        item.HAxisAlligment = Chart.HAxisAlligmentEnum.Bottom;
-                //    }
-
-                //    SpectrePanel.Children.Add(item);
-                //}
             }
         }
 

@@ -22,7 +22,8 @@ namespace CGProject1
             Local,
             Fixed,
             UniformGlobal,
-            UniformLocal
+            UniformLocal,
+            LocalZeroed
         }
 
         private double minChannelValue = 0;
@@ -315,6 +316,16 @@ namespace CGProject1
                         break;
                     }
                 case ScalingMode.Fixed: break;
+                case ScalingMode.LocalZeroed: {
+                        this.minChannelValue = 0;
+                        this.maxChannelValue = this.Channel.MinValue;
+
+                        for (int i = this.Begin; i <= this.End; i++) {
+                            this.maxChannelValue = Math.Max(this.maxChannelValue, this.Channel.values[i]);
+                        }
+
+                        break;
+                    }
             }
 
             double height = Math.Abs(this.maxChannelValue - this.minChannelValue);
