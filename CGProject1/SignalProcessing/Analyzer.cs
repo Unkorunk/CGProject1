@@ -15,6 +15,14 @@ namespace CGProject1.SignalProcessing {
         private double[] amps = null;
         private double[] psds = null;
 
+        public enum ZeroMode {
+            Nothing,
+            Null,
+            Smooth
+        }
+
+        public ZeroMode zeroMode = ZeroMode.Nothing;
+
         public Analyzer(Channel channel) {
             this.curChannel = channel;
         }
@@ -74,6 +82,19 @@ namespace CGProject1.SignalProcessing {
                 res.values[i] = 20 * Math.Log10(amps[i]);
             }
 
+            switch (this.zeroMode) {
+                case ZeroMode.Smooth:
+                    if (res.values.Length > 1) {
+                        res.values[0] = res.values[1];
+                    }
+                    break;
+                case ZeroMode.Null:
+                    res.values[0] = 0;
+                    break;
+                default:
+                    break;
+            }
+
             WindowSmoothing(res, HalfWindowSmoothing);
 
             var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
@@ -88,7 +109,20 @@ namespace CGProject1.SignalProcessing {
             res.Source = "Analyzer";
 
             for (int i = 0; i < ft.Length; i++) {
-                res.values[i] = amps[i]; ;
+                res.values[i] = amps[i];
+            }
+
+            switch (this.zeroMode) {
+                case ZeroMode.Smooth:
+                    if (res.values.Length > 1) {
+                        res.values[0] = res.values[1];
+                    }
+                    break;
+                case ZeroMode.Null:
+                    res.values[0] = 0;
+                    break;
+                default:
+                    break;
             }
 
             WindowSmoothing(res, HalfWindowSmoothing);
@@ -106,6 +140,19 @@ namespace CGProject1.SignalProcessing {
 
             for (int i = 0; i < ft.Length; i++) {
                 res.values[i] = psds[i]; ;
+            }
+
+            switch (this.zeroMode) {
+                case ZeroMode.Smooth:
+                    if (res.values.Length > 1) {
+                        res.values[0] = res.values[1];
+                    }
+                    break;
+                case ZeroMode.Null:
+                    res.values[0] = 0;
+                    break;
+                default:
+                    break;
             }
 
             WindowSmoothing(res, HalfWindowSmoothing);

@@ -41,36 +41,7 @@ namespace CGProject1 {
 
             analyzers.Add(analyzer);
 
-            Channel amp = analyzer.AmplitudeSpectre();
-            var ampChart = new Chart(amp);
-            ampChart.Height = 200;
-            ampChart.Begin = 0;
-            ampChart.End = amp.SamplesCount;
-            ampChart.Margin = new Thickness(0, 2, 0, 2);
-            ampChart.GridDraw = true;
-            ampChart.HAxisTitle = "Частота (Гц)";
-            charts[1].Add(ampChart);
-
-            Channel psd = analyzer.PowerSpectralDensity();
-            var psdChart = new Chart(psd);
-            psdChart.Height = 200;
-            psdChart.Begin = 0;
-            psdChart.End = psd.SamplesCount;
-            psdChart.Margin = new Thickness(0, 2, 0, 2);
-            psdChart.GridDraw = true;
-            psdChart.HAxisTitle = "Частота (Гц)";
-            charts[0].Add(psdChart);
-
-            Channel lg = analyzer.LogarithmicSpectre();
-            var logChart = new Chart(lg);
-            logChart.Height = 200;
-            logChart.Begin = 0;
-            logChart.End = lg.SamplesCount;
-            logChart.Margin = new Thickness(0, 2, 0, 2);
-            logChart.GridDraw = true;
-            logChart.HAxisTitle = "Частота (Гц)";
-            charts[2].Add(logChart);
-            charts[3].Add(logChart);
+            SetupCharts(analyzer);
 
             UpdatePanel();
         }
@@ -112,40 +83,44 @@ namespace CGProject1 {
                 analyzer.HalfWindowSmoothing = this.halfWindowSmoothing;
                 analyzer.SetupChannel(this.begin, this.end);
 
-                Channel amp = analyzer.AmplitudeSpectre();
-
-                var ampChart = new Chart(amp);
-                ampChart.Height = 200;
-                ampChart.Begin = 0;
-                ampChart.End = amp.SamplesCount;
-                ampChart.Margin = new Thickness(0, 2, 0, 2);
-                ampChart.GridDraw = true;
-                ampChart.HAxisTitle = "Частота (Гц)";
-                charts[1].Add(ampChart);
-
-                var psd = analyzer.PowerSpectralDensity();
-                var psdChart = new Chart(psd);
-                psdChart.Height = 200;
-                psdChart.Begin = 0;
-                psdChart.End = psd.SamplesCount;
-                psdChart.Margin = new Thickness(0, 2, 0, 2);
-                psdChart.GridDraw = true;
-                psdChart.HAxisTitle = "Частота (Гц)";
-                charts[0].Add(psdChart);
-
-                var lg = analyzer.LogarithmicSpectre();
-                var logChart = new Chart(lg);
-                logChart.Height = 200;
-                logChart.Begin = 0;
-                logChart.End = lg.SamplesCount;
-                logChart.Margin = new Thickness(0, 2, 0, 2);
-                logChart.GridDraw = true;
-                logChart.HAxisTitle = "Частота (Гц)";
-                charts[2].Add(logChart);
-                charts[3].Add(logChart);
+                SetupCharts(analyzer);
             }
 
             UpdatePanel();
+        }
+
+        private void SetupCharts(Analyzer analyzer) {
+            Channel amp = analyzer.AmplitudeSpectre();
+
+            var ampChart = new Chart(amp);
+            ampChart.Height = 200;
+            ampChart.Begin = 0;
+            ampChart.End = amp.SamplesCount;
+            ampChart.Margin = new Thickness(0, 2, 0, 2);
+            ampChart.GridDraw = true;
+            ampChart.HAxisTitle = "Частота (Гц)";
+            charts[1].Add(ampChart);
+
+            var psd = analyzer.PowerSpectralDensity();
+            var psdChart = new Chart(psd);
+            psdChart.Height = 200;
+            psdChart.Begin = 0;
+            psdChart.End = psd.SamplesCount;
+            psdChart.Margin = new Thickness(0, 2, 0, 2);
+            psdChart.GridDraw = true;
+            psdChart.HAxisTitle = "Частота (Гц)";
+            charts[0].Add(psdChart);
+
+            var lg = analyzer.LogarithmicSpectre();
+            var logChart = new Chart(lg);
+            logChart.Height = 200;
+            logChart.Begin = 0;
+            logChart.End = lg.SamplesCount;
+            logChart.Margin = new Thickness(0, 2, 0, 2);
+            logChart.GridDraw = true;
+            logChart.HAxisTitle = "Частота (Гц)";
+            charts[2].Add(logChart);
+            charts[3].Add(logChart);
         }
 
         private void ComboBoxMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -193,6 +168,43 @@ namespace CGProject1 {
 
         private bool TextIsNumeric(string input) {
             return input.All(c => char.IsDigit(c) || char.IsControl(c));
+        }
+
+        private void ZeroMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
+            if (ZeroModeSelector.SelectedIndex >= 0 && ZeroModeSelector.SelectedIndex < 3) {
+                foreach (var analyzer in analyzers) {
+                    switch (ZeroModeSelector.SelectedIndex) {
+                        case 0:
+                            analyzer.zeroMode = Analyzer.ZeroMode.Nothing;
+                            break;
+                        case 1:
+                            analyzer.zeroMode = Analyzer.ZeroMode.Null;
+                            break;
+                        case 2:
+                            analyzer.zeroMode = Analyzer.ZeroMode.Smooth;
+                            break;
+                    }
+                }
+
+                UpdateAnalyzers();
+
+                //for (int i = 0; i < charts[ComboBoxMode.SelectedIndex].Count; i++) {
+                //    var item = charts[ComboBoxMode.SelectedIndex][i];
+                //    item.DisplayHAxisTitle = false;
+                //    item.DisplayHAxisInfo = false;
+                //    item.HAxisAlligment = Chart.HAxisAlligmentEnum.Top;
+
+                //    if (i == 0 || i + 1 == charts[ComboBoxMode.SelectedIndex].Count) {
+                //        item.DisplayHAxisInfo = true;
+                //        item.DisplayHAxisTitle = true;
+                //    }
+                //    if (i + 1 == charts[ComboBoxMode.SelectedIndex].Count) {
+                //        item.HAxisAlligment = Chart.HAxisAlligmentEnum.Bottom;
+                //    }
+
+                //    SpectrePanel.Children.Add(item);
+                //}
+            }
         }
     }
 }

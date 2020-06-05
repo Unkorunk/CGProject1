@@ -20,7 +20,7 @@
                 <ComboBoxItem Content="Логарифмический режим (Амп. спектр)"/>
             </ComboBox>
             
-            <ComboBox SelectedIndex="0">
+            <ComboBox x:Name="ZeroModeSelector" SelectedIndex="0" SelectionChanged="ZeroMode_SelectionChanged">
                 <ComboBoxItem Content="X(0) = X(0)"/>
                 <ComboBoxItem Content="X(0) = 0"/>
                 <ComboBoxItem Content="X(0) = |X(1)|"/>
