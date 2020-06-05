@@ -18,6 +18,11 @@ namespace CGProject1 {
 
         private int halfWindowSmoothing = 0;
 
+        private int samplesCount = 0;
+
+        private bool locked = false;
+        private bool initilized = false;
+
         public AnalyzerWindow(int begin, int end) {
             InitializeComponent();
 
@@ -31,6 +36,26 @@ namespace CGProject1 {
         }
 
         public void AddChannel(Channel channel) {
+            samplesCount = channel.SamplesCount;
+
+            if (!initilized)
+            {
+                initilized = true;
+                BeginSlider.Maximum = samplesCount - 1;
+                EndSlider.Maximum = samplesCount - 1;
+
+                BeginSlider.Value = 0;
+                EndSlider.Value = samplesCount - 1;
+
+                BeginBox.Text = 0.ToString();
+                EndBox.Text = samplesCount.ToString();
+
+                OscillogramScroll.Minimum = 0;
+                OscillogramScroll.Maximum = channel.SamplesCount;
+                double p = 0.999;
+                OscillogramScroll.ViewportSize = channel.SamplesCount * p / (1.0 - p);
+            }
+
             if (namesSet.Contains(channel.Name)) {
                 return;
             }
@@ -97,6 +122,11 @@ namespace CGProject1 {
             ampChart.Height = 200;
             ampChart.Begin = 0;
             ampChart.End = amp.SamplesCount;
+            if (charts[1].Count != 0)
+            {
+                ampChart.Begin = charts[1][0].Begin;
+                ampChart.End = charts[1][0].End;
+            }
             ampChart.Margin = new Thickness(0, 2, 0, 2);
             ampChart.GridDraw = true;
             ampChart.HAxisTitle = "Частота (Гц)";
@@ -106,6 +136,8 @@ namespace CGProject1 {
             };
             ampChart.MaxHeightXAxisString = double.MaxValue.ToString();
             ampChart.ShowCurrentXY = true;
+            ampChart.IsMouseSelect = true;
+            ampChart.OnMouseSelect += OnMouseSelect;
             charts[1].Add(ampChart);
 
             var psd = analyzer.PowerSpectralDensity();
@@ -113,6 +145,11 @@ namespace CGProject1 {
             psdChart.Height = 200;
             psdChart.Begin = 0;
             psdChart.End = psd.SamplesCount;
+            if (charts[0].Count != 0)
+            {
+                psdChart.Begin = charts[0][0].Begin;
+                psdChart.End = charts[0][0].End;
+            }
             psdChart.Margin = new Thickness(0, 2, 0, 2);
             psdChart.GridDraw = true;
             psdChart.HAxisTitle = "Частота (Гц)";
@@ -122,6 +159,8 @@ namespace CGProject1 {
             };
             psdChart.MaxHeightXAxisString = double.MaxValue.ToString();
             psdChart.ShowCurrentXY = true;
+            psdChart.IsMouseSelect = true;
+            psdChart.OnMouseSelect += OnMouseSelect;
             charts[0].Add(psdChart);
 
             var lgPSD = analyzer.LogarithmicPSD();
@@ -129,6 +168,11 @@ namespace CGProject1 {
             logPSDChart.Height = 200;
             logPSDChart.Begin = 0;
             logPSDChart.End = lgPSD.SamplesCount;
+            if (charts[2].Count != 0)
+            {
+                logPSDChart.Begin = charts[2][0].Begin;
+                logPSDChart.End = charts[2][0].End;
+            }
             logPSDChart.Margin = new Thickness(0, 2, 0, 2);
             logPSDChart.GridDraw = true;
             logPSDChart.HAxisTitle = "Частота (Гц)";
@@ -138,6 +182,8 @@ namespace CGProject1 {
             };
             logPSDChart.MaxHeightXAxisString = double.MaxValue.ToString();
             logPSDChart.ShowCurrentXY = true;
+            logPSDChart.IsMouseSelect = true;
+            logPSDChart.OnMouseSelect += OnMouseSelect;
             charts[2].Add(logPSDChart);
 
             var lg = analyzer.LogarithmicSpectre();
@@ -145,6 +191,11 @@ namespace CGProject1 {
             logChart.Height = 200;
             logChart.Begin = 0;
             logChart.End = lg.SamplesCount;
+            if (charts[3].Count != 0)
+            {
+                logChart.Begin = charts[3][0].Begin;
+                logChart.End = charts[3][0].End;
+            }
             logChart.Margin = new Thickness(0, 2, 0, 2);
             logChart.GridDraw = true;
             logChart.HAxisTitle = "Частота (Гц)";
@@ -154,7 +205,24 @@ namespace CGProject1 {
             };
             logChart.MaxHeightXAxisString = double.MaxValue.ToString();
             logChart.ShowCurrentXY = true;
+            logChart.IsMouseSelect = true;
+            logChart.OnMouseSelect += OnMouseSelect;
             charts[3].Add(logChart);
+        }
+
+        private void OnMouseSelect(Chart sender, int newBegin, int newEnd)
+        {
+            for (int i = 0; i < charts.Count; i++)
+            {
+                foreach(var chart in charts[i])
+                {
+                    if (chart != sender)
+                    {
+                        chart.Begin = sender.Begin;
+                        chart.End = sender.End;
+                    }
+                }
+            }
         }
 
         private void ComboBoxMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -200,10 +268,6 @@ namespace CGProject1 {
             }
         }
 
-        private bool TextIsNumeric(string input) {
-            return input.All(c => char.IsDigit(c) || char.IsControl(c));
-        }
-
         private void ZeroMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
             if (ZeroModeSelector.SelectedIndex >= 0 && ZeroModeSelector.SelectedIndex < 3) {
                 foreach (var analyzer in analyzers) {
@@ -239,6 +303,104 @@ namespace CGProject1 {
                 //    SpectrePanel.Children.Add(item);
                 //}
             }
+        }
+
+        private bool TextIsNumeric(string input)
+        {
+            return input.All(c => char.IsDigit(c) || char.IsControl(c));
+        }
+
+        private void OscillogramScroll_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (locked)
+            {
+                locked = false;
+                return;
+            }
+
+            double p = (EndSlider.Value - BeginSlider.Value + 1) * 1.0 / samplesCount;
+            double begin = e.NewValue * Math.Abs(1.0 - p);
+            double end = begin + EndSlider.Value - BeginSlider.Value;
+            locked = true;
+            BeginSlider.Value = begin;
+            EndSlider.Value = end;
+        }
+
+        private void BeginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            InputBeginEnd((int)e.NewValue, (int)EndSlider.Value);
+        }
+
+        private void EndSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            InputBeginEnd((int)BeginSlider.Value, (int)e.NewValue);
+        }
+
+        private void textBox_ValueChanged(object sender, EventArgs e)
+        {
+            long begin;
+            long end;
+
+            if (!long.TryParse(BeginBox.Text, out begin))
+            {
+                begin = 0;
+            }
+
+            if (!long.TryParse(EndBox.Text, out end))
+            {
+                end = samplesCount;
+            }
+
+            InputBeginEnd(begin, end);
+        }
+
+        private void InputBeginEnd(long begin, long end)
+        {
+            if (locked)
+            {
+                locked = false;
+                return;
+            }
+
+            if (begin > samplesCount)
+            {
+                begin = samplesCount;
+            }
+
+            if (begin < 0)
+            {
+                begin = 0;
+            }
+
+            if (end > samplesCount)
+            {
+                end = samplesCount;
+            }
+
+            if (end < begin)
+            {
+                end = begin;
+            }
+
+            double p = (end - begin + 1) * 1.0 / samplesCount;
+            if (Math.Abs(p - 1.0) < 1e-5) p = 0.999;
+            OscillogramScroll.ViewportSize = samplesCount * p / Math.Abs(1.0 - p);
+            locked = true;
+            OscillogramScroll.Value = begin * (1.0 + p / Math.Abs(1.0 - p));
+
+            for (int i = 0; i < charts.Count; i++)
+            {
+                foreach (var chart in charts[i])
+                {
+                    chart.Begin = (int)begin;
+                    chart.End = (int)end;
+                }
+            }
+
+            BeginSlider.Value = begin;
+            EndSlider.Value = end;
+            BeginBox.Text = begin.ToString();
+            EndBox.Text = end.ToString();
         }
     }
 }

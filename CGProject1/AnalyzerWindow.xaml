@@ -5,14 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
-        Title="AnalyzerWindow" Height="450" Width="800">
+        Title="AnalyzerWindow" Height="600" Width="1200">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition></RowDefinition>
+            <RowDefinition Height="125"></RowDefinition>
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="125"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
         
-        <Menu Grid.Row="0">
+        <Menu Grid.Row="0" Grid.ColumnSpan="2">
             <ComboBox SelectedIndex="0" Name="ComboBoxMode" SelectionChanged="ComboBoxMode_SelectionChanged">
                 <ComboBoxItem Content="Спектральная плотность мощности"/>
                 <ComboBoxItem Content="Амплитудный спектр"/>
@@ -45,8 +50,33 @@
             </Border>
         </Menu>
         
-        <ScrollViewer Grid.Row="1">
+        <ScrollViewer Grid.Row="1" Grid.ColumnSpan="2">
             <StackPanel x:Name="SpectrePanel"></StackPanel>
         </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Grid.Column="1">
+            <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged" LargeChange="150" SmallChange="30"></ScrollBar>
+            <Label Name="BeginTimeLabel">Begin</Label>
+            <Slider Name="BeginSlider" Minimum="0" Maximum="0" ValueChanged="BeginSlider_ValueChanged"></Slider>
+            <Label Name="EndTimeLabel">End</Label>
+            <Slider Name="EndSlider" Minimum="0" Maximum="0" ValueChanged="EndSlider_ValueChanged"></Slider>
+        </StackPanel>
+
+        <Grid Grid.Row="2" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="40"></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="1">Begin</Label>
+            <Label Grid.Row="2">End</Label>
+            <TextBox Name="BeginBox" Grid.Row="1" Grid.Column="1" MaxLength="9" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" TextChanged="textBox_ValueChanged"></TextBox>
+            <TextBox Name="EndBox" Grid.Row="2" Grid.Column="1" MaxLength="9" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" TextChanged="textBox_ValueChanged"></TextBox>
+        </Grid>
     </Grid>
 </Window>
