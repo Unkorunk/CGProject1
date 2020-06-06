@@ -138,7 +138,7 @@ namespace CGProject1 {
                     ArgumentsPanel.Children.Add(label);
 
                     var field = new TextBox();
-                    field.Text = btnModel.LastValues[i].ToString();
+                    field.Text = btnModel.LastValues[i].ToString(CultureInfo.InvariantCulture);
                     field.PreviewTextInput += previewTextInput;
                     DataObject.AddPastingHandler(field, previewPasting);
 
