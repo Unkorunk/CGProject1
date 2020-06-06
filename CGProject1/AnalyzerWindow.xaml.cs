@@ -113,6 +113,11 @@ namespace CGProject1 {
             }
 
             UpdatePanel();
+            locked = false;
+            if (BeginSlider != null && EndSlider != null) {
+                InputBeginEnd((int)BeginSlider.Value, (int)EndSlider.Value);
+            }
+            
         }
 
         private void SetupCharts(Analyzer analyzer) {
