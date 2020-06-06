@@ -101,7 +101,14 @@ namespace CGProject1 {
         }
 
         private void UpdateAnalyzers() {
-            foreach(var chartList in charts) {
+            int b = 0, e = samplesCount - 1;
+            if (BeginSlider != null && EndSlider != null) {
+                b = (int)BeginSlider.Value;
+                e = (int)EndSlider.Value;
+            }
+            
+
+            foreach (var chartList in charts) {
                 chartList.Clear();
             }
 
@@ -115,7 +122,7 @@ namespace CGProject1 {
             UpdatePanel();
             locked = false;
             if (BeginSlider != null && EndSlider != null) {
-                InputBeginEnd((int)BeginSlider.Value, (int)EndSlider.Value);
+                InputBeginEnd(b, e);
             }
             
         }
@@ -363,7 +370,7 @@ namespace CGProject1 {
                 end = samplesCount;
             }
 
-            if (end < begin)
+            if (end <= begin)
             {
                 end = begin + 1;
             }
