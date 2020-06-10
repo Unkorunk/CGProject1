@@ -139,14 +139,7 @@ namespace CGProject1 {
                 ampChart.Begin = charts[1][0].Begin;
                 ampChart.End = charts[1][0].End;
             }
-            ampChart.Margin = new Thickness(0, 2, 0, 2);
-            ampChart.GridDraw = true;
-            ampChart.HAxisTitle = "Частота (Гц)";
-            ampChart.MappingXAxis = MappingXAxis;
-            ampChart.MaxHeightXAxisString = double.MaxValue.ToString();
-            ampChart.ShowCurrentXY = true;
-            ampChart.IsMouseSelect = true;
-            ampChart.OnMouseSelect += OnMouseSelect;
+            FrequencyChartSetup(ampChart);
             ampChart.Scaling = Chart.ScalingMode.LocalZeroed;
             charts[1].Add(ampChart);
 
@@ -160,14 +153,7 @@ namespace CGProject1 {
                 psdChart.Begin = charts[0][0].Begin;
                 psdChart.End = charts[0][0].End;
             }
-            psdChart.Margin = new Thickness(0, 2, 0, 2);
-            psdChart.GridDraw = true;
-            psdChart.HAxisTitle = "Частота (Гц)";
-            psdChart.MappingXAxis = MappingXAxis;
-            psdChart.MaxHeightXAxisString = double.MaxValue.ToString();
-            psdChart.ShowCurrentXY = true;
-            psdChart.IsMouseSelect = true;
-            psdChart.OnMouseSelect += OnMouseSelect;
+            FrequencyChartSetup(psdChart);
             psdChart.Scaling = Chart.ScalingMode.LocalZeroed;
             charts[0].Add(psdChart);
 
@@ -181,14 +167,7 @@ namespace CGProject1 {
                 logPSDChart.Begin = charts[2][0].Begin;
                 logPSDChart.End = charts[2][0].End;
             }
-            logPSDChart.Margin = new Thickness(0, 2, 0, 2);
-            logPSDChart.GridDraw = true;
-            logPSDChart.HAxisTitle = "Частота (Гц)";
-            logPSDChart.MappingXAxis = MappingXAxis;
-            logPSDChart.MaxHeightXAxisString = double.MaxValue.ToString();
-            logPSDChart.ShowCurrentXY = true;
-            logPSDChart.IsMouseSelect = true;
-            logPSDChart.OnMouseSelect += OnMouseSelect;
+            FrequencyChartSetup(logPSDChart);
             logPSDChart.Scaling = Chart.ScalingMode.Local;
             charts[2].Add(logPSDChart);
 
@@ -202,14 +181,7 @@ namespace CGProject1 {
                 logChart.Begin = charts[3][0].Begin;
                 logChart.End = charts[3][0].End;
             }
-            logChart.Margin = new Thickness(0, 2, 0, 2);
-            logChart.GridDraw = true;
-            logChart.HAxisTitle = "Частота (Гц)";
-            logChart.MappingXAxis = MappingXAxis;
-            logChart.MaxHeightXAxisString = double.MaxValue.ToString();
-            logChart.ShowCurrentXY = true;
-            logChart.IsMouseSelect = true;
-            logChart.OnMouseSelect += OnMouseSelect;
+            FrequencyChartSetup(logChart);
             logChart.Scaling = Chart.ScalingMode.Local;
             charts[3].Add(logChart);
         }
@@ -399,6 +371,17 @@ namespace CGProject1 {
                 BeginFrequencyLabel.Content = "Begin frequency: " + MappingXAxis(charts[0][0].Begin, charts[0][0]);
                 EndFrequencyLabel.Content = "End frequency: " + MappingXAxis(charts[0][0].End, charts[0][0]);
             }
+        }
+
+        private void FrequencyChartSetup(Chart chart) {
+            chart.Margin = new Thickness(0, 2, 0, 2);
+            chart.GridDraw = true;
+            chart.HAxisTitle = "Частота (Гц)";
+            chart.MappingXAxis = MappingXAxis;
+            chart.MaxHeightXAxisString = double.MaxValue.ToString();
+            chart.ShowCurrentXY = true;
+            chart.IsMouseSelect = true;
+            chart.OnMouseSelect += OnMouseSelect;
         }
     }
 }
