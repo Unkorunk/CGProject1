@@ -5,15 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
-        Title="SpectrogramWindow" Height="450" Width="800">
+        Title="SpectrogramWindow" Height="450" Width="800" SizeChanged="Window_SizeChanged">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="25"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="1" x:Name="Spectrograms">
+        <StackPanel Grid.Row="0">
             
         </StackPanel>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel  x:Name="Spectrograms">
+
+            </StackPanel>
+        </ScrollViewer>
+            
     </Grid>
 </Window>
