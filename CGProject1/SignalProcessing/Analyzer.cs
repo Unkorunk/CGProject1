@@ -35,16 +35,45 @@ namespace CGProject1.SignalProcessing {
             this.curChannel = channel;
         }
 
-        public void SetupChannel(int begin, int end) {
-            if (end - begin < bound) {
+        public Analyzer(double[] vals, double frq) {
+            curChannel = new Channel(vals.Length);
+            curChannel.SamplingFrq = frq;
+
+            for (int i = 0; i < vals.Length; i++) {
+                curChannel.values[i] = vals[i];
+            }
+        }
+
+        public void SetupChannel(int begin, int end, bool forceFast = false, bool expand = false) {
+            if (end - begin < bound && !forceFast) {
                 ft = SlowFourierTransform(curChannel, begin, end);
             } else {
                 int len = end - begin + 1;
                 int closestPowerOfTwo = (int)Math.Pow(2, (int)Math.Log2(len));
-                begin += (len - closestPowerOfTwo) / 2;
+
+                if (!expand) {
+                    begin += (len - closestPowerOfTwo) / 2;
+                }
+
                 end = begin + closestPowerOfTwo - 1;
 
-                ft = FastFourierTransform(curChannel, begin, end);
+                double[] vals = new double[len];
+                int idx = 0;
+                for (; idx < closestPowerOfTwo && idx + begin < curChannel.values.Length; idx++) {
+                    vals[idx] = curChannel.values[idx + begin];
+                }
+
+                if (end >= curChannel.values.Length) {
+                    if (expand) {
+                        for (; idx < len; idx++) {
+                            vals[idx] = 0;
+                        }
+                    } else {
+                        throw new Exception("Out of range exception");
+                    }
+                }
+
+                ft = FastFourierTransform(vals, begin, end);
             }
             
             if (ft.Length >= 2) {
@@ -62,22 +91,6 @@ namespace CGProject1.SignalProcessing {
 
             for (int i = 0; i < ft.Length; i++) {
                 psds[i] = sqrDt * Math.Pow(Complex.Abs(ft[i]), 2);
-            }
-        }
-
-        /// <summary>
-        /// DEPRECATED! Debug only
-        /// </summary>
-        /// <param name="channel"></param>
-        /// <param name="begin"></param>
-        /// <param name="end"></param>
-        public void SetupSlowChannel(Channel channel, int begin, int end) {
-            curChannel = channel;
-
-            ft = SlowFourierTransform(channel, begin, end);
-
-            if (ft.Length >= 2) {
-                ft[0] = ft[1];
             }
         }
 
@@ -253,13 +266,13 @@ namespace CGProject1.SignalProcessing {
             return res;
         }
 
-        private Complex[] FastFourierTransform(Channel channel, int begin, int end) {
+        private Complex[] FastFourierTransform(double[] vals, int begin, int end) {
             int n = end - begin + 1;
 
             var res = new Complex[n];
 
             for (int i = 0; i < n; i++) {
-                res[i] = channel.values[begin + i];
+                res[i] = vals[begin + i];
             }
 
             InnerFastFourierTransform(ref res);

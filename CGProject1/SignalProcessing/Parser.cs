@@ -63,7 +63,8 @@ namespace CGProject1 {
                                 break;
                             }
                         case ParseState.NeedTime: {
-                                var ts = TimeSpan.ParseExact(trimmed, "hh\\:mm\\:ss\\.fff", CultureInfo.InvariantCulture);
+                                // var ts = TimeSpan.ParseExact(trimmed, "hh\\:mm\\:ss\\.fff", CultureInfo.InvariantCulture);
+                                var ts = TimeSpan.Parse(trimmed, CultureInfo.InvariantCulture);
                                 result.StartDateTime += ts;
                                 break;
                             }

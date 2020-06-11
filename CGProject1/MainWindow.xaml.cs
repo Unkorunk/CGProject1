@@ -15,6 +15,7 @@ namespace CGProject1 {
         private ModelingWindow modelingWindow;
         private SaveWindow savingWindow;
         private AnalyzerWindow analyzerWindow;
+        private SpectrogramWindow spectrogramWindow;
 
         public StatisticsWindow statisticsWindow;
 
@@ -23,6 +24,7 @@ namespace CGProject1 {
         private bool isModelingWindowShowing = false;
         private bool isSavingWindowShowing = false;
         private bool isAnalyzerShowing = false;
+        private bool isSpectrogramsShowing = false;
 
         public bool isStatisticShowing = false;
 
@@ -59,6 +61,9 @@ namespace CGProject1 {
                 }
                 if (isStatisticShowing) {
                     statisticsWindow.Close();
+                }
+                if (isSpectrogramsShowing) {
+                    spectrogramWindow.Close();
                 }
 
                 Serializer.SerializeModels(Modelling.defaultPath, new List<ChannelConstructor>[] { Modelling.discreteModels, Modelling.continiousModels, Modelling.randomModels });
@@ -145,6 +150,14 @@ namespace CGProject1 {
             };
             chart.ContextMenu.Items.Add(item3);
 
+            var item4 = new MenuItem();
+            item4.Header = "Спектрограмма";
+            item4.Click += (object sender, RoutedEventArgs args) => {
+                OpenSpectrograms();
+                spectrogramWindow.AddChannel(currentSignal.channels[cur]);
+            };
+            chart.ContextMenu.Items.Add(item4);
+
             chart.Begin = 0;
             chart.End = currentSignal.SamplesCount;
             
@@ -174,13 +187,16 @@ namespace CGProject1 {
             if (isAnalyzerShowing) {
                 analyzerWindow.Close();
             }
-
+            if (isSpectrogramsShowing) {
+                spectrogramWindow.Close();
+            }
+ 
             foreach (var chart in charts) {
                 channels.Children.Remove(chart);
             }
             charts.Clear();
 
-            SignalProcessing.Modelling.ResetCounters();
+            Modelling.ResetCounters();
 
             this.currentSignal = newSignal;
 
@@ -228,6 +244,14 @@ namespace CGProject1 {
                     analyzerWindow.AddChannel(currentSignal.channels[cur]);
                 };
                 chart.ContextMenu.Items.Add(item3);
+
+                var item4 = new MenuItem();
+                item4.Header = "Спектрограмма";
+                item4.Click += (object sender, RoutedEventArgs args) => {
+                    OpenSpectrograms();
+                    spectrogramWindow.AddChannel(currentSignal.channels[cur]);
+                };
+                chart.ContextMenu.Items.Add(item4);
 
                 chart.Begin = 0;
                 chart.End = currentSignal.SamplesCount;
@@ -313,6 +337,15 @@ namespace CGProject1 {
                 analyzerWindow = new AnalyzerWindow(begin, end);
                 analyzerWindow.Closed += (object sender, System.EventArgs e) => this.isAnalyzerShowing = false;
                 analyzerWindow.Show();
+            }
+        }
+
+        private void OpenSpectrograms() {
+            if (!this.isSpectrogramsShowing) {
+                isSpectrogramsShowing = true;
+                spectrogramWindow = new SpectrogramWindow();
+                spectrogramWindow.Closed += (object sender, System.EventArgs e) => this.isSpectrogramsShowing = false;
+                spectrogramWindow.Show();
             }
         }
 
