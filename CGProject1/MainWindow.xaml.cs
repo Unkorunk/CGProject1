@@ -260,10 +260,12 @@ namespace CGProject1
             }
         }
 
-        private void OpenFileClick(object sender, RoutedEventArgs e) {
-            var openFileDialog = new OpenFileDialog();
-            
-            if (openFileDialog.ShowDialog() == true) {
+        private void OpenFileClick(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog() { Filter = "txt files (*.txt)|*.txt" };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
                 ResetSignal(Parser.Parse(openFileDialog.FileName));
             }
         }
