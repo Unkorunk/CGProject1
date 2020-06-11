@@ -3,20 +3,22 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 
-namespace CGProject1
+namespace CGProject1.Chart
 {
-    public class Histogram : FrameworkElement
+    public class ChartHistogram : FrameworkElement
     {
         private List<double> _data;
-        public List<double> Data {
+        public List<double> Data
+        {
             get => _data;
-            set {
+            set
+            {
                 _data = value;
                 InvalidateVisual();
             }
         }
 
-        public Histogram()
+        public ChartHistogram()
         {
             Data = new List<double>();
         }

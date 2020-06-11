@@ -4,15 +4,17 @@ using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using CGProject1.Chart;
 using CGProject1.SignalProcessing;
 
-namespace CGProject1 {
+namespace CGProject1
+{
     public partial class AnalyzerWindow : Window {
 
         private List<Analyzer> analyzers = new List<Analyzer>();
         private HashSet<string> namesSet = new HashSet<string>();
 
-        private List<List<Chart>> charts = new List<List<Chart>>();
+        private List<List<ChartLine>> charts = new List<List<ChartLine>>();
         private int begin;
         private int end;
 
@@ -26,7 +28,7 @@ namespace CGProject1 {
         public AnalyzerWindow(int begin, int end) {
             InitializeComponent();
 
-            for (int i = 0; i < ComboBoxMode.Items.Count; i++) charts.Add(new List<Chart>());
+            for (int i = 0; i < ComboBoxMode.Items.Count; i++) charts.Add(new List<ChartLine>());
 
             BeginSelector.Text = begin.ToString();
             EndSelector.Text = end.ToString();
@@ -83,7 +85,7 @@ namespace CGProject1 {
                     var item = charts[ComboBoxMode.SelectedIndex][i];
                     item.DisplayHAxisTitle = false;
                     item.DisplayHAxisInfo = false;
-                    item.HAxisAlligment = Chart.HAxisAlligmentEnum.Top;
+                    item.HAxisAlligment = ChartLine.HAxisAlligmentEnum.Top;
 
                     if (i == 0 || i + 1 == charts[ComboBoxMode.SelectedIndex].Count)
                     {
@@ -92,7 +94,7 @@ namespace CGProject1 {
                     }
                     if (i + 1 == charts[ComboBoxMode.SelectedIndex].Count)
                     {
-                        item.HAxisAlligment = Chart.HAxisAlligmentEnum.Bottom;
+                        item.HAxisAlligment = ChartLine.HAxisAlligmentEnum.Bottom;
                     }
 
                     SpectrePanel.Children.Add(item);
@@ -130,7 +132,7 @@ namespace CGProject1 {
         private void SetupCharts(Analyzer analyzer) {
             Channel amp = analyzer.AmplitudeSpectre();
 
-            var ampChart = new Chart(amp);
+            var ampChart = new ChartLine(amp);
             ampChart.Height = 200;
             ampChart.Begin = 0;
             ampChart.End = amp.SamplesCount;
@@ -140,11 +142,11 @@ namespace CGProject1 {
                 ampChart.End = charts[1][0].End;
             }
             FrequencyChartSetup(ampChart);
-            ampChart.Scaling = Chart.ScalingMode.LocalZeroed;
+            ampChart.Scaling = ChartLine.ScalingMode.LocalZeroed;
             charts[1].Add(ampChart);
 
             var psd = analyzer.PowerSpectralDensity();
-            var psdChart = new Chart(psd);
+            var psdChart = new ChartLine(psd);
             psdChart.Height = 200;
             psdChart.Begin = 0;
             psdChart.End = psd.SamplesCount;
@@ -154,11 +156,11 @@ namespace CGProject1 {
                 psdChart.End = charts[0][0].End;
             }
             FrequencyChartSetup(psdChart);
-            psdChart.Scaling = Chart.ScalingMode.LocalZeroed;
+            psdChart.Scaling = ChartLine.ScalingMode.LocalZeroed;
             charts[0].Add(psdChart);
 
             var lgPSD = analyzer.LogarithmicPSD();
-            var logPSDChart = new Chart(lgPSD);
+            var logPSDChart = new ChartLine(lgPSD);
             logPSDChart.Height = 200;
             logPSDChart.Begin = 0;
             logPSDChart.End = lgPSD.SamplesCount;
@@ -168,11 +170,11 @@ namespace CGProject1 {
                 logPSDChart.End = charts[2][0].End;
             }
             FrequencyChartSetup(logPSDChart);
-            logPSDChart.Scaling = Chart.ScalingMode.Local;
+            logPSDChart.Scaling = ChartLine.ScalingMode.Local;
             charts[2].Add(logPSDChart);
 
             var lg = analyzer.LogarithmicSpectre();
-            var logChart = new Chart(lg);
+            var logChart = new ChartLine(lg);
             logChart.Height = 200;
             logChart.Begin = 0;
             logChart.End = lg.SamplesCount;
@@ -182,17 +184,17 @@ namespace CGProject1 {
                 logChart.End = charts[3][0].End;
             }
             FrequencyChartSetup(logChart);
-            logChart.Scaling = Chart.ScalingMode.Local;
+            logChart.Scaling = ChartLine.ScalingMode.Local;
             charts[3].Add(logChart);
         }
 
-        private string MappingXAxis(int idx, Chart chart)
+        private string MappingXAxis(int idx, ChartLine chart)
         {
             double curVal = chart.Channel.DeltaTime * idx;
             return curVal.ToString("N6", CultureInfo.InvariantCulture);
         }
 
-        private void OnMouseSelect(Chart sender, int newBegin, int newEnd)
+        private void OnMouseSelect(ChartLine sender, int newBegin, int newEnd)
         {
             for (int i = 0; i < charts.Count; i++)
             {
@@ -373,7 +375,7 @@ namespace CGProject1 {
             }
         }
 
-        private void FrequencyChartSetup(Chart chart) {
+        private void FrequencyChartSetup(ChartLine chart) {
             chart.Margin = new Thickness(0, 2, 0, 2);
             chart.GridDraw = true;
             chart.HAxisTitle = "Частота (Гц)";

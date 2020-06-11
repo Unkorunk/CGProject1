@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CGProject1.Chart;
 using CGProject1.SignalProcessing;
 using Microsoft.Win32;
 
-namespace CGProject1 {
+namespace CGProject1
+{
     public partial class MainWindow : Window {
         public static MainWindow instance = null;
 
@@ -30,7 +32,7 @@ namespace CGProject1 {
 
         public Signal currentSignal;
 
-        private List<Chart> charts = new List<Chart>();
+        private List<ChartLine> charts = new List<ChartLine>();
 
         public MainWindow() {
             instance = this;
@@ -110,7 +112,7 @@ namespace CGProject1 {
                 analyzerWindow.Close();
             }
 
-            var chart = new Chart(channel);
+            var chart = new ChartLine(channel);
             chart.Height = 100;
 
             charts.Add(chart);
@@ -205,7 +207,7 @@ namespace CGProject1 {
             }
 
             for (int i = 0; i < currentSignal.channels.Count; i++) {
-                var chart = new Chart(currentSignal.channels[i]);
+                var chart = new ChartLine(currentSignal.channels[i]);
                 chart.Height = 100;
 
                 charts.Add(chart);

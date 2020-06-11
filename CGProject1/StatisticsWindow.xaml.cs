@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CGProject1.Chart;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -21,7 +22,7 @@ namespace CGProject1
             InitializeComponent();
         }
 
-        public void ReplaceChart(Chart chart) {
+        public void ReplaceChart(ChartLine chart) {
             if (subscribed.ContainsKey(chart.Channel.Name)) {
                 var border = subscribed[chart.Channel.Name];
 
@@ -74,11 +75,11 @@ namespace CGProject1
 
                 panel.Children.Add(groupedKTextBox);
 
-                Histogram histogram = new Histogram();
+                ChartHistogram histogram = new ChartHistogram();
                 statisticGrid.Children.Add(histogram);
                 Grid.SetColumn(histogram, 1);
 
-                Action<Chart> updateInfo = (sender) => {
+                Action<ChartLine> updateInfo = (sender) => {
                     channelNameLabel.Content = "Name: " + sender.Channel.Name;
                     intervalLabel.Content = "Begin: " + (sender.Begin + 1) + "; End: " + (sender.End + 1);
 
@@ -136,7 +137,7 @@ namespace CGProject1
 
                 kTextBox.TextChanged += (object sender, TextChangedEventArgs e) => updateInfo(chart);
 
-                Chart.OnChangeIntervalDel onChangeInterval = (sender) => updateInfo(sender);
+                ChartLine.OnChangeIntervalDel onChangeInterval = (sender) => updateInfo(sender);
                 chart.OnChangeInterval += onChangeInterval;
 
                 MenuItem closeChannel = new MenuItem();
@@ -157,7 +158,7 @@ namespace CGProject1
             }
         }
 
-        public void Update(Chart chart, bool fromMainWindow)
+        public void Update(ChartLine chart, bool fromMainWindow)
         {
             if (!subscribed.ContainsKey(chart.Channel.Name))
             {
@@ -214,11 +215,11 @@ namespace CGProject1
 
                 panel.Children.Add(groupedKTextBox);
 
-                Histogram histogram = new Histogram();
+                ChartHistogram histogram = new ChartHistogram();
                 statisticGrid.Children.Add(histogram);
                 Grid.SetColumn(histogram, 1);
 
-                Action<Chart> updateInfo = (sender) =>
+                Action<ChartLine> updateInfo = (sender) =>
                 {
                     channelNameLabel.Content = "Name: " + sender.Channel.Name;
                     intervalLabel.Content = "Begin: " + (sender.Begin + 1) + "; End: " + (sender.End + 1);
@@ -287,7 +288,7 @@ namespace CGProject1
 
                 kTextBox.TextChanged += (object sender, TextChangedEventArgs e) => updateInfo(chart);
 
-                Chart.OnChangeIntervalDel onChangeInterval = (sender) => updateInfo(sender);
+                ChartLine.OnChangeIntervalDel onChangeInterval = (sender) => updateInfo(sender);
 
                 MenuItem closeChannel = new MenuItem();
                 closeChannel.Header = "Закрыть канал";
@@ -325,7 +326,7 @@ namespace CGProject1
             }
         }
 
-        public double CalcAvg(Chart chart)
+        public double CalcAvg(ChartLine chart)
         {
             if (chart.Length <= 0) return 0.0;
 
@@ -334,7 +335,7 @@ namespace CGProject1
                 .Average();
         }
 
-        public double CalcDisp(Chart chart)
+        public double CalcDisp(ChartLine chart)
         {
             if (chart.Length <= 0) return 0.0;
 
@@ -347,7 +348,7 @@ namespace CGProject1
             return disp /= chart.Length;
         }
 
-        public double CalcCoefAsim(Chart chart)
+        public double CalcCoefAsim(ChartLine chart)
         {
             if (chart.Length <= 0) return 0.0;
 
@@ -362,7 +363,7 @@ namespace CGProject1
             return coef;
         }
 
-        public double CalcCoefExces(Chart chart)
+        public double CalcCoefExces(ChartLine chart)
         {
             if (chart.Length <= 0) return 0.0;
 
@@ -377,7 +378,7 @@ namespace CGProject1
             return coef - 3;
         }
 
-        public double CalcKvantil(Chart chart, double p)
+        public double CalcKvantil(ChartLine chart, double p)
         {
             if (chart.Length <= 0) return 0.0;
 

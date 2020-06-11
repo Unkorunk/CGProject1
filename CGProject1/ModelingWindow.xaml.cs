@@ -5,10 +5,12 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using CGProject1.Chart;
 using CGProject1.SignalProcessing;
 
 
-namespace CGProject1 {
+namespace CGProject1
+{
     public partial class ModelingWindow : Window {
         public ModelingWindow(Signal signal) {
             InitializeComponent();
@@ -444,7 +446,7 @@ namespace CGProject1 {
 
             ChartPreview.Children.Clear();
 
-            var chart = new Chart(channel);
+            var chart = new ChartLine(channel);
             chart.Height = 100;
             chart.ShowCurrentXY = true;
 

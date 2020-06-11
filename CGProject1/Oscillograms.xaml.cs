@@ -4,13 +4,15 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
 using System.Collections.Generic;
+using CGProject1.Chart;
 
-namespace CGProject1 {
+namespace CGProject1
+{
     /// <summary>
     /// Interaction logic for Oscillograms.xaml
     /// </summary>
     public partial class Oscillograms : Window {
-        private HashSet<Chart> activeCharts;
+        private HashSet<ChartLine> activeCharts;
 
         private int samplesCount = 0;
 
@@ -20,7 +22,7 @@ namespace CGProject1 {
 
         public Oscillograms() {
             InitializeComponent();
-            activeCharts = new HashSet<Chart>();
+            activeCharts = new HashSet<ChartLine>();
 
             var globalScaling = new MenuItem();
             globalScaling.Header = "Глобальное";
@@ -91,7 +93,7 @@ namespace CGProject1 {
         }
 
         public void AddChannel(Channel channel) {
-            var newChart = new Chart(channel) {
+            var newChart = new ChartLine(channel) {
                 IsMouseSelect = true, ShowCurrentXY = true
             };
 
@@ -129,14 +131,14 @@ namespace CGProject1 {
             var globalScaling = new MenuItem();
             globalScaling.Header = "Глобальное";
             globalScaling.Click += (object sender, RoutedEventArgs args) => {
-                newChart.Scaling = Chart.ScalingMode.Global;
+                newChart.Scaling = ChartLine.ScalingMode.Global;
             };
             scaleMenu.Items.Add(globalScaling);
 
             var autoScaling = new MenuItem();
             autoScaling.Header = "Локальное";
             autoScaling.Click += (object sender, RoutedEventArgs args) => {
-                newChart.Scaling = Chart.ScalingMode.Local;
+                newChart.Scaling = ChartLine.ScalingMode.Local;
             };
             scaleMenu.Items.Add(autoScaling);
 
@@ -147,7 +149,7 @@ namespace CGProject1 {
                 settings.ShowDialog();
                 if (settings.Status)
                 {
-                    newChart.Scaling = Chart.ScalingMode.Fixed;
+                    newChart.Scaling = ChartLine.ScalingMode.Fixed;
                     newChart.MinFixedScale = settings.From;
                     newChart.MaxFixedScale = settings.To;
                 }
@@ -158,7 +160,7 @@ namespace CGProject1 {
             uniformGlobalScaling.Header = "Единое глобальное";
             uniformGlobalScaling.Click += (object sender, RoutedEventArgs args) => {
                 newChart.GroupedCharts = activeCharts.ToList();
-                newChart.Scaling = Chart.ScalingMode.UniformGlobal;
+                newChart.Scaling = ChartLine.ScalingMode.UniformGlobal;
             };
             scaleMenu.Items.Add(uniformGlobalScaling);
 
@@ -166,7 +168,7 @@ namespace CGProject1 {
             uniformLocalScaling.Header = "Единое локальное";
             uniformLocalScaling.Click += (object sender, RoutedEventArgs args) => {
                 newChart.GroupedCharts = activeCharts.ToList();
-                newChart.Scaling = Chart.ScalingMode.UniformLocal;
+                newChart.Scaling = ChartLine.ScalingMode.UniformLocal;
             };
             scaleMenu.Items.Add(uniformLocalScaling);
             #endregion Scale
@@ -304,7 +306,7 @@ namespace CGProject1 {
             //ResetScalingMode(sender as MenuItem);
 
             foreach (var chart in activeCharts) {
-                chart.Scaling = Chart.ScalingMode.Global;
+                chart.Scaling = ChartLine.ScalingMode.Global;
             }
         }
 
@@ -312,7 +314,7 @@ namespace CGProject1 {
             //ResetScalingMode(sender as MenuItem);
 
             foreach (var chart in activeCharts) {
-                chart.Scaling = Chart.ScalingMode.Local;
+                chart.Scaling = ChartLine.ScalingMode.Local;
             }
         }
         private void FixedScaling_Click(object sender, RoutedEventArgs e) {
@@ -324,7 +326,7 @@ namespace CGProject1 {
             {
                 foreach (var chart in activeCharts)
                 {
-                    chart.Scaling = Chart.ScalingMode.Fixed;
+                    chart.Scaling = ChartLine.ScalingMode.Fixed;
                     chart.MinFixedScale = settings.From;
                     chart.MaxFixedScale = settings.To;
                 }
@@ -337,7 +339,7 @@ namespace CGProject1 {
             foreach (var chart in activeCharts)
             {
                 chart.GroupedCharts = activeCharts.ToList();
-                chart.Scaling = Chart.ScalingMode.UniformLocal;
+                chart.Scaling = ChartLine.ScalingMode.UniformLocal;
             }
         }
         private void UniformGlobalScaling_Click(object sender, RoutedEventArgs e)
@@ -347,7 +349,7 @@ namespace CGProject1 {
             foreach (var chart in activeCharts)
             {
                 chart.GroupedCharts = activeCharts.ToList();
-                chart.Scaling = Chart.ScalingMode.UniformGlobal;
+                chart.Scaling = ChartLine.ScalingMode.UniformGlobal;
             }
         }
     }
