@@ -74,6 +74,7 @@ namespace CGProject1 {
 
             var label = new Label();
             label.Content = $"Канал: {channel.Name}";
+            label.FontWeight = FontWeights.Bold;
             label.HorizontalContentAlignment = HorizontalAlignment.Center;
 
             channelPanel.Children.Add(label);
@@ -248,9 +249,11 @@ namespace CGProject1 {
                 return;
             }
 
-            if (newCoeff < 1 || newCoeff > 10) {
-                MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK);
-                return;
+            if (newCoeff < 1) {
+                newCoeff = 1;
+            }
+            if (newCoeff > 10) {
+                newCoeff = 10;
             }
 
             BrightnessField.Text = newBrightness.ToString(CultureInfo.InvariantCulture);
