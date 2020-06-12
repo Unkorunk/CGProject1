@@ -25,6 +25,8 @@
                 <MenuItem Header="Инструменты">
                     <MenuItem Header="Информация о сигнале" Click="AboutSignalClick"></MenuItem>
                     <MenuItem Header="Осциллограммы" Click="OscillogramsClick"></MenuItem>
+                    <MenuItem Header="Анализ" Click="AnalyzatorClick"/>
+                    <MenuItem Header="Спектрограммы" Click="SpectrogramsClick"/>
                 </MenuItem>
                 <MenuItem Header="Настройки"></MenuItem>
                 <MenuItem Header="О программе" Click="AboutClick"></MenuItem>

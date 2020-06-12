@@ -288,7 +288,7 @@ namespace CGProject1 {
                     || !double.TryParse(HeightField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newHeight)
                     || !double.TryParse(CoeffSelector.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newCoeff))
             {
-                MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK);
+                MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 

@@ -87,6 +87,9 @@ namespace CGProject1
                 this.modelingWindow.Closed += (object sender, System.EventArgs e) => this.isModelingWindowShowing = false;
                 this.modelingWindow.Show();
                 this.isModelingWindowShowing = true;
+            } else {
+                this.modelingWindow.Topmost = true;
+                this.modelingWindow.Topmost = false;
             }
         }
 
@@ -293,7 +296,6 @@ namespace CGProject1
             }
 
             charts[row].Selected = true;
-            //charts[row].SetSelectInterval((int)sliderBegin.Value, (int)sliderEnd.Value);
             charts[row].InvalidateVisual();
         }
 
@@ -305,11 +307,22 @@ namespace CGProject1
                 aboutSignalWindow.Closed += (object sender, System.EventArgs e) => this.showing = false;
                 aboutSignalWindow.Show();
                 showing = true;
+            } else {
+                aboutSignalWindow.Topmost = true;
+                aboutSignalWindow.Topmost = false;
             }
         }
 
         private void OscillogramsClick(object sender, RoutedEventArgs e) {
             OpenOscillograms();
+        }
+
+        private void AnalyzatorClick(object sender, RoutedEventArgs e) {
+            OpenAnalyzer();
+        }
+
+        private void SpectrogramsClick(object sender, RoutedEventArgs e) {
+            OpenSpectrograms();
         }
 
         private void OpenOscillograms() {
@@ -319,6 +332,9 @@ namespace CGProject1
                 oscillogramWindow.Closed += (object sender, System.EventArgs e) => this.isOscillogramShowing = false;
                 oscillogramWindow.Update(currentSignal);
                 oscillogramWindow.Show();
+            } else {
+                oscillogramWindow.Topmost = true;
+                oscillogramWindow.Topmost = false;
             }
         }
 
@@ -341,6 +357,9 @@ namespace CGProject1
                 analyzerWindow = new AnalyzerWindow(begin, end);
                 analyzerWindow.Closed += (object sender, System.EventArgs e) => this.isAnalyzerShowing = false;
                 analyzerWindow.Show();
+            } else {
+                analyzerWindow.Topmost = true;
+                analyzerWindow.Topmost = false;
             }
         }
 
@@ -350,6 +369,9 @@ namespace CGProject1
                 spectrogramWindow = new SpectrogramWindow();
                 spectrogramWindow.Closed += (object sender, System.EventArgs e) => this.isSpectrogramsShowing = false;
                 spectrogramWindow.Show();
+            } else {
+                spectrogramWindow.Topmost = true;
+                spectrogramWindow.Topmost = false;
             }
         }
 
@@ -372,6 +394,9 @@ namespace CGProject1
                 savingWindow.Closed += (object sender, System.EventArgs e) => this.isSavingWindowShowing = false;
                 savingWindow.Show();
                 this.isSavingWindowShowing = true;
+            } else {
+                savingWindow.Topmost = true;
+                savingWindow.Topmost = false;
             }
         }
     }
