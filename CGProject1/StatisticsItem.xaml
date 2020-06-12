@@ -6,41 +6,44 @@
              xmlns:local="clr-namespace:CGProject1" xmlns:chart="clr-namespace:CGProject1.Chart"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <Border BorderThickness="1.0" BorderBrush="Black">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition></ColumnDefinition>
-                    <ColumnDefinition></ColumnDefinition>
-                </Grid.ColumnDefinitions>
+    <Border BorderThickness="1.0" BorderBrush="Black">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0">
-                    <Label Name="ChannelNameLabel"></Label>
-                    <Label Name="ChannelIntervalLabel"></Label>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition></ColumnDefinition>
-                            <ColumnDefinition></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <Label Name="ChannelNameLabel"></Label>
+                <Label Name="ChannelIntervalLabel"></Label>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
 
-                        <Label Name="LeftLabel" Grid.Column="0"></Label>
-                        <Label Name="RightLabel" Grid.Column="1"></Label>
-                    </Grid>
+                    <Label Name="LeftLabel" Grid.Column="0"></Label>
+                    <Label Name="RightLabel" Grid.Column="1"></Label>
+                </Grid>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition></ColumnDefinition>
-                            <ColumnDefinition></ColumnDefinition>
-                            <ColumnDefinition Width="0.75*"></ColumnDefinition>
-                        </Grid.ColumnDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
 
-                        <Label Content="Кол-во интервалов(K):" Grid.Column="0"></Label>
-                        <TextBox Name="IntervalTextBox" Text="100" Grid.Column="1" TextChanged="IntervalTextBox_TextChanged"></TextBox>
-                    </Grid>
-                </StackPanel>
+                    <Label Content="Кол-во интервалов(K):" Grid.Column="0"></Label>
+                    <TextBox Name="IntervalTextBox" Text="100" Grid.Column="1"
+                             VerticalAlignment="Center"
+                             PreviewTextInput="previewTextInput"
+                             PreviewKeyDown="previewKeyDown"
+                             DataObject.Pasting="previewPasting"
+                             TextChanged="textChanged"></TextBox>
+                </Grid>
+            </StackPanel>
 
-                <chart:ChartHistogram x:Name="Histogram" Grid.Column="1"></chart:ChartHistogram>
-            </Grid>
-        </Border>
-    </Grid>
+            <chart:ChartHistogram x:Name="Histogram" Grid.Column="1"></chart:ChartHistogram>
+        </Grid>
+    </Border>
 </UserControl>
