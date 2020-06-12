@@ -43,15 +43,6 @@
                 <ScrollViewer Grid.Row="0" Grid.Column="0">
                     <StackPanel Name="channels" MouseUp="OnChannelClick"></StackPanel>
                 </ScrollViewer>
-                
-                <!--<Grid Grid.Row="0" Grid.Column="0" Name="channels" MouseUp="OnChannelClick">
-                    <Grid.RowDefinitions>
-                        <RowDefinition></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                </Grid>-->
 
                 <Grid Grid.Row="0" Grid.Column="1">
                     <Grid.RowDefinitions>
