@@ -207,6 +207,9 @@ namespace CGProject1
                     }
                 }
             }
+
+            locked = false;
+            InputBeginEnd(sender.Begin, sender.End);
         }
 
         private void ComboBoxMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
