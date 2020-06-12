@@ -103,7 +103,7 @@ namespace CGProject1.Chart {
         }
 
         private void DrawBitmap(DrawingContext drawingContext) {
-            if (matrix.GetLength(1) != ActualWidth - rightOffset - leftOffset) {
+            if (Math.Abs(matrix.GetLength(1) - (ActualWidth - rightOffset - leftOffset)) > 1e-5) {
                 SetupChannel(curChannel);
             }
 
@@ -225,8 +225,7 @@ namespace CGProject1.Chart {
         }
 
         private async void SetupChannel(Channel channel) {
-            var task = CalculateMatrix(channel);
-            var res = await task;
+            var res = await CalculateMatrix(channel);
             if (res != null) {
                 this.matrix = res;
                 InvalidateVisual();
