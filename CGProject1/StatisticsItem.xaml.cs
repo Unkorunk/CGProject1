@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Text;
 using System.Linq;
+using System.Windows;
 using CGProject1.Chart;
+using System.Windows.Input;
 using System.Windows.Controls;
 
 namespace CGProject1
@@ -11,55 +14,60 @@ namespace CGProject1
     public partial class StatisticsItem : UserControl
     {
         private ChartLine _subscriber;
-        
-        public ChartLine Subscriber { 
+
+        public ChartLine Subscriber
+        {
             get => _subscriber;
-            set {
-                this._subscriber = value;
-                this.UpdateInfo();
-            } 
+            set
+            {
+                _subscriber = value;
+                UpdateInfo();
+            }
         }
 
         public StatisticsItem(ChartLine subscriber)
         {
             InitializeComponent();
 
-            this.Subscriber = subscriber;
+            Subscriber = subscriber;
         }
 
         public void UpdateInfo()
         {
-            if (this.Subscriber == null) return;
+            if (Subscriber == null) return;
 
             ChannelNameLabel.Content = "Name: " + Subscriber.Channel.Name;
             ChannelIntervalLabel.Content = "Begin: " + (Subscriber.Begin + 1) + "; End: " + (Subscriber.End + 1);
 
-            LeftLabel.Content = "";
-            RightLabel.Content = "";
+            var leftColumn = new StringBuilder();
+            var rightColumn = new StringBuilder();
 
-            double avg = CalcAvg(Subscriber);
-            LeftLabel.Content += "Среднее: " + Math.Round(avg, 2) + Environment.NewLine;
+            var average = CalcAverage(Subscriber);
+            leftColumn.AppendLine(string.Format("Среднее: {0:0.##}", average));
+            var variance = CalcVariance(average, Subscriber);
+            leftColumn.AppendLine(string.Format("Дисперсия: {0:0.##}", variance));
+            var sd = CalcSD(variance);
+            leftColumn.AppendLine(string.Format("Ср.кв.откл: {0:0.##}", sd));
+            var variability = CalcVariability(sd, average);
+            leftColumn.AppendLine(string.Format("Вариация: {0:0.##}", variability));
+            var skewness = CalcSkewness(variance, average, Subscriber);
+            leftColumn.AppendLine(string.Format("Асимметрия: {0:0.##}", skewness));
+            var kurtosis = CalcKurtosis(variance, average, Subscriber);
+            leftColumn.Append(string.Format("Эксцесс: {0:0.##}", kurtosis));
 
-            double disp = CalcDisp(Subscriber);
-            LeftLabel.Content += "Дисперсия: " + Math.Round(disp, 2) + Environment.NewLine;
-            LeftLabel.Content += "Ср.кв.откл: " + Math.Round(Math.Sqrt(disp), 2) + Environment.NewLine;
+            var minValue = CalcMinValue(Subscriber);
+            rightColumn.AppendLine(string.Format("Минимум: {0:0.##}", minValue));
+            var maxValue = CalcMaxValue(Subscriber);
+            rightColumn.AppendLine(string.Format("Максимум: {0:0.##}", maxValue));
+            var quantile5 = CalcQuantile(Subscriber, 0.05);
+            rightColumn.AppendLine(string.Format("Квантиль 0.05: {0:0.##}", quantile5));
+            var quantile95 = CalcQuantile(Subscriber, 0.95);
+            rightColumn.AppendLine(string.Format("Квантиль 0.95: {0:0.##}", quantile95));
+            var median = CalcQuantile(Subscriber, 0.5);
+            rightColumn.Append(string.Format("Медиана: {0:0.##}", median));
 
-            LeftLabel.Content += "Вариация: " + Math.Round(Math.Sqrt(disp) / avg, 2) + Environment.NewLine;
-            LeftLabel.Content += "Асимметрия: " + Math.Round(CalcCoefAsim(Subscriber), 2) + Environment.NewLine;
-            LeftLabel.Content += "Эксцесс: " + Math.Round(CalcCoefExces(Subscriber), 2);
-
-            double minValue = Subscriber.Channel.values
-                .Where((_, idx) => idx >= Subscriber.Begin && idx <= Subscriber.End)
-                .Min();
-            RightLabel.Content += "Минимум: " + Math.Round(minValue, 2) + Environment.NewLine;
-            double maxValue = Subscriber.Channel.values
-                .Where((_, idx) => idx >= Subscriber.Begin && idx <= Subscriber.End)
-                .Max();
-            RightLabel.Content += "Максимум: " + Math.Round(maxValue, 2) + Environment.NewLine;
-
-            RightLabel.Content += "Квантиль 0.05: " + Math.Round(CalcKvantil(Subscriber, 0.05), 2) + Environment.NewLine;
-            RightLabel.Content += "Квантиль 0.95: " + Math.Round(CalcKvantil(Subscriber, 0.95), 2) + Environment.NewLine;
-            RightLabel.Content += "Медиана: " + Math.Round(CalcKvantil(Subscriber, 0.5), 2);
+            LeftLabel.Content = leftColumn.ToString();
+            RightLabel.Content = rightColumn.ToString();
 
             Histogram.Data.Clear();
 
@@ -86,68 +94,197 @@ namespace CGProject1
             Histogram.InvalidateVisual();
         }
 
-        public double CalcAvg(ChartLine chart)
+        private void previewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (chart.Length <= 0) return 0.0;
-
-            return chart.Channel.values
-                .Where((_, idx) => idx >= chart.Begin && idx <= chart.End)
-                .Average();
+            e.Handled = !TextIsNumeric(e.Text);
         }
 
-        public double CalcDisp(ChartLine chart)
+        private void previewPasting(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string input = (string)e.DataObject.GetData(typeof(string));
+                if (!TextIsNumeric(input)) e.CancelCommand();
+            }
+            else
+            {
+                e.CancelCommand();
+            }
+        }
+
+        private void textChanged(object sender, TextChangedEventArgs e) => UpdateInfo();
+
+        private void previewKeyDown(object sender, KeyEventArgs e)
+        {
+            e.Handled = (e.Key == Key.Space);
+        }
+
+        private bool TextIsNumeric(string input)
+        {
+            return input.All(c => char.IsDigit(c) || char.IsControl(c));
+        }
+
+        public double CalcAverage(ChartLine chart)
         {
             if (chart.Length <= 0) return 0.0;
 
-            double avg = CalcAvg(chart);
-            double disp = 0.0;
+            double average = 0.0;
             for (int i = chart.Begin; i <= chart.End; i++)
             {
-                disp += Math.Pow(chart.Channel.values[i] - avg, 2);
+                average += chart.Channel.values[i];
             }
-            return disp /= chart.Length;
+            average /= chart.Length;
+
+            return average;
         }
 
-        public double CalcCoefAsim(ChartLine chart)
+        public double CalcVariance(double average, ChartLine chart)
         {
             if (chart.Length <= 0) return 0.0;
 
-            double mse3 = Math.Pow(CalcDisp(chart), 3.0 / 2.0);
-            double avg = CalcAvg(chart);
-            double coef = 0.0;
+            double variance = 0.0;
             for (int i = chart.Begin; i <= chart.End; i++)
             {
-                coef += Math.Pow(chart.Channel.values[i] - avg, 3);
+                variance += Math.Pow(chart.Channel.values[i] - average, 2);
             }
-            coef /= chart.Length * mse3;
-            return coef;
+            variance /= chart.Length;
+
+            return variance;
         }
 
-        public double CalcCoefExces(ChartLine chart)
+        public double CalcSD(double variance) => Math.Sqrt(variance);
+
+        public double CalcVariability(double sd, double average) => sd / average;
+
+        public double CalcSkewness(double variance, double average, ChartLine chart)
         {
             if (chart.Length <= 0) return 0.0;
 
-            double mse4 = Math.Pow(CalcDisp(chart), 2);
-            double avg = CalcAvg(chart);
-            double coef = 0.0;
+            double mse3 = Math.Pow(variance, 3.0 / 2.0);
+
+            double skewness = 0.0;
             for (int i = chart.Begin; i <= chart.End; i++)
             {
-                coef += Math.Pow(chart.Channel.values[i] - avg, 4);
+                skewness += Math.Pow(chart.Channel.values[i] - average, 3);
             }
-            coef /= chart.Length * mse4;
-            return coef - 3;
+            skewness /= chart.Length * mse3;
+
+            return skewness;
         }
 
-        public double CalcKvantil(ChartLine chart, double p)
+        public double CalcKurtosis(double variance, double average, ChartLine chart)
+        {
+            if (chart.Length <= 0) return 0.0;
+
+            double mse4 = Math.Pow(variance, 2);
+
+            double kurtosis = 0.0;
+            for (int i = chart.Begin; i <= chart.End; i++)
+            {
+                kurtosis += Math.Pow(chart.Channel.values[i] - average, 4);
+            }
+            kurtosis = kurtosis / (chart.Length * mse4) - 3.0;
+
+            return kurtosis;
+        }
+
+        public double CalcQuantile(ChartLine chart, double p)
         {
             if (chart.Length <= 0) return 0.0;
 
             p = Math.Clamp(p, 0.0, 1.0);
-            return chart.Channel.values
-                .Where((_, idx) => idx >= chart.Begin && idx <= chart.End)
-                .OrderBy(x => x).ToList()[(int)(p * (chart.Length - 1))];
+            int k = (int)(p * (chart.Length - 1));
+
+            double[] arr = new double[chart.Length];
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = chart.Channel.values[chart.Begin + i];
+            }
+
+            return OrderStatistics(arr, k);
         }
 
-        private void IntervalTextBox_TextChanged(object sender, TextChangedEventArgs e) => UpdateInfo();   
+        public double CalcMinValue(ChartLine chart)
+        {
+            if (chart.Length <= 0) return 0.0;
+
+            double minValue = double.MaxValue;
+            for (int i = chart.Begin; i <= chart.End; i++)
+            {
+                minValue = Math.Min(minValue, chart.Channel.values[i]);
+            }
+
+            return minValue;
+        }
+
+        public double CalcMaxValue(ChartLine chart)
+        {
+            if (chart.Length <= 0) return 0.0;
+
+            double maxValue = double.MinValue;
+            for (int i = chart.Begin; i <= chart.End; i++)
+            {
+                maxValue = Math.Max(maxValue, chart.Channel.values[i]);
+            }
+
+            return maxValue;
+        }
+
+        private void Swap(ref double lhs, ref double rhs)
+        {
+            double t = lhs;
+            lhs = rhs;
+            rhs = t;
+        }
+
+        private int Partition(double[] arr, int left, int right)
+        {
+            double pivot = arr[left];
+            while (true)
+            {
+                while (arr[left] < pivot)
+                {
+                    left++;
+                }
+
+                while (arr[right] > pivot)
+                {
+                    right--;
+                }
+
+                if (left < right)
+                {
+                    if (arr[left] == arr[right]) return right;
+
+                    Swap(ref arr[left], ref arr[right]);
+                }
+                else
+                {
+                    return right;
+                }
+            }
+        }
+
+        private double OrderStatistics(double[] arr, int k)
+        {
+            int left = 0, right = arr.Length;
+            while (true)
+            {
+                int mid = Partition(arr, left, right - 1);
+
+                if (mid == k)
+                {
+                    return arr[mid];
+                }
+                else if (k < mid)
+                {
+                    right = mid;
+                }
+                else
+                {
+                    left = mid + 1;
+                }
+            }
+        }
     }
 }
