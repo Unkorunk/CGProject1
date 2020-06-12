@@ -44,23 +44,40 @@ namespace CGProject1 {
             palettes = new List<byte[][]>();
 
             var greyPalette = new byte[256][];
-            var hotPalette = new byte[256][];
-
-            for (int i = 0; i <= 85; i++) hotPalette[i] = new byte[3] { (byte)(i * 3), 0, 0 };
-            for (int i = 86; i <= 170; i++) hotPalette[i] = new byte[3] { 255, (byte)((i - 85) * 3), 0 };
-            for (int i = 171; i <= 255; i++) hotPalette[i] = new byte[3] { 255, 255, (byte)((i - 170) * 3) };
-
-            for (int i = 0; i < 256; i++)
-            {
+            for (int i = 0; i < 256; i++) {
                 greyPalette[i] = new byte[3];
-                for (int j = 0; j < 3; j++)
-                {
+                for (int j = 0; j < 3; j++) {
                     greyPalette[i][j] = (byte)i;
                 }
             }
 
             palettes.Add(greyPalette);
+
+            var hotPalette = new byte[256][];
+
+            for (int i = 0; i <= 85; i++) hotPalette[i] = new byte[3] { (byte)(i * 3), 0, 0 };
+            for (int i = 86; i <= 170; i++) hotPalette[i] = new byte[3] { 255, (byte)((i - 85) * 3), 0 };
+            for (int i = 171; i <= 255; i++) hotPalette[i] = new byte[3] { 255, 255, (byte)((i - 170) * 3) };
             palettes.Add(hotPalette);
+
+            var icePalette = new byte[256][];
+
+            for (int i = 0; i < 128; i++) {
+                icePalette[i] = new byte[3] { 0, (byte)(i * 2), (byte)(i * 2) };
+            }
+            for (int i = 128; i < 256; i++) {
+                icePalette[i] = new byte[3] { (byte)((i - 128) * 2), 255, 255 };
+            }
+            palettes.Add(icePalette);
+
+            var blueRedYellow = new byte[256][];
+            for (int i = 0; i < 128; i++) {
+                blueRedYellow[i] = new byte[3] { (byte)(i * 2), 0, (byte)(255 - i * 2) };
+            }
+            for (int i = 128; i < 256; i++) {
+                blueRedYellow[i] = new byte[3] { 255, (byte)((i - 128) * 2), 0 };
+            }
+            palettes.Add(blueRedYellow);
         }
 
         public async void AddChannel(Channel channel) {
