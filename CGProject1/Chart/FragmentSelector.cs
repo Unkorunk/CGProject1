@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
 namespace CGProject1.Chart
 {
-    public class FragmentSelector : FrameworkElement
+    public class FragmentSelector : Thumb
     {
         public event EventHandler IntervalUpdate;
 
@@ -44,7 +45,7 @@ namespace CGProject1.Chart
         private int _intervalCenter = 0;
 
         private double _padding = 0.1;
-        public double Padding
+        public double TBPadding
         {
             get => _padding;
             set
@@ -57,9 +58,14 @@ namespace CGProject1.Chart
         private double _sliderWidth = 10.0;
         private double SliderWidth { get => _sliderWidth; set { _sliderWidth = value; InvalidateVisual(); } }
 
+        public FragmentSelector()
+        {
+            this.Template = null;
+        }
+
         protected override void OnRender(DrawingContext drawingContext)
         {
-            double visualPadding = ActualHeight * Padding;
+            double visualPadding = ActualHeight * TBPadding;
 
             drawingContext.DrawRectangle(Brushes.Gray, new Pen(Brushes.Black, 1.0), new Rect(
                 SliderWidth,
@@ -89,7 +95,7 @@ namespace CGProject1.Chart
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            double visualPadding = ActualHeight * Padding;
+            double visualPadding = ActualHeight * TBPadding;
 
             double visualLength = (ActualWidth - 2 * SliderWidth) / (Maximum - Minimum);
 

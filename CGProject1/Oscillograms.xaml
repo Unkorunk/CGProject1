@@ -29,7 +29,7 @@
             <Label Name="BeginTimeLabel">Start time:</Label>
             <Label Name="EndTimeLabel">End time:</Label>
 
-            <chart:FragmentSelector x:Name="FSelector" Height="20" Padding="0.15" IntervalUpdate="FSelector_IntervalUpdate"></chart:FragmentSelector>
+            <chart:FragmentSelector x:Name="FSelector" Height="20" TBPadding="0.15" IntervalUpdate="FSelector_IntervalUpdate"></chart:FragmentSelector>
         </StackPanel>
 
         <Grid Grid.Row="2" Grid.Column="0">
