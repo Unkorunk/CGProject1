@@ -10,15 +10,33 @@ using CGProject1.Chart;
 using System.Windows.Input;
 using System.Linq;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace CGProject1 {
     public partial class SpectrogramWindow : Window {
+        private static List<byte[][]> palettes;
+
+        private byte[][] curPalette = palettes[1];
+
+        private double spectrogramHeight = 100;
+        private double coeffN = 1.0;
+        private double boostCoeff = 1.0;
+
+        private HashSet<string> channelNames;
+        private List<Image> pics;
+        private List<Channel> channels;
+        private Dictionary<string, CancellationTokenSource> cts;
+        private Dictionary<string, CountdownEvent> cde;
+
         public SpectrogramWindow() {
             channelNames = new HashSet<string>();
             pics = new List<Image>();
             channels = new List<Channel>();
+
+            cts = new Dictionary<string, CancellationTokenSource>();
+            cde = new Dictionary<string, CountdownEvent>();
+
             InitializeComponent();
-            
         }
 
         static SpectrogramWindow()
@@ -45,22 +63,13 @@ namespace CGProject1 {
             palettes.Add(hotPalette);
         }
 
-        private static List<byte[][]> palettes;
-
-        private byte[][] curPalette = palettes[1];
-
-        private double spectrogramHeight = 100;
-        private double coeffN = 1.0;
-        private double boostCoeff = 1.0;
-
-        private HashSet<String> channelNames;
-        private List<Image> pics;
-        private List<Channel> channels;
-
-        public void AddChannel(Channel channel) {
+        public async void AddChannel(Channel channel) {
             if (channelNames.Contains(channel.Name)) {
                 return;
             }
+
+            cts.Add(channel.Name, null);
+            cde.Add(channel.Name, null);
 
             channelNames.Add(channel.Name);
             channels.Add(channel);
@@ -79,7 +88,8 @@ namespace CGProject1 {
 
             channelPanel.Children.Add(label);
 
-            var bitmap = CalculateBitmap(channel);
+            var task = CalculateBitmap(channel);
+            var bitmap = await task;
 
             // step 7.2
             Image pic = new Image();
@@ -99,10 +109,9 @@ namespace CGProject1 {
             channelPanel.Children.Add(chart);
 
             Spectrograms.Children.Add(border);
-            
         }
 
-        private WriteableBitmap CalculateBitmap(Channel channel) {
+        private async Task<WriteableBitmap> CalculateBitmap(Channel channel) {
             int width = (int)Spectrograms.RenderSize.Width;
             int height = (int)spectrogramHeight;
 
@@ -129,12 +138,13 @@ namespace CGProject1 {
             int l = NN / N;
 
             // step 5
-            ThreadPool.GetMaxThreads(out var threadCount, out var completionPortThreads);
-            CountdownEvent countdownEvent = new CountdownEvent(threadCount);
             WaitCallback threadAction = (obj) => {
-                int offset = ((int[])obj)[0];
-                int step = ((int[])obj)[1];
-                for (int i = offset; i < sectionsCount; i += step) {
+                var offset = (int)((object[])obj)[0];
+                var step = (int)((object[])obj)[1];
+                var cts = (CancellationTokenSource)((object[])obj)[2];
+                var cde = (CountdownEvent)((object[])obj)[3];
+
+                for (int i = offset; i < sectionsCount && !cts.IsCancellationRequested; i += step) {
                     double[] x = new double[NN];
 
                     // step 5.1
@@ -193,14 +203,28 @@ namespace CGProject1 {
                     }
                 }
 
-                countdownEvent.Signal();
+                cde.Signal();
             };
 
-            for (int i = 0; i < threadCount; i++) {
-                ThreadPool.QueueUserWorkItem(threadAction, new int[] { i, threadCount });
+            ThreadPool.GetMaxThreads(out var threadCount, out var completionPortThreads);
+            
+            if (cts[channel.Name] != null) {
+                cts[channel.Name].Cancel();
+                cde[channel.Name].Wait();
             }
 
-            countdownEvent.Wait();
+            var countdownEvent = new CountdownEvent(threadCount);
+            var token = new CancellationTokenSource();
+
+            cde[channel.Name] = countdownEvent;
+            cts[channel.Name] = token;
+
+            for (int i = 0; i < threadCount; i++) {
+                ThreadPool.QueueUserWorkItem(threadAction, new object[] { i, threadCount, token, countdownEvent });
+            }
+
+            await Task.Factory.StartNew(() => countdownEvent.Wait());
+            if (token.IsCancellationRequested) return null;
 
             // step 6
             double maxVal = double.MinValue;
@@ -230,21 +254,23 @@ namespace CGProject1 {
             return bitmap;
         }
 
-        private void RedrawSpectrograms() {
+        private async void RedrawSpectrograms() {
             for (int i = 0; i < channels.Count; i++) {
-                pics[i].Source = CalculateBitmap(channels[i]);
-                pics[i].Height = this.spectrogramHeight;
+                var task = CalculateBitmap(channels[i]);
+                var source = await task;
+                if (source != null)
+                {
+                    pics[i].Source = source;
+                    pics[i].Height = this.spectrogramHeight;
+                }
             }
         }
 
         private void UpdateSpectrograms(object sender, RoutedEventArgs e) {
-            double newBrightness = 0;
-            double newHeight = 0;
-            double newCoeff = 0;
-
-            if (!double.TryParse(BrightnessField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out newBrightness)
-                    || !double.TryParse(HeightField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out newHeight)
-                    || !double.TryParse(CoeffSelector.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out newCoeff)) {
+            if (!double.TryParse(BrightnessField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newBrightness)
+                    || !double.TryParse(HeightField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newHeight)
+                    || !double.TryParse(CoeffSelector.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newCoeff))
+            {
                 MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK);
                 return;
             }
