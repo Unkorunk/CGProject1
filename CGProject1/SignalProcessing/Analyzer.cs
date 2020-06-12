@@ -9,8 +9,6 @@ namespace CGProject1.SignalProcessing {
         private Channel curChannel;
         private Complex[] ft;
 
-        private int bound = 4096;
-
         public int HalfWindowSmoothing { get; set; }
 
         private double[] amps = null;

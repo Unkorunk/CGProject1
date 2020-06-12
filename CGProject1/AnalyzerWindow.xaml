@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CGProject1"
+        xmlns:local="clr-namespace:CGProject1" xmlns:chart="clr-namespace:CGProject1.Chart"
         mc:Ignorable="d"
         Title="Анализ" Height="600" Width="1200">
     <Grid>
@@ -55,11 +55,10 @@
         </ScrollViewer>
 
         <StackPanel Grid.Row="2" Grid.Column="1">
-            <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged" LargeChange="150" SmallChange="30"></ScrollBar>
-            <Label Name="BeginFrequencyLabel">Begin frequency: 0.0</Label>
-            <Slider Name="BeginSlider" Minimum="0" Maximum="0" ValueChanged="BeginSlider_ValueChanged"></Slider>
-            <Label Name="EndFrequencyLabel">End frequency: 0.0</Label>
-            <Slider Name="EndSlider" Minimum="0" Maximum="0" ValueChanged="EndSlider_ValueChanged"></Slider>
+            <Label Name="BeginFrequencyLabel">Begin Frequency: </Label>
+            <Label Name="EndFrequencyLabel">End Frequency: </Label>
+            
+            <chart:FragmentSelector x:Name="FSelector" Height="20" TBPadding="0.15" IntervalUpdate="FSelector_IntervalUpdate"></chart:FragmentSelector>
         </StackPanel>
 
         <Grid Grid.Row="2" Grid.Column="0">

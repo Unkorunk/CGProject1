@@ -26,8 +26,8 @@
             <MenuItem Name="ScalingChooser" Header="Масштабирование"></MenuItem>
         </Menu>
         <StackPanel Grid.Row="2" Grid.Column="1">
-            <Label Name="BeginTimeLabel">Start time:</Label>
-            <Label Name="EndTimeLabel">End time:</Label>
+            <Label Name="BeginTimeLabel">Start Time: </Label>
+            <Label Name="EndTimeLabel">End Time: </Label>
 
             <chart:FragmentSelector x:Name="FSelector" Height="20" TBPadding="0.15" IntervalUpdate="FSelector_IntervalUpdate"></chart:FragmentSelector>
         </StackPanel>

@@ -22,7 +22,6 @@ namespace CGProject1
 
         private int samplesCount = 0;
 
-        private bool locked = false;
         private bool initilized = false;
 
         public AnalyzerWindow(int begin, int end) {
@@ -41,6 +40,9 @@ namespace CGProject1
             }
         }
 
+        public int GetBegin() => FSelector.LeftSlider;
+        public int GetEnd() => FSelector.RightSlider;
+
         public void AddChannel(Channel channel) {
             if (namesSet.Contains(channel.Name)) {
                 return;
@@ -57,19 +59,16 @@ namespace CGProject1
                 initilized = true;
                 samplesCount = analyzer.AmplitudeSpectre().SamplesCount - 1;
 
-                BeginSlider.Maximum = samplesCount - 1;
-                EndSlider.Maximum = samplesCount - 1;
+                FSelector.Minimum = 0;
+                FSelector.Maximum = samplesCount - 1;
 
-                BeginSlider.Value = 0;
-                EndSlider.Value = samplesCount - 1;
+                FSelector.LeftSlider = 0;
+                FSelector.RightSlider = samplesCount - 1;
 
-                BeginBox.Text = 0.ToString();
-                EndBox.Text = (samplesCount - 1).ToString();
+                BeginBox.Text = GetBegin().ToString();
+                EndBox.Text = GetEnd().ToString();
 
-                OscillogramScroll.Minimum = 0;
-                OscillogramScroll.Maximum = samplesCount;
-                double p = 0.999;
-                OscillogramScroll.ViewportSize = samplesCount * p / (1.0 - p);
+                InputBeginEnd(GetBegin(), GetEnd());
             }
 
             analyzers.Add(analyzer);
@@ -108,9 +107,9 @@ namespace CGProject1
 
         private void UpdateAnalyzers() {
             int b = 0, e = samplesCount - 1;
-            if (BeginSlider != null && EndSlider != null) {
-                b = (int)BeginSlider.Value;
-                e = (int)EndSlider.Value;
+            if (FSelector != null) {
+                b = GetBegin();
+                e = GetEnd();
             }
             
 
@@ -126,11 +125,9 @@ namespace CGProject1
             }
 
             UpdatePanel();
-            locked = false;
-            if (BeginSlider != null && EndSlider != null) {
+            if (FSelector != null) {
                 InputBeginEnd(b, e);
             }
-            
         }
 
         private void SetupCharts(Analyzer analyzer) {
@@ -212,7 +209,6 @@ namespace CGProject1
                 }
             }
 
-            locked = false;
             InputBeginEnd(sender.Begin, sender.End);
         }
 
@@ -284,47 +280,14 @@ namespace CGProject1
             return input.All(c => char.IsDigit(c) || char.IsControl(c));
         }
 
-        private void OscillogramScroll_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (samplesCount == 0) {
-                return;
-            }
-
-            if (locked)
-            {
-                locked = false;
-                return;
-            }
-
-            double p = (EndSlider.Value - BeginSlider.Value + 1) * 1.0 / samplesCount;
-            double begin = e.NewValue * Math.Abs(1.0 - p);
-            double end = begin + EndSlider.Value - BeginSlider.Value;
-            locked = true;
-            BeginSlider.Value = begin;
-            EndSlider.Value = end;
-        }
-
-        private void BeginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            InputBeginEnd((int)e.NewValue, (int)EndSlider.Value);
-        }
-
-        private void EndSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            InputBeginEnd((int)BeginSlider.Value, (int)e.NewValue);
-        }
-
         private void textBox_ValueChanged(object sender, EventArgs e)
         {
-            long begin;
-            long end;
-
-            if (!long.TryParse(BeginBox.Text, out begin))
+            if (!int.TryParse(BeginBox.Text, out int begin))
             {
                 begin = 0;
             }
 
-            if (!long.TryParse(EndBox.Text, out end))
+            if (!int.TryParse(EndBox.Text, out int end))
             {
                 end = samplesCount;
             }
@@ -332,61 +295,33 @@ namespace CGProject1
             InputBeginEnd(begin, end);
         }
 
-        private void InputBeginEnd(long begin, long end)
+        private void InputBeginEnd(int begin, int end)
         {
             if (samplesCount == 0) {
                 return;
             }
 
-            if (locked)
-            {
-                locked = false;
-                return;
-            }
-
-            if (begin > samplesCount)
-            {
-                begin = samplesCount;
-            }
-
-            if (begin < 0)
-            {
-                begin = 0;
-            }
-
-            if (end > samplesCount)
-            {
-                end = samplesCount;
-            }
-
-            if (end <= begin)
-            {
-                end = begin + 1;
-            }
-
-            double p = (end - begin + 1) * 1.0 / samplesCount;
-            if (Math.Abs(p - 1.0) < 1e-5) p = 0.999;
-            OscillogramScroll.ViewportSize = samplesCount * p / Math.Abs(1.0 - p);
-            locked = true;
-            OscillogramScroll.Value = begin * (1.0 + p / Math.Abs(1.0 - p));
+            end = Math.Clamp(end, 0, samplesCount - 1);
+            begin = Math.Clamp(begin, 0, end - 1);
 
             for (int i = 0; i < charts.Count; i++)
             {
                 foreach (var chart in charts[i])
                 {
-                    chart.Begin = (int)begin;
-                    chart.End = (int)end;
+                    chart.Begin = begin;
+                    chart.End = end;
                 }
             }
 
-            BeginSlider.Value = begin;
-            EndSlider.Value = end;
-            BeginBox.Text = begin.ToString();
-            EndBox.Text = end.ToString();
+            if (GetBegin() != begin) FSelector.LeftSlider = begin;
+            if (GetEnd() != end) FSelector.RightSlider = end;
+            if (BeginBox.Text != begin.ToString()) BeginBox.Text = begin.ToString();
+            if (EndBox.Text != end.ToString()) EndBox.Text = end.ToString();
+
             if (charts.Count != 0 && charts[0].Count != 0)
             {
-                BeginFrequencyLabel.Content = "Begin frequency: " + MappingXAxis(charts[0][0].Begin, charts[0][0]);
-                EndFrequencyLabel.Content = "End frequency: " + MappingXAxis(charts[0][0].End, charts[0][0]);
+                BeginFrequencyLabel.Content = "Begin Frequency: " + MappingXAxis(charts[0][0].Begin, charts[0][0]);
+                EndFrequencyLabel.Content = "End Frequency: " + MappingXAxis(charts[0][0].End, charts[0][0]);
             }
         }
 
@@ -399,6 +334,11 @@ namespace CGProject1
             chart.ShowCurrentXY = true;
             chart.IsMouseSelect = true;
             chart.OnMouseSelect += OnMouseSelect;
+        }
+
+        private void FSelector_IntervalUpdate(object sender, EventArgs e)
+        {
+            InputBeginEnd(GetBegin(), GetEnd());
         }
     }
 }
