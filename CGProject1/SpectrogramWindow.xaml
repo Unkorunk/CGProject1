@@ -32,6 +32,8 @@
             <ComboBox SelectedIndex="0" x:Name="PaletteSelector" SelectionChanged="ComboBoxMode_SelectionChanged">
                 <ComboBoxItem Content="GRAY"/>
                 <ComboBoxItem Content="HOT"/>
+                <ComboBoxItem Content="ICE"/>
+                <ComboBoxItem Content="BlueRed"/>
             </ComboBox>
         </Menu>
 
