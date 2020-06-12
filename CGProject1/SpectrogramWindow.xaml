@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
-        Title="SpectrogramWindow" Height="450" Width="800" SizeChanged="Window_SizeChanged">
+        Title="Спектрограмма" Height="500" Width="1000" SizeChanged="Window_SizeChanged">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
@@ -21,7 +21,7 @@
                     <TextBox x:Name="BrightnessField" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center"> 1.0 </TextBox>
 
                     <Label Content="Высота"/>
-                    <TextBox x:Name="HeightField" Width="50" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center"> 100 </TextBox>
+                    <TextBox x:Name="HeightField" Width="50" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center"> 150 </TextBox>
 
                     <Label Content="Захлест:"/>
                     <TextBox x:Name="CoeffSelector" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center"> 1.0 </TextBox>

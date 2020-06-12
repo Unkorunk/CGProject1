@@ -55,36 +55,6 @@ namespace CGProject1.SignalProcessing {
             Fourier.Forward(vals);
             ft = vals;
 
-            //if (end - begin < bound && !forceFast) {
-            //    ft = SlowFourierTransform(curChannel, begin, end);
-            //} else {
-            //    int len = end - begin + 1;
-            //    int closestPowerOfTwo = (int)Math.Pow(2, (int)Math.Log2(len));
-
-            //    if (!expand) {
-            //        begin += (len - closestPowerOfTwo) / 2;
-            //    }
-
-            //    end = begin + closestPowerOfTwo - 1;
-
-            //    double[] vals = new double[len];
-            //    int idx = 0;
-            //    for (; idx < closestPowerOfTwo && idx + begin < curChannel.values.Length; idx++) {
-            //        vals[idx] = curChannel.values[idx + begin];
-            //    }
-
-            //    if (end >= curChannel.values.Length) {
-            //        if (expand) {
-            //            for (; idx < len; idx++) {
-            //                vals[idx] = 0;
-            //            }
-            //        } else {
-            //            throw new Exception("Out of range exception");
-            //        }
-            //    }
-
-            //    ft = FastFourierTransform(vals, begin, end);
-            //}
             
             if (ft.Length >= 2) {
                 ft[0] = ft[1];
