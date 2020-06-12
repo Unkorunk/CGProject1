@@ -48,6 +48,10 @@ namespace CGProject1.SignalProcessing {
             if (end - begin < bound && !forceFast) {
                 ft = SlowFourierTransform(curChannel, begin, end);
             } else {
+                if (expand) {
+                    end *= 2;
+                }
+
                 int len = end - begin + 1;
                 int closestPowerOfTwo = (int)Math.Pow(2, (int)Math.Log2(len));
 
