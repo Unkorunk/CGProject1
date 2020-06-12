@@ -41,6 +41,7 @@ namespace CGProject1.Chart
         }
 
         private bool _intervalSelected = false;
+        private int _intervalCenter = 0;
 
         private double _padding = 0.1;
         public double Padding
@@ -114,7 +115,9 @@ namespace CGProject1.Chart
                 );
                 if (interval.Contains(point))
                 {
+                    int sliderVal = (int)Math.Round(point.X / visualLength + Minimum);
                     _intervalSelected = true;
+                    _intervalCenter = sliderVal - LeftSlider;
                 }
             }
 
@@ -139,7 +142,7 @@ namespace CGProject1.Chart
             else if (_intervalSelected)
             {
                 int sliderVal = (int)Math.Round(point.X / visualLength + Minimum);
-                int offset = (sliderVal - LeftSlider) - (RightSlider - LeftSlider) / 2;
+                int offset = (sliderVal - LeftSlider) - (_intervalCenter);
 
                 int newLeft = Math.Clamp(LeftSlider + offset, Minimum, RightSlider - 1);
                 int noffset = newLeft - LeftSlider;
