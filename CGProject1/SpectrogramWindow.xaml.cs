@@ -199,7 +199,7 @@ namespace CGProject1 {
 
                     // step 5.6
                     var analyzer = new Analyzer(x, channel.SamplingFrq);
-                    analyzer.SetupChannel(0, x.Length * 2, true, true);
+                    analyzer.SetupChannel(0, x.Length, true, true);
                     Channel amps = analyzer.AmplitudeSpectre();
                     //if (amps.values.Length != NN / 2) {
                     //    throw new Exception();
