@@ -46,8 +46,9 @@ namespace CGProject1.Chart {
         private double spectrogramHeight = 100;
         private double coeffN = 1.0;
 
-        private const double leftOffset = 40;
-        private const double rightOffset = 60;
+        private const double leftOffset = 50;
+        private const double rightOffset = 70;
+        private const double paletteOffset = 2.5;
         private double titleOffset = 30;
         private Channel curChannel;
 
@@ -61,6 +62,20 @@ namespace CGProject1.Chart {
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
 
+            DrawTitle(drawingContext);
+
+            if (matrix == null) {
+                SetupChannel(curChannel);
+            }
+
+            if (matrix != null && curPalette != null) {
+
+
+                DrawBitmap(drawingContext);
+            }
+        }
+
+        private void DrawTitle(DrawingContext drawingContext) {
             var title = new FormattedText(curChannel.Name,
                     CultureInfo.GetCultureInfo("en-us"),
                     FlowDirection.LeftToRight,
@@ -72,40 +87,71 @@ namespace CGProject1.Chart {
 
             titleOffset = title.Height + 2;
             drawingContext.DrawText(title, new Point(ActualWidth / 2 - title.Width / 2, 0));
+        }
 
-            if (matrix == null) {
+        private void DrawBitmap(DrawingContext drawingContext) {
+            if (matrix.GetLength(1) != ActualWidth - rightOffset - leftOffset) {
                 SetupChannel(curChannel);
             }
 
-            if (matrix != null && curPalette != null) {
-                if (matrix.GetLength(1) != ActualWidth - rightOffset - leftOffset) {
-                    SetupChannel(curChannel);
-                }
+            int width = matrix.GetLength(1);
+            int height = matrix.GetLength(0);
 
-                int width = matrix.GetLength(1);//(int)(ActualWidth - rightOffset);
-                int height = matrix.GetLength(0);//(int)(ActualHeight - titleOffset);
+            // step 7.1
+            var bitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
+            byte[] rawImg = new byte[height * bitmap.BackBufferStride];
 
-                // step 7.1
-                var bitmap = new WriteableBitmap(width, height, 96, 96, PixelFormats.Bgra32, null);
-                byte[] rawImg = new byte[height * bitmap.BackBufferStride];
-
-                for (int i = 0; i < matrix.GetLength(0); i++) {
-                    for (int j = 0; j < matrix.GetLength(1); j++) {
-                        byte intensity = (byte)Math.Min(255, matrix[i, j] / maxValue * 255.0 * boostCoeff);
-                        for (int k = 0; k < 3; k++) {
-                            rawImg[(matrix.GetLength(0) - 1 - i) * bitmap.BackBufferStride + j * 4 + k] = curPalette[intensity][2 - k];
-                        }
-                        rawImg[(height - 1 - i) * bitmap.BackBufferStride + j * 4 + 3] = 255;
+            for (int i = 0; i < matrix.GetLength(0); i++) {
+                for (int j = 0; j < matrix.GetLength(1); j++) {
+                    byte intensity = (byte)Math.Min(255, matrix[i, j] / maxValue * 255.0 * boostCoeff);
+                    for (int k = 0; k < 3; k++) {
+                        rawImg[(matrix.GetLength(0) - 1 - i) * bitmap.BackBufferStride + j * 4 + k] = curPalette[intensity][2 - k];
                     }
+                    rawImg[(height - 1 - i) * bitmap.BackBufferStride + j * 4 + 3] = 255;
                 }
-
-                bitmap.WritePixels(new Int32Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight),
-                    rawImg, bitmap.PixelWidth * bitmap.Format.BitsPerPixel / 8, 0);
-
-                drawingContext.DrawImage(bitmap, new Rect(leftOffset, titleOffset, bitmap.PixelWidth, bitmap.PixelHeight));
             }
 
-            
+            bitmap.WritePixels(new Int32Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight),
+                rawImg, bitmap.PixelWidth * bitmap.Format.BitsPerPixel / 8, 0);
+
+            drawingContext.DrawImage(bitmap, new Rect(leftOffset, titleOffset, bitmap.PixelWidth, bitmap.PixelHeight));
+
+            double minFrq = 0;
+            double maxFrq = curChannel.SamplingFrq / 2;
+
+            for (int i = 0; i < 5; i++) {
+                double y = i * height / 4;
+
+                drawingContext.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(leftOffset - 3, titleOffset + y),
+                       new Point(leftOffset, titleOffset + y));
+
+                string val = Math.Round(maxFrq - (i) * (maxFrq - minFrq) / 4, 4).ToString(CultureInfo.InvariantCulture);
+                if (val.Length > 8) {
+                    val = val.Substring(0, 8);
+                }
+
+                if (val.Length > 12) {
+                    val = val.Substring(0, 12);
+                }
+
+                var formText1 = new FormattedText(val,
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    12, Brushes.Blue, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                );
+
+                if (i == 0) {
+                    y += formText1.Height / 2;
+                } else if (i == 4) {
+                    y -= formText1.Height / 2;
+                }
+
+                formText1.TextAlignment = TextAlignment.Right;
+
+                drawingContext.DrawText(formText1, new Point(leftOffset - 5, titleOffset + y - formText1.Height / 2));
+                
+            }
         }
 
         private async void SetupChannel(Channel channel) {
