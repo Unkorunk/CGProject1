@@ -20,15 +20,18 @@ namespace CGProject1 {
         private double boostCoeff = 1.0;
 
         private HashSet<string> channelNames;
-        private List<Spectrogram> pics;
+        private List<Spectrogram> spectrograms;
         private List<Channel> channels;
+        //private List<TextBox> brightnessBoxes;
+
         private Dictionary<string, CancellationTokenSource> cts;
         private Dictionary<string, CountdownEvent> cde;
 
         public SpectrogramWindow() {
             channelNames = new HashSet<string>();
-            pics = new List<Spectrogram>();
+            spectrograms = new List<Spectrogram>();
             channels = new List<Channel>();
+            //brightnessBoxes = new List<TextBox>();
 
             cts = new Dictionary<string, CancellationTokenSource>();
             cde = new Dictionary<string, CountdownEvent>();
@@ -102,11 +105,17 @@ namespace CGProject1 {
             sp.SpectrogramHeight = this.spectrogramHeight;
             channelPanel.Children.Add(sp);
 
-            pics.Add(sp);
+            spectrograms.Add(sp);
+
+            var bottomGrid = new Grid();
+            bottomGrid.ColumnDefinitions.Add(new ColumnDefinition());
+            var cd1 = new ColumnDefinition();
+            cd1.Width = new GridLength(sp.RightOffset);
+            bottomGrid.ColumnDefinitions.Add(cd1);
 
             var chart = new ChartLine(in channel);
             chart.Height = 100;
-            chart.Margin = new Thickness(sp.LeftOffset, 2, sp.RightOffset, 2);
+            chart.Margin = new Thickness(sp.LeftOffset, 2, 2, 2);
             chart.Begin = 0;
             chart.End = channel.SamplesCount;
             chart.DisplayTitle = false;
@@ -119,7 +128,23 @@ namespace CGProject1 {
                 return t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss");
             };
 
-            channelPanel.Children.Add(chart);
+            bottomGrid.Children.Add(chart);
+
+            //var brightnessPanel = new StackPanel();
+            //Grid.SetColumn(brightnessPanel, 1);
+            //bottomGrid.Children.Add(brightnessPanel);
+
+            //var brightnessLabel = new Label();
+            //brightnessLabel.Content = "Яркость: ";
+            //brightnessLabel.VerticalAlignment = VerticalAlignment.Center;
+            //brightnessPanel.Children.Add(brightnessLabel);
+
+            //var brightnessBox = new TextBox();
+            //brightnessBox.Text = this.boostCoeff.ToString(CultureInfo.InvariantCulture);
+            //brightnessBox.VerticalAlignment = VerticalAlignment.Center;
+            //brightnessPanel.Children.Add(brightnessBox);
+
+            channelPanel.Children.Add(bottomGrid);
 
             Spectrograms.Children.Add(border);
         }
@@ -151,7 +176,7 @@ namespace CGProject1 {
 
             this.CoeffSlider.Value = newCoeff;
 
-            foreach (var sp in pics) {
+            foreach (var sp in spectrograms) {
                 sp.BoostCoeff = boostCoeff;
                 sp.CoeffN = coeffN;
                 sp.SpectrogramHeight = spectrogramHeight;
@@ -167,7 +192,7 @@ namespace CGProject1 {
                 curPalette = palettes[PaletteSelector.SelectedIndex];
             }
 
-            foreach (var sp in pics) {
+            foreach (var sp in spectrograms) {
                 sp.Palette = curPalette;
             }
         }
@@ -193,7 +218,7 @@ namespace CGProject1 {
             this.coeffN = e.NewValue;
             CoeffSelector.Text = this.coeffN.ToString(CultureInfo.InvariantCulture);
             
-            foreach (var sp in pics) {
+            foreach (var sp in spectrograms) {
                 sp.CoeffN = coeffN;
             }
         }

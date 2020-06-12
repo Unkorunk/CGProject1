@@ -194,7 +194,7 @@ namespace CGProject1.Chart {
                 drawingContext.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(ActualWidth - rightOffset + 5 + bitmap.PixelWidth, titleOffset + y),
                        new Point(ActualWidth - rightOffset + 5 + bitmap.PixelWidth + 4, titleOffset + y));
 
-                string val = Math.Round(maxValue - (i) * (maxValue - minValue) / 4, 4).ToString(CultureInfo.InvariantCulture);
+                string val = Math.Round(maxValue - (i) * (maxValue - minValue) / 4, 5).ToString(CultureInfo.InvariantCulture);
                 if (val.Length > 8) {
                     val = val.Substring(0, 8);
                 }
