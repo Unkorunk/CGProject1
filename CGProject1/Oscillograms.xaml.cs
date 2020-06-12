@@ -15,8 +15,6 @@ namespace CGProject1
         private HashSet<ChartLine> activeCharts;
 
         private int samplesCount = 0;
-
-        bool locked = false;
         DateTime startTime;
         double deltaTime;
 
@@ -51,19 +49,17 @@ namespace CGProject1
         }
 
         public int GetBegin() {
-            return (int)BeginSlider.Value;
+            return FSelector.LeftSlider;
         }
 
         public int GetEnd() {
-            return (int)EndSlider.Value;
+            return FSelector.RightSlider;
         }
 
         public void Update(Signal signal) {
-            BeginSlider.IsEnabled = signal != null;
-            EndSlider.IsEnabled = signal != null;
+            FSelector.IsEnabled = signal != null;
             BeginBox.IsEnabled = signal != null;
             EndBox.IsEnabled = signal != null;
-            OscillogramScroll.IsEnabled = signal != null;
 
             //ResetScalingMode(defaultScaling);
             
@@ -72,19 +68,14 @@ namespace CGProject1
                 OscillogramsField.Children.Clear();
                 activeCharts.Clear();
 
-                BeginSlider.Maximum = samplesCount - 1;
-                EndSlider.Maximum = samplesCount - 1;
+                FSelector.Minimum = 0;
+                FSelector.Maximum = samplesCount - 1;
 
-                BeginSlider.Value = 0;
-                EndSlider.Value = samplesCount - 1;
+                FSelector.LeftSlider = 0;
+                FSelector.RightSlider = samplesCount - 1;
 
                 BeginBox.Text = 0.ToString();
                 EndBox.Text = (samplesCount - 1).ToString();
-
-                OscillogramScroll.Minimum = 0;
-                OscillogramScroll.Maximum = signal.SamplesCount;
-                double p = 0.999;
-                OscillogramScroll.ViewportSize = signal.SamplesCount * p / (1.0 - p);
 
                 startTime = signal.StartDateTime;
                 deltaTime = signal.DeltaTime;
@@ -97,13 +88,13 @@ namespace CGProject1
                 IsMouseSelect = true, ShowCurrentXY = true
             };
 
-            newChart.Begin = (int)BeginSlider.Value;
-            newChart.End = (int)EndSlider.Value;
+            newChart.Begin = (int)FSelector.LeftSlider;
+            newChart.End = (int)FSelector.RightSlider;
 
             newChart.OnMouseSelect += (sender, newBegin, newEnd) =>
             {
-                BeginSlider.Value = newBegin;
-                EndSlider.Value = newEnd;
+                FSelector.LeftSlider = newBegin;
+                FSelector.RightSlider = newEnd;
             };
 
             newChart.Height = 300;
@@ -194,68 +185,41 @@ namespace CGProject1
             }
         }
 
-        private void BeginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            InputBeginEnd((int)e.NewValue, (int)EndSlider.Value);
-        }
+        //private void BeginSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+        //    InputBeginEnd((int)e.NewValue, (int)EndSlider.Value);
+        //}
 
-        private void EndSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            InputBeginEnd((int)BeginSlider.Value, (int)e.NewValue);
-        }
+        //private void EndSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+        //    InputBeginEnd((int)BeginSlider.Value, (int)e.NewValue);
+        //}
 
         private void textBox_ValueChanged(object sender, EventArgs e) {
-            long begin;
-            long end;
-
-            if (!long.TryParse(BeginBox.Text, out begin)) {
+            if (!int.TryParse(BeginBox.Text, out int begin))
+            {
                 begin = 0;
             }
 
-            if (!long.TryParse(EndBox.Text, out end)) {
+            if (!int.TryParse(EndBox.Text, out int end)) {
                 end = samplesCount;
             }
 
             InputBeginEnd(begin, end);
         }
 
-        private void InputBeginEnd(long begin, long end) {
-            if (locked)
-            {
-                locked = false;
-                return;
-            }
-
-            if (begin > samplesCount) {
-                begin = samplesCount;
-            }
-
-            if (begin < 0) {
-                begin = 0;
-            }
-
-            if (end > samplesCount) {
-                end = samplesCount;
-            }
-
-            if (end < begin) {
-                end = begin;
-            }
-
-            double p = (end - begin + 1) * 1.0 / samplesCount;
-            if (Math.Abs(p - 1.0) < 1e-5) p = 0.999;
-            OscillogramScroll.ViewportSize = samplesCount * p / Math.Abs(1.0 - p);
-            locked = true;
-            OscillogramScroll.Value = begin * (1.0 + p / Math.Abs(1.0 - p));
-            
+        private void InputBeginEnd(int begin, int end) {
+            end = Math.Clamp(end, 0, samplesCount - 1);
+            begin = Math.Clamp(begin, 0, end - 1);
 
             foreach (var chart in activeCharts) {
-                chart.Begin = (int)begin;
-                chart.End = (int)end;
+                chart.Begin = begin;
+                chart.End = end;
             }
 
-            BeginSlider.Value = begin;
-            EndSlider.Value = end;
-            BeginBox.Text = begin.ToString();
-            EndBox.Text = end.ToString();
+            if (FSelector.LeftSlider != begin) FSelector.LeftSlider = begin;
+            if (FSelector.RightSlider != end) FSelector.RightSlider = end;
+            if (BeginBox.Text != begin.ToString()) BeginBox.Text = begin.ToString();
+            if (EndBox.Text != end.ToString()) EndBox.Text = end.ToString();
+
             BeginTimeLabel.Content = (startTime + TimeSpan.FromSeconds(deltaTime * begin)).ToString("dd-MM-yyyy hh\\:mm\\:ss");
             EndTimeLabel.Content = (startTime + TimeSpan.FromSeconds(deltaTime * end)).ToString("dd-MM-yyyy hh\\:mm\\:ss");
         }
@@ -277,20 +241,20 @@ namespace CGProject1
             return input.All(c => char.IsDigit(c) || char.IsControl(c));
         }
 
-        private void OscillogramScroll_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            if (locked)
-            {
-                locked = false;
-                return;
-            }
+        //private void OscillogramScroll_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+        //    if (locked)
+        //    {
+        //        locked = false;
+        //        return;
+        //    }
 
-            double p = (EndSlider.Value - BeginSlider.Value + 1) * 1.0 / samplesCount;
-            double begin = e.NewValue * Math.Abs(1.0 - p);
-            double end = begin + EndSlider.Value - BeginSlider.Value;
-            locked = true;
-            BeginSlider.Value = begin;
-            EndSlider.Value = end;
-        }
+        //    double p = (EndSlider.Value - BeginSlider.Value + 1) * 1.0 / samplesCount;
+        //    double begin = e.NewValue * Math.Abs(1.0 - p);
+        //    double end = begin + EndSlider.Value - BeginSlider.Value;
+        //    locked = true;
+        //    BeginSlider.Value = begin;
+        //    EndSlider.Value = end;
+        //}
 
         //private void ResetScalingMode(MenuItem scalingMode) {
         //    foreach (MenuItem item in ScalingChooser.Items) {
@@ -351,6 +315,11 @@ namespace CGProject1
                 chart.GroupedCharts = activeCharts.ToList();
                 chart.Scaling = ChartLine.ScalingMode.UniformGlobal;
             }
+        }
+
+        private void FSelector_IntervalUpdate(object sender, EventArgs e)
+        {
+            InputBeginEnd(FSelector.LeftSlider, FSelector.RightSlider);
         }
     }
 }

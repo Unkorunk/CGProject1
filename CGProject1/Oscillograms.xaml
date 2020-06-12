@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CGProject1"
+        xmlns:local="clr-namespace:CGProject1" xmlns:chart="clr-namespace:CGProject1.Chart"
         mc:Ignorable="d"
         Title="Осциллограммы" Height="600" Width="1200">
     <Grid>
@@ -26,11 +26,10 @@
             <MenuItem Name="ScalingChooser" Header="Масштабирование"></MenuItem>
         </Menu>
         <StackPanel Grid.Row="2" Grid.Column="1">
-            <ScrollBar Orientation="Horizontal" Name="OscillogramScroll" ValueChanged="OscillogramScroll_ValueChanged" LargeChange="150" SmallChange="30"></ScrollBar>
             <Label Name="BeginTimeLabel">Start time:</Label>
-            <Slider Name="BeginSlider" Minimum="0" Maximum="0" ValueChanged="BeginSlider_ValueChanged"></Slider>
             <Label Name="EndTimeLabel">End time:</Label>
-            <Slider Name="EndSlider" Minimum="0" Maximum="0" ValueChanged="EndSlider_ValueChanged"></Slider>
+
+            <chart:FragmentSelector x:Name="FSelector" Height="20" Padding="0.15" IntervalUpdate="FSelector_IntervalUpdate"></chart:FragmentSelector>
         </StackPanel>
 
         <Grid Grid.Row="2" Grid.Column="0">

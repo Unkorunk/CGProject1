@@ -3,8 +3,6 @@ using System.Windows;
 using System.Threading;
 using System.Windows.Media;
 using System.Windows.Controls;
-using CGProject1.SignalProcessing;
-using System.Windows.Media.Imaging;
 using System.Collections.Generic;
 using CGProject1.Chart;
 using System.Windows.Input;
@@ -17,7 +15,7 @@ namespace CGProject1 {
 
         private byte[][] curPalette = palettes[1];
 
-        private double spectrogramHeight = 100;
+        private double spectrogramHeight = 150;
         private double coeffN = 1.0;
         private double boostCoeff = 1.0;
 
@@ -106,42 +104,26 @@ namespace CGProject1 {
 
             pics.Add(sp);
 
-            //var task = CalculateBitmap(channel);
-            //var bitmap = await task;
-
-            // step 7.2
-            //Image pic = new Image();
-            //pic.Source = bitmap;
-            //pic.Stretch = Stretch.Fill;
-            //pic.Height = spectrogramHeight;
-
-            //channelPanel.Children.Add(pic);
-            //pics.Add(pic);
-
             var chart = new ChartLine(in channel);
-            chart.Height = 50;
+            chart.Height = 100;
+            chart.Margin = new Thickness(sp.LeftOffset, 2, sp.RightOffset, 2);
             chart.Begin = 0;
             chart.End = channel.SamplesCount;
             chart.DisplayTitle = false;
+            chart.GridDraw = true;
+            chart.DisplayVAxisInfo = false;
+            chart.DisplayHAxisInfo = true;
+            chart.HAxisAlligment = ChartLine.HAxisAlligmentEnum.Bottom;
+            chart.MappingXAxis = (int idx, ChartLine chart) => {
+                var t = chart.Channel.StartDateTime + TimeSpan.FromSeconds(chart.Channel.DeltaTime * idx);
+                return t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss");
+            };
 
             channelPanel.Children.Add(chart);
 
             Spectrograms.Children.Add(border);
         }
 
-        //private async void RedrawSpectrograms() {
-        //    for (int i = 0; i < channels.Count; i++) {
-        //        pics[i].CoeffN = this.coeffN;
-                
-        //        var task = CalculateBitmap(channels[i]);
-        //        var source = await task;
-        //        if (source != null)
-        //        {
-        //            pics[i].Source = source;
-        //            pics[i].Height = this.spectrogramHeight;
-        //        }
-        //    }
-        //}
 
         private void UpdateSpectrograms(object sender, RoutedEventArgs e) {
             if (!double.TryParse(BrightnessField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newBrightness)
