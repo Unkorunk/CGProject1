@@ -8,13 +8,32 @@
         Title="SpectrogramWindow" Height="450" Width="800" SizeChanged="Window_SizeChanged">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="25"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
-            
-        </StackPanel>
+        <Menu Grid.Row="0">
+            <Border BorderThickness="1" BorderBrush="Black">
+                <StackPanel Orientation="Horizontal">
+                    <Button Click="UpdateSpectrograms">Обновить спектрограммы</Button>
+
+                    <Label Content="Яркость:"/>
+                    <TextBox x:Name="BrightnessField" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center"> 1.0 </TextBox>
+
+                    <Label Content="Высота"/>
+                    <TextBox x:Name="HeightField" Width="50" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center"> 100 </TextBox>
+
+                    <Label Content="Захлест:"/>
+                    <TextBox x:Name="CoeffSelector" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center"> 1.0 </TextBox>
+                    <Slider x:Name="CoeffSlider" Margin="5, 1, 5, 1" Width="100" Minimum="1" Maximum="10" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"></Slider>
+                </StackPanel>
+            </Border>
+
+            <ComboBox SelectedIndex="0" x:Name="PaletteSelector" SelectionChanged="ComboBoxMode_SelectionChanged">
+                <ComboBoxItem Content="GRAY"/>
+                <ComboBoxItem Content="HOT"/>
+            </ComboBox>
+        </Menu>
 
         <ScrollViewer Grid.Row="1">
             <StackPanel  x:Name="Spectrograms">
