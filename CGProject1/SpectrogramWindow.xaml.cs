@@ -257,7 +257,7 @@ namespace CGProject1 {
 
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    byte intensity = Math.Min((byte)255, (byte)(spectrogramMatrix[i, j] / maxVal * 256.0 * boostCoeff));
+                    byte intensity = (byte)Math.Min(255, spectrogramMatrix[i, j] / maxVal * 255.0 * boostCoeff);
                     for (int k = 0; k < 3; k++) {
                         rawImg[(height - 1 - i) * bitmap.BackBufferStride + j * 4 + k] = curPalette[intensity][2 - k];
                     }
@@ -288,7 +288,7 @@ namespace CGProject1 {
                     || !double.TryParse(HeightField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newHeight)
                     || !double.TryParse(CoeffSelector.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newCoeff))
             {
-                MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK);
+                MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 

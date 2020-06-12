@@ -207,6 +207,9 @@ namespace CGProject1
                     }
                 }
             }
+
+            locked = false;
+            InputBeginEnd(sender.Begin, sender.End);
         }
 
         private void ComboBoxMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
@@ -279,6 +282,10 @@ namespace CGProject1
 
         private void OscillogramScroll_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            if (samplesCount == 0) {
+                return;
+            }
+
             if (locked)
             {
                 locked = false;
@@ -323,6 +330,10 @@ namespace CGProject1
 
         private void InputBeginEnd(long begin, long end)
         {
+            if (samplesCount == 0) {
+                return;
+            }
+
             if (locked)
             {
                 locked = false;
