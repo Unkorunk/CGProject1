@@ -27,7 +27,7 @@ namespace CGProject1.Chart {
         public double BoostCoeff {
             get => boostCoeff; set {
                 boostCoeff = value;
-                SetupChannel(curChannel);
+                InvalidateVisual();
             }
         }
 
