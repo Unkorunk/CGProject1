@@ -158,6 +158,10 @@ namespace CGProject1 {
                 newCoeff = 10;
             }
 
+            if (newHeight < 64) {
+                newHeight = 64;
+            }
+
             BrightnessField.Text = newBrightness.ToString(CultureInfo.InvariantCulture);
             HeightField.Text = newHeight.ToString(CultureInfo.InvariantCulture);
             CoeffSelector.Text = newCoeff.ToString(CultureInfo.InvariantCulture);

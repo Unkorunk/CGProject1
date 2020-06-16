@@ -11,6 +11,10 @@ namespace CGProject1.Chart {
     public class Spectrogram : FrameworkElement {
         public Spectrogram(Channel channel) {
             curChannel = channel;
+
+            SizeChanged += (object sender, SizeChangedEventArgs e) => {
+                SetupChannel(curChannel);
+            };
         }
 
         public double CoeffN {
@@ -23,7 +27,7 @@ namespace CGProject1.Chart {
         public double BoostCoeff {
             get => boostCoeff; set {
                 boostCoeff = value;
-                SetupChannel(curChannel);
+                InvalidateVisual();
             }
         }
 
@@ -103,9 +107,9 @@ namespace CGProject1.Chart {
         }
 
         private void DrawBitmap(DrawingContext drawingContext) {
-            if (matrix.GetLength(1) != ActualWidth - rightOffset - leftOffset) {
-                SetupChannel(curChannel);
-            }
+            //if (Math.Abs(matrix.GetLength(1) - (ActualWidth - rightOffset - leftOffset)) > 1e-5) {
+            //    SetupChannel(curChannel);
+            //}
 
             int width = matrix.GetLength(1);
             int height = matrix.GetLength(0);
@@ -127,7 +131,7 @@ namespace CGProject1.Chart {
             bitmap.WritePixels(new Int32Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight),
                 rawImg, bitmap.PixelWidth * bitmap.Format.BitsPerPixel / 8, 0);
 
-            drawingContext.DrawImage(bitmap, new Rect(leftOffset, titleOffset, bitmap.PixelWidth, bitmap.PixelHeight));
+            drawingContext.DrawImage(bitmap, new Rect(leftOffset, titleOffset, ActualWidth - rightOffset - leftOffset, bitmap.PixelHeight));
 
             double minFrq = 0;
             double maxFrq = curChannel.SamplingFrq / 2;
@@ -165,7 +169,7 @@ namespace CGProject1.Chart {
                 drawingContext.DrawText(formText1, new Point(leftOffset - 5, titleOffset + y - formText1.Height / 2));
             }
 
-            drawingContext.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 1.0), new Rect(leftOffset, titleOffset, bitmap.PixelWidth, bitmap.PixelHeight));
+            drawingContext.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 1.0), new Rect(leftOffset, titleOffset, ActualWidth - rightOffset - leftOffset, bitmap.PixelHeight));
         }
 
         private void DrawBrightness(DrawingContext drawingContext) {
@@ -290,7 +294,6 @@ namespace CGProject1.Chart {
 
                     avrg /= sectionN;
 
-
                     for (int j = 0; j < sectionN; j++) {
                         x[j] -= avrg;
                     }
@@ -347,11 +350,13 @@ namespace CGProject1.Chart {
             }
 
             await Task.Factory.StartNew(() => countdownEvent.Wait());
+
             if (token.IsCancellationRequested) return null;
 
             // step 6
             double maxVal = double.MinValue;
             double minVal = double.MaxValue;
+
             for (int i = 0; i < sectionsCount; i++) {
                 for (int j = 0; j < samplesPerSection; j++) {
                     maxVal = Math.Max(maxVal, spectrogramMatrix[j, i]);
