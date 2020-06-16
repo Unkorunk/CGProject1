@@ -24,17 +24,12 @@ namespace CGProject1 {
         private List<Channel> channels;
         //private List<TextBox> brightnessBoxes;
 
-        private Dictionary<string, CancellationTokenSource> cts;
-        private Dictionary<string, CountdownEvent> cde;
 
         public SpectrogramWindow() {
             channelNames = new HashSet<string>();
             spectrograms = new List<Spectrogram>();
             channels = new List<Channel>();
             //brightnessBoxes = new List<TextBox>();
-
-            cts = new Dictionary<string, CancellationTokenSource>();
-            cde = new Dictionary<string, CountdownEvent>();
 
             InitializeComponent();
         }
@@ -84,9 +79,6 @@ namespace CGProject1 {
             if (channelNames.Contains(channel.Name)) {
                 return;
             }
-
-            cts.Add(channel.Name, null);
-            cde.Add(channel.Name, null);
 
             channelNames.Add(channel.Name);
             channels.Add(channel);
