@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
-        Title="Спектрограмма" Height="500" Width="1000" SizeChanged="Window_SizeChanged">
+        Title="Спектрограмма" Height="500" Width="1000">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
@@ -35,6 +35,11 @@
                 <ComboBoxItem Content="ICE"/>
                 <ComboBoxItem Content="BlueRed"/>
             </ComboBox>
+
+            <StackPanel Orientation="Horizontal">
+                <Label x:Name="BeginLabel" Width="120">Начало: </Label>
+                <Label x:Name="EndLabel" Width="120">Конец: </Label>
+            </StackPanel>
         </Menu>
 
         <ScrollViewer Grid.Row="1">

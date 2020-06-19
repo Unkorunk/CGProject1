@@ -38,11 +38,11 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>BEGIN</Label>
-                        <TextBox x:Name="BeginSelector" Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting"></TextBox>
+                        <TextBox x:Name="BeginSelector" Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" IsEnabled="False"></TextBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>END</Label>
-                        <TextBox x:Name="EndSelector" Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting"></TextBox>
+                        <TextBox x:Name="EndSelector" Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" IsEnabled="False"></TextBox>
                     </StackPanel>
 
                     <Button Content="Обновить спектры" Margin="8,0,0,0" Click="SelectInterval"></Button>

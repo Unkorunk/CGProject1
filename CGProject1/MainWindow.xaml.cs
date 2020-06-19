@@ -13,20 +13,20 @@ namespace CGProject1
         public static MainWindow instance = null;
 
         private AboutSignal aboutSignalWindow;
-        private Oscillograms oscillogramWindow;
+        public Oscillograms oscillogramWindow;
         private ModelingWindow modelingWindow;
         private SaveWindow savingWindow;
-        private AnalyzerWindow analyzerWindow;
-        private SpectrogramWindow spectrogramWindow;
+        public AnalyzerWindow analyzerWindow;
+        public SpectrogramWindow spectrogramWindow;
 
         public StatisticsWindow statisticsWindow;
 
         private bool isAboutSignalShowing = false;
-        private bool isOscillogramShowing = false;
+        public bool isOscillogramShowing = false;
         private bool isModelingWindowShowing = false;
         private bool isSavingWindowShowing = false;
-        private bool isAnalyzerShowing = false;
-        private bool isSpectrogramsShowing = false;
+        public bool isAnalyzerShowing = false;
+        public bool isSpectrogramsShowing = false;
         public bool isStatisticShowing = false;
 
         public Signal currentSignal;

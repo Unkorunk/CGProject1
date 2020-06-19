@@ -11,6 +11,8 @@ namespace CGProject1.Chart {
     public class Spectrogram : FrameworkElement {
         public Spectrogram(Channel channel) {
             curChannel = channel;
+            this.begin = 0;
+            this.end = channel.SamplesCount - 1;
 
             SizeChanged += (object sender, SizeChangedEventArgs e) => {
                 SetupChannel(curChannel);
@@ -56,6 +58,23 @@ namespace CGProject1.Chart {
         public double RightOffset {
             get => rightOffset;
         }
+
+        public int Begin {
+            get => begin; set {
+                begin = value;
+                SetupChannel(curChannel);
+            }
+        }
+
+        public int End {
+            get => end; set {
+                end = value;
+                SetupChannel(curChannel);
+            } 
+        }
+
+        private int begin;
+        private int end;
 
         private double boostCoeff = 1.0;
         private byte[][] curPalette;
@@ -229,7 +248,7 @@ namespace CGProject1.Chart {
         }
 
         private async void SetupChannel(Channel channel) {
-            var task = CalculateMatrix(channel);
+            var task = CalculateMatrix(channel, this.begin, this.end);
             var res = await task;
             if (res != null) {
                 this.matrix = res;
@@ -237,10 +256,12 @@ namespace CGProject1.Chart {
             }
         }
 
-        private async Task<double[,]> CalculateMatrix(Channel channel) {
+        private async Task<double[,]> CalculateMatrix(Channel channel, int left, int right) {
             if (ActualWidth == 0 || spectrogramHeight == 0) {
                 return null;
             }
+
+            int len = right - left + 1;
 
             int width = (int)(ActualWidth - rightOffset - leftOffset);
             int height = (int)(spectrogramHeight - titleOffset);
@@ -252,7 +273,7 @@ namespace CGProject1.Chart {
             var spectrogramMatrix = new double[samplesPerSection, sectionsCount];
 
             // step 2
-            double sectionBase = (double)channel.SamplesCount / sectionsCount;
+            double sectionBase = (double)len / sectionsCount;
 
             // step 3
             int sectionN = (int)(sectionBase * coeffN);
@@ -283,10 +304,10 @@ namespace CGProject1.Chart {
                     // step 5.3
                     double avrg = 0;
                     for (int j = 0; j < sectionN; j++) {
-                        if (j + start >= channel.values.Length) {
+                        if (j + start >= len) {
                             x[j] = 0;
                         } else {
-                            x[j] = channel.values[j + start];
+                            x[j] = channel.values[left + j + start];
                         }
 
                         avrg += x[j];

@@ -43,6 +43,16 @@ namespace CGProject1
         public int GetBegin() => FSelector.LeftSlider;
         public int GetEnd() => FSelector.RightSlider;
 
+        public void SetupSegment(int begin, int end) {
+            BeginSelector.Text = begin.ToString();
+            EndSelector.Text = end.ToString();
+
+            this.begin = begin;
+            this.end = end;
+
+            UpdateAnalyzers();
+        }
+
         public void AddChannel(Channel channel) {
             if (namesSet.Contains(channel.Name)) {
                 return;

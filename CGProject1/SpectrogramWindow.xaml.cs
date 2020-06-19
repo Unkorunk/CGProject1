@@ -25,11 +25,17 @@ namespace CGProject1 {
         //private List<TextBox> brightnessBoxes;
 
 
+        private int begin;
+        private int end;
+
         public SpectrogramWindow() {
             channelNames = new HashSet<string>();
             spectrograms = new List<Spectrogram>();
             channels = new List<Channel>();
             //brightnessBoxes = new List<TextBox>();
+
+            begin = 0;
+            end = 0;
 
             InitializeComponent();
         }
@@ -75,6 +81,19 @@ namespace CGProject1 {
             palettes.Add(blueRedYellow);
         }
 
+        public void SetSegment(int begin, int end) {
+            this.begin = begin;
+            this.end = end;
+
+            BeginLabel.Content = $"Начало: {begin}";
+            EndLabel.Content = $"Конец: {end}";
+
+            foreach (var sp in spectrograms) {
+                sp.Begin = begin;
+                sp.End = end;
+            }
+        }
+
         public void AddChannel(Channel channel) {
             if (channelNames.Contains(channel.Name)) {
                 return;
@@ -82,6 +101,15 @@ namespace CGProject1 {
 
             channelNames.Add(channel.Name);
             channels.Add(channel);
+
+            if (begin == 0 && end == 0) {
+                if (MainWindow.instance.isOscillogramShowing) {
+                    SetSegment(MainWindow.instance.oscillogramWindow.GetBegin(),
+                        MainWindow.instance.oscillogramWindow.GetEnd());
+                } else {
+                    SetSegment(0, channel.SamplesCount - 1);
+                }
+            }
 
             var border = new Border();
             border.BorderThickness = new Thickness(1);
@@ -91,6 +119,8 @@ namespace CGProject1 {
             border.Child = channelPanel;
 
             var sp = new Spectrogram(channel);
+            sp.Begin = this.begin;
+            sp.End = this.end;
             sp.Palette = this.curPalette;
             sp.CoeffN = this.coeffN;
             sp.BoostCoeff = this.boostCoeff;
@@ -121,20 +151,6 @@ namespace CGProject1 {
             };
 
             bottomGrid.Children.Add(chart);
-
-            //var brightnessPanel = new StackPanel();
-            //Grid.SetColumn(brightnessPanel, 1);
-            //bottomGrid.Children.Add(brightnessPanel);
-
-            //var brightnessLabel = new Label();
-            //brightnessLabel.Content = "Яркость: ";
-            //brightnessLabel.VerticalAlignment = VerticalAlignment.Center;
-            //brightnessPanel.Children.Add(brightnessLabel);
-
-            //var brightnessBox = new TextBox();
-            //brightnessBox.Text = this.boostCoeff.ToString(CultureInfo.InvariantCulture);
-            //brightnessBox.VerticalAlignment = VerticalAlignment.Center;
-            //brightnessPanel.Children.Add(brightnessBox);
 
             channelPanel.Children.Add(bottomGrid);
 

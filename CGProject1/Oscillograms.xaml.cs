@@ -226,6 +226,14 @@ namespace CGProject1
 
             BeginTimeLabel.Content = "Start Time: " + (startTime + TimeSpan.FromSeconds(deltaTime * begin)).ToString("dd-MM-yyyy hh\\:mm\\:ss");
             EndTimeLabel.Content = "End Time: " + (startTime + TimeSpan.FromSeconds(deltaTime * end)).ToString("dd-MM-yyyy hh\\:mm\\:ss");
+
+            if (MainWindow.instance.isSpectrogramsShowing) {
+                MainWindow.instance.spectrogramWindow.SetSegment(begin, end);
+            }
+
+            if (MainWindow.instance.isAnalyzerShowing) {
+                MainWindow.instance.analyzerWindow.SetupSegment(begin, end);
+            }
         }
 
         private void previewTextInput(object sender, TextCompositionEventArgs e)
