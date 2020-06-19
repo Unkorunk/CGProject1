@@ -168,7 +168,7 @@ namespace CGProject1.Chart
             var t = chart.Channel.StartDateTime + TimeSpan.FromSeconds(chart.Channel.DeltaTime * idx);
             return t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss") + "\n(" + idx.ToString() + ")";
         };
-        public string MaxHeightXAxisString = DateTime.Now.ToString("dd-MM-yyyy \n hh\\:mm\\:ss") + "\n(" + int.MaxValue.ToString() + ")";
+        public string MaxHeightXAxisString = DateTime.Now.ToString("dd-MM-yyyy \n HH\\:mm\\:ss") + "\n(" + int.MaxValue.ToString() + ")";
 
         protected override void OnRender(DrawingContext dc)
         {

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using CGProject1.SignalProcessing;
@@ -73,6 +74,8 @@ namespace CGProject1.Chart {
             } 
         }
 
+        public bool ShowCurrentXY { get; set; }
+
         private int begin;
         private int end;
 
@@ -96,8 +99,34 @@ namespace CGProject1.Chart {
         private double minValue;
         private double maxValue;
 
+        private double stepX = 1;
+        private double stepY = 1;
+
+        private int curSelectedX = -1;
+        private int curSelectedY = -1;
+
         protected override void OnRender(DrawingContext drawingContext) {
             base.OnRender(drawingContext);
+            int lenX = 0;
+            int lenY = 0;
+            double matrixVal = 0;
+
+            if (matrix != null) {
+                var curMatrix = this.matrix;
+
+                lenX = curMatrix.GetLength(1);
+                lenY = curMatrix.GetLength(0);
+
+                stepX = (ActualWidth - rightOffset - leftOffset) / (lenX);
+                stepY = (ActualHeight - titleOffset) / (lenY);
+
+                if (curSelectedX != -1 && curSelectedY != -1 && curSelectedY < curMatrix.GetLength(0) && curSelectedX < curMatrix.GetLength(1)) {
+                    matrixVal = curMatrix[lenY - curSelectedY - 1, curSelectedX] * boostCoeff;
+                }
+
+            }
+
+            double curLen = this.End - this.Begin + 1;
 
             DrawTitle(drawingContext);
 
@@ -109,6 +138,130 @@ namespace CGProject1.Chart {
                 DrawBitmap(drawingContext);
                 DrawBrightness(drawingContext);
             }
+
+            if (lenX != 0 && lenY != 0 && curSelectedX != -1 && curSelectedY != -1) {
+                double centerX = 0.0;
+
+                centerX = leftOffset + stepX * curSelectedX;
+
+                drawingContext.DrawLine(new Pen(Brushes.Green, 2.0),
+                    new Point(centerX, titleOffset),
+                    new Point(centerX, ActualHeight));
+
+                var formText1 = new FormattedText($"X: { curChannel.StartDateTime + TimeSpan.FromSeconds((this.begin + curSelectedX * curLen / lenX) * curChannel.DeltaTime):dd-MM-yyyy \n HH\\:mm\\:ss}",
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    12, Brushes.DarkGreen, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                );
+
+                formText1.TextAlignment = TextAlignment.Center;
+
+                drawingContext.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Black, 2.0), new Rect(
+                    centerX - formText1.Width / 2, 0, formText1.Width, formText1.Height
+                ));
+                drawingContext.DrawText(formText1, new Point(centerX, 0.0));
+
+                double centerY = titleOffset + stepY * curSelectedY;
+
+                drawingContext.DrawLine(new Pen(Brushes.Green, 2.0),
+                    new Point(leftOffset, centerY),
+                    new Point(ActualWidth - rightOffset, centerY)
+                );
+
+                //string val = Math.Round(this.Channel.values[curSelected], 5).ToString(CultureInfo.InvariantCulture);
+                //if (val.Length > this.MaxVAxisLength) {
+                //    val = val.Substring(0, this.MaxVAxisLength);
+                //}
+                double yValStep = curChannel.SamplingFrq / 2 / lenY;
+                string valStr = ((lenY - curSelectedY) * yValStep).ToString(CultureInfo.InvariantCulture);
+                if (valStr.Length > 8) {
+                    valStr = valStr.Substring(0, 8);
+                }
+
+                var formText2 = new FormattedText($"Y: {valStr}",
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    12, Brushes.DarkGreen, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                );
+                formText2.TextAlignment = TextAlignment.Right;
+
+                drawingContext.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Black, 2.0), new Rect(
+                    leftOffset - formText2.Width, centerY - formText2.Height / 2, formText2.Width, formText2.Height
+                ));
+                drawingContext.DrawText(formText2, new Point(leftOffset, centerY - formText2.Height / 2));
+
+                var matrixStrVal = matrixVal.ToString(CultureInfo.InvariantCulture);
+                if (matrixStrVal.Length > 8) {
+                    matrixStrVal = matrixStrVal.Substring(0, 8);
+                }
+
+                var formText3 = new FormattedText($"I: {matrixStrVal}",
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    14, Brushes.DarkGreen, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                );
+                formText3.SetFontWeight(FontWeights.Bold);
+                formText3.TextAlignment = TextAlignment.Right;
+
+                drawingContext.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Black, 2.0), new Rect(
+                   centerX - 3 * formText3.Width / 2, centerY + formText3.Height / 2, formText3.Width, formText3.Height
+               ));
+                drawingContext.DrawText(formText3, new Point(centerX - formText3.Width / 2, centerY + formText3.Height / 2));
+            }
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e) {
+            base.OnMouseMove(e);
+
+            var position = e.GetPosition(this);
+            if (position.X >= leftOffset && position.X <= ActualWidth -  rightOffset
+                && position.Y >= titleOffset) {
+                if (ShowCurrentXY) {
+                    curSelectedX = GetXIdx(position);
+                    curSelectedY = GetYIdx(position);
+                }
+
+                InvalidateVisual();
+            } else if (curSelectedX != -1) {
+                //tooltip.IsOpen = false;
+                curSelectedX = -1;
+                curSelectedY = -1;
+                InvalidateVisual();
+            }
+        }
+
+        protected override void OnMouseLeave(MouseEventArgs e) {
+            base.OnMouseLeave(e);
+            base.OnMouseLeave(e);
+            if (ShowCurrentXY) {
+                if (curSelectedX != -1) {
+                    curSelectedX = -1;
+                    curSelectedY = -1;
+                }
+            }
+        }
+
+        private int GetXIdx(Point position) {
+            position.X -= leftOffset;
+
+            int idx;
+
+            idx = (int)Math.Round(position.X / stepX);
+            
+            return idx;
+        }
+
+        private int GetYIdx(Point position) {
+            position.Y -= titleOffset;
+
+            int idx;
+
+            idx = (int)Math.Round(position.Y / stepY);
+
+            return idx;
         }
 
         private void DrawTitle(DrawingContext drawingContext) {

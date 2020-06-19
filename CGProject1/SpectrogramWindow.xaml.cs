@@ -21,6 +21,7 @@ namespace CGProject1 {
         private HashSet<string> channelNames;
         private List<Spectrogram> spectrograms;
         private List<Channel> channels;
+        private List<ChartLine> charts;
         //private List<TextBox> brightnessBoxes;
 
 
@@ -31,6 +32,7 @@ namespace CGProject1 {
             channelNames = new HashSet<string>();
             spectrograms = new List<Spectrogram>();
             channels = new List<Channel>();
+            charts = new List<ChartLine>();
             //brightnessBoxes = new List<TextBox>();
 
             begin = 0;
@@ -91,6 +93,11 @@ namespace CGProject1 {
                 sp.Begin = begin;
                 sp.End = end;
             }
+
+            foreach (var chart in charts) {
+                chart.Begin = begin;
+                chart.End = end;
+            }
         }
 
         public void AddChannel(Channel channel) {
@@ -124,6 +131,7 @@ namespace CGProject1 {
             sp.CoeffN = this.coeffN;
             sp.BoostCoeff = this.boostCoeff;
             sp.SpectrogramHeight = this.spectrogramHeight;
+            sp.ShowCurrentXY = true;
             channelPanel.Children.Add(sp);
 
             spectrograms.Add(sp);
@@ -137,8 +145,8 @@ namespace CGProject1 {
             var chart = new ChartLine(in channel);
             chart.Height = 100;
             chart.Margin = new Thickness(sp.LeftOffset, 2, 2, 2);
-            chart.Begin = 0;
-            chart.End = channel.SamplesCount;
+            chart.Begin = this.begin;
+            chart.End = this.end;
             chart.DisplayTitle = false;
             chart.GridDraw = true;
             chart.DisplayVAxisInfo = false;
@@ -148,6 +156,7 @@ namespace CGProject1 {
                 var t = chart.Channel.StartDateTime + TimeSpan.FromSeconds(chart.Channel.DeltaTime * idx);
                 return t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss");
             };
+            charts.Add(chart);
 
             bottomGrid.Children.Add(chart);
 
@@ -192,10 +201,6 @@ namespace CGProject1 {
                 sp.CoeffN = coeffN;
                 sp.SpectrogramHeight = spectrogramHeight;
             }
-        }
-
-        private void Window_SizeChanged(object sender, SizeChangedEventArgs e) {
-            //RedrawSpectrograms();
         }
 
         private void ComboBoxMode_SelectionChanged(object sender, SelectionChangedEventArgs e) {
