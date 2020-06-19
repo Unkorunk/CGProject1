@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -142,7 +143,7 @@ namespace CGProject1.Chart
         private double stepX = 1.0;
         private int stepOptimization = 0;
 
-        private ToolTip tooltip;
+        //private ToolTip tooltip;
 
         private int curSelected = -1;
 
@@ -150,9 +151,9 @@ namespace CGProject1.Chart
         {
             Channel = channel;
             _groupedCharts = new List<ChartLine>() { this };
-            tooltip = new ToolTip();
-            tooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
-            tooltip.PlacementTarget = this;
+            //tooltip = new ToolTip();
+            //tooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
+            //tooltip.PlacementTarget = this;
 
             DisplayHAxisInfo = true;
             DisplayVAxisInfo = true;
@@ -405,17 +406,12 @@ namespace CGProject1.Chart
                     dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width, interfaceOffset.Height + y),
                         new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
                     string val = Math.Round(maxChannelValue - (i + 1) * (maxChannelValue - minChannelValue) / 6, 5).ToString(CultureInfo.InvariantCulture);
-                    if (val.Length > 8)
+                    if (val.Length > this.MaxVAxisLength)
                     {
-                        val = val.Substring(0, 8);
+                        val = val.Substring(0, this.MaxVAxisLength);
                     }
                     if (DisplayVAxisInfo)
                     {
-                        if (val.Length > 12)
-                        {
-                            val = val.Substring(0, 12);
-                        }
-
                         var formText1 = new FormattedText(val,
                             CultureInfo.GetCultureInfo("en-us"),
                             FlowDirection.LeftToRight,
@@ -425,7 +421,7 @@ namespace CGProject1.Chart
 
                         formText1.TextAlignment = TextAlignment.Right;
 
-                        dc.DrawText(formText1, new Point(interfaceOffset.Width - 5, interfaceOffset.Height + y - formText1.Height / 2));
+                        dc.DrawText(formText1, new Point(interfaceOffset.Width, interfaceOffset.Height + y - formText1.Height / 2));
                     }
                 }
             }
@@ -470,18 +466,65 @@ namespace CGProject1.Chart
             #region [SelectInterval] Draw
             if (curSelected != -1)
             {
+                double centerX = 0.0;
                 if (optimization)
                 {
+                    centerX = interfaceOffset.Width + 2.0 * stepX * (curSelected - Begin) / stepOptimization;
+
                     dc.DrawLine(new Pen(Brushes.Green, 2.0),
-                        new Point(interfaceOffset.Width + 2.0 * stepX * (curSelected - Begin) / stepOptimization, interfaceOffset.Height),
-                        new Point(interfaceOffset.Width + 2.0 * stepX * (curSelected - Begin) / stepOptimization, actSize.Height + interfaceOffset.Height));
+                        new Point(centerX, interfaceOffset.Height),
+                        new Point(centerX, actSize.Height + interfaceOffset.Height)
+                    );
                 }
                 else
                 {
+                    centerX = interfaceOffset.Width + stepX * (curSelected - Begin);
+
                     dc.DrawLine(new Pen(Brushes.Green, 2.0),
-                        new Point(interfaceOffset.Width + stepX * (curSelected - Begin), interfaceOffset.Height),
-                        new Point(interfaceOffset.Width + stepX * (curSelected - Begin), actSize.Height + interfaceOffset.Height));
+                        new Point(centerX, interfaceOffset.Height),
+                        new Point(centerX, actSize.Height + interfaceOffset.Height));
                 }
+
+                var formText1 = new FormattedText(this.MappingXAxis(curSelected, this),
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    12, Brushes.DarkGreen, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                );
+
+                formText1.TextAlignment = TextAlignment.Center;
+
+                dc.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Black, 2.0), new Rect(
+                    centerX - formText1.Width / 2, 0, formText1.Width, formText1.Height    
+                ));
+                dc.DrawText(formText1, new Point(centerX, 0.0));
+
+                double centerY = actSize.Height / (maxChannelValue - minChannelValue) * (this.Channel.values[curSelected] - minChannelValue);
+                centerY = actSize.Height - centerY;
+                centerY += interfaceOffset.Height;
+
+                dc.DrawLine(new Pen(Brushes.Green, 2.0),
+                    new Point(interfaceOffset.Width, centerY),
+                    new Point(interfaceOffset.Width + actSize.Width, centerY)
+                );
+
+                string val = Math.Round(this.Channel.values[curSelected], 5).ToString(CultureInfo.InvariantCulture);
+                if (val.Length > this.MaxVAxisLength)
+                {
+                    val = val.Substring(0, this.MaxVAxisLength);
+                }
+                var formText2 = new FormattedText(val,
+                    CultureInfo.GetCultureInfo("en-us"),
+                    FlowDirection.LeftToRight,
+                    new Typeface("Times New Roman"),
+                    12, Brushes.DarkGreen, VisualTreeHelper.GetDpi(this).PixelsPerDip
+                );
+                formText2.TextAlignment = TextAlignment.Right;
+
+                dc.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Black, 2.0), new Rect(
+                    interfaceOffset.Width - formText2.Width, centerY - formText2.Height / 2, formText2.Width, formText2.Height
+                ));
+                dc.DrawText(formText2, new Point(interfaceOffset.Width, centerY - formText2.Height / 2));
             }
 
             if (enableSelectInterval)
@@ -573,15 +616,13 @@ namespace CGProject1.Chart
             if (position.X >= interfaceOffset.Width &&
                 position.Y >= interfaceOffset.Height)
             {
-
-
                 if (ShowCurrentXY)
                 { 
                     curSelected = GetIdx(position);
-                    tooltip.IsOpen = true;
-                    tooltip.HorizontalOffset = 1;//position.X;
-                    tooltip.VerticalOffset = ActualHeight - 26;// position.Y - 20;
-                    tooltip.Content = $"X: {curSelected}; Y: {Channel.values[curSelected]}";
+                    //tooltip.IsOpen = true;
+                    //tooltip.HorizontalOffset = 1;//position.X;
+                    //tooltip.VerticalOffset = ActualHeight - 26;// position.Y - 20;
+                    //tooltip.Content = $"X: {this.MappingXAxis(curSelected, this)}; Y: {Channel.values[curSelected]}";
                 }
 
                 if (enableSelectInterval && IsMouseSelect)
@@ -604,7 +645,7 @@ namespace CGProject1.Chart
             }
             else if (curSelected != -1)
             {
-                tooltip.IsOpen = false;
+                //tooltip.IsOpen = false;
                 curSelected = -1;
                 InvalidateVisual();
             }
@@ -617,7 +658,7 @@ namespace CGProject1.Chart
             {
                 if (curSelected != -1)
                 {
-                    tooltip.IsOpen = false;
+                    //tooltip.IsOpen = false;
                     curSelected = -1;
                 }
             }
