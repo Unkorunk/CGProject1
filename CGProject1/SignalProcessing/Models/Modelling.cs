@@ -97,6 +97,18 @@ namespace CGProject1.SignalProcessing {
                     });
             continiousModels.Add(withTonicEnvelope);
 
+            var linearChirp = new ChannelConstructor("ЛЧМ - сигнал", 13,
+                    new string[] { "Амплитуда", "Нач. частота", "Конечная частота", "Нач. фаза"}, new string[0],
+                    new double[] { double.MinValue, 0, 0, 0},
+                    new double[] { double.MaxValue, double.MaxValue, double.MaxValue, 2 * Math.PI },
+                    new double[] { 1, 0.1, 1, 0 }, null,
+                    (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
+                        double t = n * dt;
+                        double dF = (args[2] - args[1]) / (signalVals.Length * dt);
+                        return args[0] * Math.Cos(2 * Math.PI * (args[1] + dF * t) * t + args[3] );
+                    });
+            continiousModels.Add(linearChirp);
+
             randomModels = new List<ChannelConstructor>();
 
             var uniformWhiteNoise = new ChannelConstructor("Белый шум (равномерный)", 9,

@@ -576,7 +576,7 @@ namespace CGProject1.Chart
 
 
                 if (ShowCurrentXY)
-                {
+                { 
                     curSelected = GetIdx(position);
                     tooltip.IsOpen = true;
                     tooltip.HorizontalOffset = 1;//position.X;
