@@ -50,7 +50,7 @@ namespace CGProject1.SignalProcessing {
                 vals[i] = curChannel.values[i + begin];
             }
 
-            Fourier.Forward(vals);
+            Fourier.Forward(vals, FourierOptions.NoScaling);
             ft = vals;
 
             
