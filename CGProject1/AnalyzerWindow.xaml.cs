@@ -136,6 +136,13 @@ namespace CGProject1
 
             UpdatePanel();
             if (FSelector != null) {
+                if (b >= FSelector.Maximum) {
+                    b = FSelector.Maximum - 1;
+                }
+                if (e > FSelector.Maximum) {
+                    e = FSelector.Maximum;
+                }
+
                 InputBeginEnd(b, e);
             }
         }
@@ -197,6 +204,8 @@ namespace CGProject1
             FrequencyChartSetup(logChart);
             logChart.Scaling = ChartLine.ScalingMode.Local;
             charts[3].Add(logChart);
+
+            FSelector.Maximum = lg.SamplesCount - 1;
         }
 
         private string MappingXAxis(int idx, ChartLine chart)
