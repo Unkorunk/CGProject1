@@ -37,7 +37,7 @@ namespace CGProject1.SignalProcessing {
 
             var discretSin = new ChannelConstructor("Дискр. синусоида", 3,
                     new string[] { "Амплитуда", "Круг. частота", "Нач. фаза" }, new string[0],
-                    new double[] { double.MinValue, 0, 0 }, new double[] { double.MaxValue, Math.PI, Math.PI * 2 }, new double[] { 1, Math.PI, 0 }, null,
+                    new double[] { double.MinValue, 0, 0 }, new double[] { double.MaxValue, Math.PI, Math.PI * 2 }, new double[] { 1, Math.PI / 10, 0 }, null,
                     (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
                         return args[0] * Math.Sin(n * args[1] + args[2]);
                     });
@@ -68,7 +68,7 @@ namespace CGProject1.SignalProcessing {
                     new string[] { "Амплитуда", "Ширина огибающей", "Частота несущей", "Нач. фаза несущей" }, new string[0],
                     new double[] { double.MinValue, 1e-6, 0, 0 },
                     new double[] { double.MaxValue, double.MaxValue, double.MaxValue, Math.PI * 2 },
-                     new double[] { 1, 10, 44000, 0 }, null,
+                     new double[] { 1, 10, 0.1, 0 }, null,
                     (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
                         double t = n * dt;
                         return args[0] * Math.Exp(-t / args[1]) * Math.Cos(2 * Math.PI * args[2] * t + args[3]);
@@ -79,7 +79,7 @@ namespace CGProject1.SignalProcessing {
                     new string[] { "Амплитуда", "Частота огибающей", "Частота несущей", "Нач. фаза несущей" }, new string[0],
                     new double[] { double.MinValue, 0, 0, 0 },
                     new double[] { double.MaxValue, double.MaxValue, double.MaxValue, Math.PI * 2 },
-                    new double[] { 1, 1000, 44000, 0 }, null,
+                    new double[] { 1, 0.01, 0.1, 0 }, null,
                     (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
                         double t = n * dt;
                         return args[0] * Math.Cos(2 * Math.PI * args[1] * t) * Math.Cos(2 * Math.PI * args[2] * t + args[3]);
@@ -90,7 +90,7 @@ namespace CGProject1.SignalProcessing {
                     new string[] { "Амплитуда", "Индекс глубины модуляции", "Частота огибающей", "Частота несущей", "Нач. фаза несущей" }, new string[0],
                     new double[] { double.MinValue, 0, 0, 0, 0 },
                     new double[] { double.MaxValue, 1, double.MaxValue, double.MaxValue, 2 * Math.PI },
-                    new double[] { 1, 1, 1000, 44000, 0 }, null,
+                    new double[] { 1, 1, 0.01, 0.1, 0 }, null,
                     (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
                         double t = n * dt;
                         return args[0] * (1 + args[1] * Math.Cos(2 * Math.PI * args[2] * t)) * Math.Cos(2 * Math.PI * args[3] * t + args[4]);
@@ -101,7 +101,7 @@ namespace CGProject1.SignalProcessing {
                     new string[] { "Амплитуда", "Нач. частота", "Конечная частота", "Нач. фаза"}, new string[0],
                     new double[] { double.MinValue, 0, 0, 0},
                     new double[] { double.MaxValue, double.MaxValue, double.MaxValue, 2 * Math.PI },
-                    new double[] { 1, 0.1, 1, 0 }, null,
+                    new double[] { 1, 0.01, 0.1, 0 }, null,
                     (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
                         double t = n * dt;
                         double dF = (args[2] - args[1]) / (signalVals.Length * dt);
