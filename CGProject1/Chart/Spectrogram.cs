@@ -206,10 +206,15 @@ namespace CGProject1.Chart {
                 formText3.SetFontWeight(FontWeights.Bold);
                 formText3.TextAlignment = TextAlignment.Right;
 
+                double posX = centerX - formText3.Width / 2;
+                if (posX < formText3.Width) {
+                    posX = centerX + formText3.Width;
+                }
+
                 drawingContext.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Black, 2.0), new Rect(
-                   centerX - 3 * formText3.Width / 2, centerY + formText3.Height / 2, formText3.Width, formText3.Height
+                   posX - formText3.Width, centerY - formText3.Height / 2, formText3.Width, formText3.Height
                ));
-                drawingContext.DrawText(formText3, new Point(centerX - formText3.Width / 2, centerY + formText3.Height / 2));
+                drawingContext.DrawText(formText3, new Point(posX, centerY - formText3.Height / 2));
             }
         }
 
