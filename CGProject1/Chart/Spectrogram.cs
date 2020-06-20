@@ -174,12 +174,18 @@ namespace CGProject1.Chart {
                 //    val = val.Substring(0, this.MaxVAxisLength);
                 //}
                 double yValStep = curChannel.SamplingFrq / 2 / lenY;
-                string valStr = ((lenY - curSelectedY) * yValStep).ToString(CultureInfo.InvariantCulture);
+                string valStr = "F:" + ((lenY - curSelectedY) * yValStep).ToString(CultureInfo.InvariantCulture);
                 if (valStr.Length > 8) {
                     valStr = valStr.Substring(0, 8);
                 }
 
-                var formText2 = new FormattedText($"Y: {valStr}",
+                string valStr2 = "T:"+(1.0 / ((lenY - curSelectedY) * yValStep)).ToString(CultureInfo.InvariantCulture);
+                if (valStr2.Length > 8)
+                {
+                    valStr2 = valStr2.Substring(0, 8);
+                }
+
+                var formText2 = new FormattedText($"{valStr}\n{valStr2}",
                     CultureInfo.GetCultureInfo("en-us"),
                     FlowDirection.LeftToRight,
                     new Typeface("Times New Roman"),
