@@ -105,7 +105,7 @@ namespace CGProject1.SignalProcessing {
                     (int n, double dt, double[] args, double[][] varargs, double[] signalVals) => {
                         double t = n * dt;
                         double dF = (args[2] - args[1]) / (signalVals.Length * dt);
-                        return args[0] * Math.Cos(2 * Math.PI * (args[1] + dF * t) * t + args[3] );
+                        return args[0] * Math.Cos(2 * Math.PI * (args[1] + dF * t / 2) * t + args[3] );
                     });
             continiousModels.Add(linearChirp);
 
