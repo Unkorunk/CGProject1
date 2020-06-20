@@ -36,6 +36,7 @@ namespace CGProject1
             this.end = end;
 
             if (MainWindow.instance.currentSignal != null) {
+                BeginFrequencyLabel.Content = "Begin frequency: 0";
                 EndFrequencyLabel.Content = $"End frequency: {(MainWindow.instance.currentSignal.SamplingFrq / 2).ToString(CultureInfo.InvariantCulture)}";
             }
         }

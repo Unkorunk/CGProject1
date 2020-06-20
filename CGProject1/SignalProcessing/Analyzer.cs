@@ -53,11 +53,6 @@ namespace CGProject1.SignalProcessing {
             Fourier.Forward(vals, FourierOptions.NoScaling);
             ft = vals;
 
-            
-            if (ft.Length >= 2) {
-                ft[0] = ft[1];
-            }
-
             amps = new double[ft.Length];
 
             for (int i = 0; i < ft.Length; i++) {
