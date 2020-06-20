@@ -199,7 +199,11 @@ namespace CGProject1.SignalProcessing {
                 double curWindow = 0;
 
                 for (int i = 0; i < halfWindow * 2 + 1; i++) {
-                    double curVal = channel.values[(channel.values.Length * halfWindow - halfWindow + i) % channel.values.Length];
+                    int curIdx = Math.Abs(0 - halfWindow + i);
+                    if (curIdx >= channel.values.Length) {
+                        curIdx -= (curIdx % channel.values.Length) + 1;
+                    }
+                    double curVal = channel.values[curIdx];
                     curWindow += curVal;
                     q.AddLast(curVal);
                 }
@@ -209,7 +213,13 @@ namespace CGProject1.SignalProcessing {
                 for (int i = 1; i < channel.values.Length; i++) {
                     curWindow -= q.First.Value;
                     q.RemoveFirst();
-                    double curVal = channel.values[(i + halfWindow) % channel.values.Length];
+
+                    int curIdx = Math.Abs(i + halfWindow);
+                    if (curIdx >= channel.values.Length) {
+                        curIdx -= (curIdx % channel.values.Length) + 1;
+                    }
+
+                    double curVal = channel.values[curIdx];
                     curWindow += curVal;
                     q.AddLast(curVal);
 
