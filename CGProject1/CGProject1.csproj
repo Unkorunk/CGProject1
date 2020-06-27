@@ -7,7 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="graph.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="4.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WAVE\WAVE.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="graph.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CGProject1.Chart;
 using CGProject1.SignalProcessing;
 using Microsoft.Win32;
+using WAVE;
 
 namespace CGProject1
 {
@@ -190,11 +192,40 @@ namespace CGProject1
 
         private void OpenFileClick(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog() { Filter = "txt files (*.txt)|*.txt" };
+            var openFileDialog = new OpenFileDialog() { Filter = "txt files (*.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave" };
 
             if (openFileDialog.ShowDialog() == true)
             {
-                ResetSignal(Parser.Parse(openFileDialog.FileName));
+                switch(Path.GetExtension(openFileDialog.FileName))
+                {
+                    case ".wav":
+                    case ".wave":
+                        if (WaveReader.TryRead(File.ReadAllBytes(openFileDialog.FileName), out var waveFile))
+                        {
+                            var signal = new Signal(Path.GetFileName(openFileDialog.FileName));
+                            signal.SamplingFrq = waveFile.nSamplesPerSec;
+
+                            for (int i = 0; i < waveFile.nChannels; i++)
+                            {
+                                signal.channels.Add(new Channel(waveFile.data.GetLength(0)));
+                                signal.channels[i].Source = signal.fileName;
+                                signal.channels[i].Name = signal.fileName + "_" + i;
+                                for (int j = 0; j < waveFile.data.GetLength(0); j++)
+                                {
+                                    signal.channels[i].values[j] = waveFile.data[j, i];
+                                }
+                            }
+
+                            signal.UpdateChannelsInfo();
+
+                            ResetSignal(signal);
+                        }
+                        break;
+                    case ".txt":
+                        ResetSignal(Parser.Parse(openFileDialog.FileName));
+                        break;
+                    default: throw new NotImplementedException();
+                }
             }
         }
 
