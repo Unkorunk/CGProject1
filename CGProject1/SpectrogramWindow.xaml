@@ -23,7 +23,7 @@
                     <Label Content="Высота"/>
                     <TextBox x:Name="HeightField" Width="50" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center"> 150 </TextBox>
 
-                    <Label Content="Захлест:"/>
+                    <Label Content="Нахлёст:"/>
                     <TextBox x:Name="CoeffSelector" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center"> 1.0 </TextBox>
                     <Slider x:Name="CoeffSlider" Margin="5, 1, 5, 1" Width="100" Minimum="1" Maximum="10" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"></Slider>
                 </StackPanel>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGProject1" xmlns:chart="clr-namespace:CGProject1.Chart"
         mc:Ignorable="d"
-        Title="Осциллограммы" Height="600" Width="1200">
+        Title="Осциллограмма" Height="600" Width="1200">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="125"></ColumnDefinition>

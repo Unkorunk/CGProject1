@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
-        Title="StatisticsWindow" Height="450" Width="800">
+        Title="Статистика" Height="450" Width="800">
     <Grid>
         <ScrollViewer>
             <StackPanel Name="ChannelsPanel"></StackPanel>

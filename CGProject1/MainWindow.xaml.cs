@@ -73,10 +73,10 @@ namespace CGProject1
         }
 
         private void AboutClick(object sender, RoutedEventArgs e) {
-            MessageBox.Show("КГ-СИСТПРО-1-КАЛИНИН\r\n" +
-                "Работу выполнили:\r\n" +
-                "Михалев Юрий\r\n" +
-                "Калинин Владислав\r\n" +
+            MessageBox.Show("Система визуализации и анализа многоканальных сигналов\r\n" +
+                "Авторы:\r\n" +
+                "Михалев Юрий (SmelJey)\r\n" +
+                "Калинин Владислав (Unkorunk)\r\n" +
                 "29.02.2020",
                 "О программе", MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -155,7 +155,7 @@ namespace CGProject1
             chart.ContextMenu.Items.Add(item1);
 
             var item2 = new MenuItem();
-            item2.Header = "Статистики";
+            item2.Header = "Статистика";
             item2.Click += (object sender, RoutedEventArgs args) => {
                 if (!isStatisticShowing) {
                     statisticsWindow = new StatisticsWindow();
