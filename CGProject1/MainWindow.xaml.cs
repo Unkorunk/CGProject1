@@ -7,7 +7,7 @@ using System.Windows.Input;
 using CGProject1.Chart;
 using CGProject1.SignalProcessing;
 using Microsoft.Win32;
-using WAVE;
+using FileFormats;
 
 namespace CGProject1
 {
@@ -192,44 +192,54 @@ namespace CGProject1
 
         private void OpenFileClick(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog() { Filter = "txt files (*.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave" };
+            var openFileDialog = new OpenFileDialog() {
+                Filter = "txt files (*.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave|dat files (*.dat)|*.dat"
+            };
 
             if (openFileDialog.ShowDialog() == true)
             {
-                switch(Path.GetExtension(openFileDialog.FileName))
+                IReader reader;
+                switch (Path.GetExtension(openFileDialog.FileName))
                 {
+                    case ".dat":
+                        reader = new DatReader();
+                        break;
                     case ".wav":
                     case ".wave":
-                        if (WaveReader.TryRead(File.ReadAllBytes(openFileDialog.FileName), out var waveFile))
-                        {
-                            var signal = new Signal(Path.GetFileName(openFileDialog.FileName));
-                            signal.SamplingFrq = waveFile.nSamplesPerSec;
-
-                            for (int i = 0; i < waveFile.nChannels; i++)
-                            {
-                                signal.channels.Add(new Channel(waveFile.data.GetLength(0)));
-                                signal.channels[i].Source = signal.fileName;
-                                signal.channels[i].Name = signal.fileName + "_" + i;
-                                for (int j = 0; j < waveFile.data.GetLength(0); j++)
-                                {
-                                    signal.channels[i].values[j] = waveFile.data[j, i];
-                                }
-                            }
-
-                            signal.UpdateChannelsInfo();
-
-                            ResetSignal(signal);
-                        }
+                        reader = new WaveReader();
                         break;
                     case ".txt":
-                        ResetSignal(Parser.Parse(openFileDialog.FileName));
+                        reader = new TxtReader();
                         break;
-                    default: throw new NotImplementedException();
+                    default:
+                        throw new NotImplementedException();
+                }
+
+                if (reader.TryRead(File.ReadAllBytes(openFileDialog.FileName), out var waveFile))
+                {
+                    var signal = new Signal(Path.GetFileName(openFileDialog.FileName));
+                    signal.SamplingFrq = waveFile.nSamplesPerSec;
+                    signal.StartDateTime = waveFile.dateTime;
+
+                    for (int i = 0; i < waveFile.nChannels; i++)
+                    {
+                        signal.channels.Add(new Channel(waveFile.data.GetLength(0)));
+                        signal.channels[i].Source = signal.fileName;
+                        signal.channels[i].Name = waveFile.channelNames[i] ?? ("Channel " + i);
+                        for (int j = 0; j < waveFile.data.GetLength(0); j++)
+                        {
+                            signal.channels[i].values[j] = waveFile.data[j, i];
+                        }
+                    }
+
+                    signal.UpdateChannelsInfo();
+
+                    ResetSignal(signal);
                 }
             }
         }
 
-        private void OnChannelClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+        private void OnChannelClick(object sender, MouseButtonEventArgs e) {
             var point = Mouse.GetPosition(channels);
 
             int row = 0;

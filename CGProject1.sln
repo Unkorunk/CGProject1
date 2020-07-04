@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CGProject1", "CGProject1\CGProject1.csproj", "{FED38BF0-4849-404A-95D4-4005CCE2A7E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WAVE", "WAVE\WAVE.csproj", "{E523A41B-CF17-4B55-8757-E6F0D654DC89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileFormats", "WAVE\FileFormats.csproj", "{E523A41B-CF17-4B55-8757-E6F0D654DC89}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

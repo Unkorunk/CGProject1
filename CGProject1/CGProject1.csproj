@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WAVE\WAVE.csproj" />
+    <ProjectReference Include="..\WAVE\FileFormats.csproj" />
   </ItemGroup>
 
   <ItemGroup>

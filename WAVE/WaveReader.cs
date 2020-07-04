@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace WAVE
+namespace FileFormats
 {
-    public class WaveReader
+    public class WaveReader : IReader
     {
         private const ushort WAVE_FORMAT_PCM = 0x0001;
 
@@ -19,9 +19,9 @@ namespace WAVE
             public int cksize;
         }
 
-        public static bool TryRead(byte[] data, out WaveFile waveFile)
+        public bool TryRead(byte[] data, out FileInfo waveFile)
         {
-            waveFile = new WaveFile();
+            waveFile = new FileInfo();
 
             int offset = 0;
 
@@ -91,7 +91,7 @@ namespace WAVE
             return headerInfo;
         }
 
-        private static bool fmtChunk(byte[] data, ref int offset, ref WaveFile waveFile, out FmtInfo fmtInfo)
+        private static bool fmtChunk(byte[] data, ref int offset, ref FileInfo waveFile, out FmtInfo fmtInfo)
         {
             fmtInfo = new FmtInfo();
 
@@ -114,10 +114,12 @@ namespace WAVE
             fmtInfo.wBitsPerSample = BitConverter.ToUInt16(data, offset);
             offset += 2;
 
+            waveFile.channelNames = new string[waveFile.nChannels];
+
             return true;
         }
 
-        private static bool dataChunk(byte[] data, ref int offset, ref WaveFile waveFile, in FmtInfo fmtInfo, in HeaderInfo headerInfo)
+        private static bool dataChunk(byte[] data, ref int offset, ref FileInfo waveFile, in FmtInfo fmtInfo, in HeaderInfo headerInfo)
         {
             int bytesPerSample = fmtInfo.nBlockAlign / waveFile.nChannels;
             int bytesPerBlock = bytesPerSample * waveFile.nChannels;
