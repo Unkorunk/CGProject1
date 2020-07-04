@@ -15,13 +15,17 @@ namespace CGProject1
     {
         private ChartLine _subscriber;
 
+        private int begin;
+        private int end;
+        private int length { get => end - begin + 1; }
+
         public ChartLine Subscriber
         {
             get => _subscriber;
             set
             {
                 _subscriber = value;
-                UpdateInfo();
+                UpdateInfo(0, value.Channel.SamplesCount - 1);
             }
         }
 
@@ -32,12 +36,15 @@ namespace CGProject1
             Subscriber = subscriber;
         }
 
-        public void UpdateInfo()
+        public void UpdateInfo(int begin, int end)
         {
             if (Subscriber == null) return;
 
+            this.begin = begin;
+            this.end = end;
+
             ChannelNameLabel.Content = "Name: " + Subscriber.Channel.Name;
-            ChannelIntervalLabel.Content = "Begin: " + (Subscriber.Begin + 1) + "; End: " + (Subscriber.End + 1);
+            ChannelIntervalLabel.Content = "Begin: " + (this.begin + 1) + "; End: " + (this.end + 1);
 
             var leftColumn = new StringBuilder();
             var rightColumn = new StringBuilder();
@@ -71,22 +78,22 @@ namespace CGProject1
 
             Histogram.Data.Clear();
 
-            if (Subscriber.Length > 0)
+            if (this.length > 0)
             {
                 if (int.TryParse(IntervalTextBox.Text, out int K))
                 {
                     K = Math.Max(1, K);
                     int[] cnt = new int[K];
-                    for (int i = 0; i < Subscriber.Length; i++)
+                    for (int i = 0; i < this.length; i++)
                     {
-                        double p = (Subscriber.Channel.values[Subscriber.Begin + i] - minValue) / (maxValue - minValue);
+                        double p = (Subscriber.Channel.values[this.begin + i] - minValue) / (maxValue - minValue);
                         if (Math.Abs(maxValue - minValue) < 1e-6) p = 0.0;
                         cnt[(int)((K - 1) * p)]++;
                     }
 
                     for (int i = 0; i < K; i++)
                     {
-                        Histogram.Data.Add(cnt[i] * 1.0 / Subscriber.Length);
+                        Histogram.Data.Add(cnt[i] * 1.0 / this.length);
                     }
                 }
             }
@@ -112,7 +119,7 @@ namespace CGProject1
             }
         }
 
-        private void textChanged(object sender, TextChangedEventArgs e) => UpdateInfo();
+        private void textChanged(object sender, TextChangedEventArgs e) => UpdateInfo(this.begin, this.end);
 
         private void previewKeyDown(object sender, KeyEventArgs e)
         {
@@ -126,28 +133,28 @@ namespace CGProject1
 
         public double CalcAverage(ChartLine chart)
         {
-            if (chart.Length <= 0) return 0.0;
+            if (length <= 0) return 0.0;
 
             double average = 0.0;
-            for (int i = chart.Begin; i <= chart.End; i++)
+            for (int i = this.begin; i <= this.end; i++)
             {
                 average += chart.Channel.values[i];
             }
-            average /= chart.Length;
+            average /= length;
 
             return average;
         }
 
         public double CalcVariance(double average, ChartLine chart)
         {
-            if (chart.Length <= 0) return 0.0;
+            if (length <= 0) return 0.0;
 
             double variance = 0.0;
-            for (int i = chart.Begin; i <= chart.End; i++)
+            for (int i = this.begin; i <= this.end; i++)
             {
                 variance += Math.Pow(chart.Channel.values[i] - average, 2);
             }
-            variance /= chart.Length;
+            variance /= length;
 
             return variance;
         }
@@ -158,47 +165,47 @@ namespace CGProject1
 
         public double CalcSkewness(double variance, double average, ChartLine chart)
         {
-            if (chart.Length <= 0) return 0.0;
+            if (length <= 0) return 0.0;
 
             double mse3 = Math.Pow(variance, 3.0 / 2.0);
 
             double skewness = 0.0;
-            for (int i = chart.Begin; i <= chart.End; i++)
+            for (int i = this.begin; i <= this.end; i++)
             {
                 skewness += Math.Pow(chart.Channel.values[i] - average, 3);
             }
-            skewness /= chart.Length * mse3;
+            skewness /= length * mse3;
 
             return skewness;
         }
 
         public double CalcKurtosis(double variance, double average, ChartLine chart)
         {
-            if (chart.Length <= 0) return 0.0;
+            if (length <= 0) return 0.0;
 
             double mse4 = Math.Pow(variance, 2);
 
             double kurtosis = 0.0;
-            for (int i = chart.Begin; i <= chart.End; i++)
+            for (int i = this.begin; i <= this.end; i++)
             {
                 kurtosis += Math.Pow(chart.Channel.values[i] - average, 4);
             }
-            kurtosis = kurtosis / (chart.Length * mse4) - 3.0;
+            kurtosis = kurtosis / (length * mse4) - 3.0;
 
             return kurtosis;
         }
 
         public double CalcQuantile(ChartLine chart, double p)
         {
-            if (chart.Length <= 0) return 0.0;
+            if (length <= 0) return 0.0;
 
             p = Math.Clamp(p, 0.0, 1.0);
-            int k = (int)(p * (chart.Length - 1));
+            int k = (int)(p * (length - 1));
 
-            double[] arr = new double[chart.Length];
+            double[] arr = new double[length];
             for (int i = 0; i < arr.Length; i++)
             {
-                arr[i] = chart.Channel.values[chart.Begin + i];
+                arr[i] = chart.Channel.values[this.begin + i];
             }
 
             return OrderStatistics(arr, k);
@@ -206,10 +213,10 @@ namespace CGProject1
 
         public double CalcMinValue(ChartLine chart)
         {
-            if (chart.Length <= 0) return 0.0;
+            if (length <= 0) return 0.0;
 
             double minValue = double.MaxValue;
-            for (int i = chart.Begin; i <= chart.End; i++)
+            for (int i = this.begin; i <= this.end; i++)
             {
                 minValue = Math.Min(minValue, chart.Channel.values[i]);
             }
@@ -219,10 +226,10 @@ namespace CGProject1
 
         public double CalcMaxValue(ChartLine chart)
         {
-            if (chart.Length <= 0) return 0.0;
+            if (length <= 0) return 0.0;
 
             double maxValue = double.MinValue;
-            for (int i = chart.Begin; i <= chart.End; i++)
+            for (int i = this.begin; i <= this.end; i++)
             {
                 maxValue = Math.Max(maxValue, chart.Channel.values[i]);
             }

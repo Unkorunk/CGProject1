@@ -1,11 +1,13 @@
-﻿<Window x:Class="CGProject1.Oscillograms"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CGProject1" xmlns:chart="clr-namespace:CGProject1.Chart"
-        mc:Ignorable="d"
-        Title="Осциллограмма" Height="600" Width="1200">
+﻿<Page x:Class="CGProject1.OscillogramsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:CGProject1" xmlns:chart="clr-namespace:CGProject1.Chart"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="OscillogramsPage">
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="125"></ColumnDefinition>
@@ -26,8 +28,8 @@
             <MenuItem Name="ScalingChooser" Header="Масштабирование"></MenuItem>
         </Menu>
         <StackPanel Grid.Row="2" Grid.Column="1">
-            <Label Name="BeginTimeLabel">Start Time: </Label>
-            <Label Name="EndTimeLabel">End Time: </Label>
+            <Label Name="BeginTimeLabel">Start Time:</Label>
+            <Label Name="EndTimeLabel">End Time:</Label>
 
             <chart:FragmentSelector x:Name="FSelector" Height="20" TBPadding="0.15" IntervalUpdate="FSelector_IntervalUpdate"></chart:FragmentSelector>
         </StackPanel>
@@ -50,4 +52,4 @@
         </Grid>
 
     </Grid>
-</Window>
+</Page>

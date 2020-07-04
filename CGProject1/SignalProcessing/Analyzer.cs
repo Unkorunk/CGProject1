@@ -30,6 +30,8 @@ namespace CGProject1.SignalProcessing {
             } 
         }
 
+        public string OriginalName { get => this.curChannel.Name; }
+
         public Analyzer(Channel channel) {
             this.curChannel = channel;
         }

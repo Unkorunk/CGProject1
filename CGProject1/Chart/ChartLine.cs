@@ -521,6 +521,14 @@ namespace CGProject1.Chart
                 );
                 formText2.TextAlignment = TextAlignment.Right;
 
+                if (centerY + formText2.Height / 2 > Height) {
+                    centerY -= centerY + formText2.Height / 2 - Height + 1;
+                }
+
+                if (centerY - formText2.Height / 2 < 0) {
+                    centerY -= centerY - formText2.Height / 2;
+                }
+
                 dc.DrawRectangle(Brushes.LightGray, new Pen(Brushes.Black, 2.0), new Rect(
                     interfaceOffset.Width - formText2.Width, centerY - formText2.Height / 2, formText2.Width, formText2.Height
                 ));

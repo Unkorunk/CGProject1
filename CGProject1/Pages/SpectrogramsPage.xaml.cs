@@ -1,15 +1,21 @@
 ﻿using System;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Controls;
 using System.Collections.Generic;
-using CGProject1.Chart;
-using System.Windows.Input;
-using System.Linq;
 using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using CGProject1.Chart;
 
-namespace CGProject1 {
-    public partial class SpectrogramWindow : Window {
+namespace CGProject1.Pages {
+    public partial class SpectrogramsPage : Page {
         private static List<byte[][]> palettes;
 
         private byte[][] curPalette = palettes[1];
@@ -22,18 +28,16 @@ namespace CGProject1 {
         private List<Spectrogram> spectrograms;
         private List<Channel> channels;
         private List<ChartLine> charts;
-        //private List<TextBox> brightnessBoxes;
 
 
         private int begin;
         private int end;
 
-        public SpectrogramWindow() {
+        public SpectrogramsPage() {
             channelNames = new HashSet<string>();
             spectrograms = new List<Spectrogram>();
             channels = new List<Channel>();
             charts = new List<ChartLine>();
-            //brightnessBoxes = new List<TextBox>();
 
             begin = 0;
             end = 0;
@@ -41,8 +45,7 @@ namespace CGProject1 {
             InitializeComponent();
         }
 
-        static SpectrogramWindow()
-        {
+        static SpectrogramsPage() {
             palettes = new List<byte[][]>();
 
             var greyPalette = new byte[256][];
@@ -82,7 +85,16 @@ namespace CGProject1 {
             palettes.Add(blueRedYellow);
         }
 
-        public void SetSegment(int begin, int end) {
+        public void Reset() {
+            channelNames.Clear();
+            spectrograms.Clear();
+            channels.Clear();
+            charts.Clear();
+
+            Spectrograms.Children.Clear();
+        }
+
+        public void UpdateActiveFragment(int begin, int end) {
             this.begin = begin;
             this.end = end;
 
@@ -132,6 +144,7 @@ namespace CGProject1 {
             sp.BoostCoeff = this.boostCoeff;
             sp.SpectrogramHeight = this.spectrogramHeight;
             sp.ShowCurrentXY = true;
+            sp.ContextMenu = new ContextMenu();
             channelPanel.Children.Add(sp);
 
             spectrograms.Add(sp);
@@ -169,8 +182,7 @@ namespace CGProject1 {
         private void UpdateSpectrograms(object sender, RoutedEventArgs e) {
             if (!double.TryParse(BrightnessField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newBrightness)
                     || !double.TryParse(HeightField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newHeight)
-                    || !double.TryParse(CoeffSelector.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newCoeff))
-            {
+                    || !double.TryParse(CoeffSelector.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newCoeff)) {
                 MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
@@ -233,7 +245,7 @@ namespace CGProject1 {
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
             this.coeffN = e.NewValue;
             CoeffSelector.Text = this.coeffN.ToString(CultureInfo.InvariantCulture);
-            
+
             foreach (var sp in spectrograms) {
                 sp.CoeffN = coeffN;
             }

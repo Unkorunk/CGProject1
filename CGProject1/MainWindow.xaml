@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
         xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
-        Title="Система визуализации и анализа многоканальных сигналов" Height="800" Width="1200" Icon="/graph.ico">
+        Title="Система визуализации и анализа многоканальных сигналов" Height="800" Width="1200" WindowState="Maximized" Icon="/graph.ico">
     <Grid>
         <Grid>
             <Grid.RowDefinitions>
@@ -24,44 +25,42 @@
                 <MenuItem Header="Моделирование" Click="ModelingClick"></MenuItem>
                 <MenuItem Header="Инструменты">
                     <MenuItem Header="Информация о сигнале" Click="AboutSignalClick"></MenuItem>
-                    <MenuItem Header="Осциллограмма" Click="OscillogramsClick"></MenuItem>
-                    <MenuItem Header="Анализ" Click="AnalyzatorClick"/>
-                    <MenuItem Header="Спектрограмма" Click="SpectrogramsClick"/>
+                    <MenuItem Header="Статистики" Click="OpenStatisticsPage"></MenuItem>
+                    <MenuItem Header="Осциллограмма" Click="OpenOscillogramsPage"></MenuItem>
+                    <MenuItem Header="Анализ" Click="OpenAnalyzerPage"/>
+                    <MenuItem Header="Спектрограмма" Click="OpenSpectrogramsPage"/>
                 </MenuItem>
                 <MenuItem Header="О программе" Click="AboutClick"></MenuItem>
             </Menu>
-            <Grid Grid.Row="1" Name="grid">
-                <Grid.RowDefinitions>
-                    <RowDefinition></RowDefinition>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"></ColumnDefinition>
-                    <ColumnDefinition Width="4*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
+            <xcad:DockingManager Grid.Row="1" Name="dm">
+                <xcad:DockingManager.DocumentHeaderTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="{Binding IconSource}" Margin="0,0,4,0"/>
+                            <TextBlock Text="{Binding Title}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </xcad:DockingManager.DocumentHeaderTemplate>
+                <xcad:LayoutRoot x:Name="_layoutRoot">
+                    <xcad:LayoutPanel Orientation="Horizontal">
+                        <xcad:LayoutAnchorablePaneGroup DockWidth="150">
+                            <xcad:LayoutAnchorablePane x:Name="LeftPane">
 
-                <ScrollViewer Grid.Row="0" Grid.Column="0">
-                    <StackPanel Name="channels" MouseUp="OnChannelClick"></StackPanel>
-                </ScrollViewer>
-
-                <Grid Grid.Row="0" Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="50"></RowDefinition>
-                            <RowDefinition Height="50"></RowDefinition>
-                            <RowDefinition Height="30"></RowDefinition>
-                            <RowDefinition Height="*"></RowDefinition>
-                        </Grid.RowDefinitions>
-                    </Grid>
-
-                </Grid>
-            </Grid>
+                            </xcad:LayoutAnchorablePane>
+                        </xcad:LayoutAnchorablePaneGroup>
+                        <xcad:LayoutDocumentPaneGroup Orientation="Vertical">
+                            <xcad:LayoutDocumentPane x:Name="UpperMiddlePane">
+                            </xcad:LayoutDocumentPane>
+                            <xcad:LayoutDocumentPane x:Name="LowerMiddlePane">
+                            </xcad:LayoutDocumentPane>
+                        </xcad:LayoutDocumentPaneGroup >
+                        <xcad:LayoutAnchorablePaneGroup DockWidth="500">
+                            <xcad:LayoutAnchorablePane x:Name="RightPane">
+                            </xcad:LayoutAnchorablePane>
+                        </xcad:LayoutAnchorablePaneGroup>
+                    </xcad:LayoutPanel>
+                </xcad:LayoutRoot>
+            </xcad:DockingManager>
         </Grid>
 
     </Grid>

@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using CGProject1.Chart;
 using CGProject1.SignalProcessing;
 
-namespace CGProject1
-{
-    public partial class AnalyzerWindow : Window {
-
+namespace CGProject1.Pages {
+    public partial class AnalyzerPage : Page {
         private List<Analyzer> analyzers = new List<Analyzer>();
         private HashSet<string> namesSet = new HashSet<string>();
 
@@ -22,18 +21,12 @@ namespace CGProject1
 
         private int samplesCount = 0;
 
-        private bool initilized = false;
+        private bool initiliezed = false;
 
-        public AnalyzerWindow(int begin, int end) {
+        public AnalyzerPage() {
             InitializeComponent();
 
             for (int i = 0; i < ComboBoxMode.Items.Count; i++) charts.Add(new List<ChartLine>());
-
-            BeginSelector.Text = begin.ToString();
-            EndSelector.Text = end.ToString();
-
-            this.begin = begin;
-            this.end = end;
 
             if (MainWindow.instance.currentSignal != null) {
                 BeginFrequencyLabel.Content = "Begin frequency: 0";
@@ -44,14 +37,28 @@ namespace CGProject1
         public int GetBegin() => FSelector.LeftSlider;
         public int GetEnd() => FSelector.RightSlider;
 
-        public void SetupSegment(int begin, int end) {
+        public void UpdateActiveSegment(int begin, int end) {
             BeginSelector.Text = begin.ToString();
             EndSelector.Text = end.ToString();
 
             this.begin = begin;
             this.end = end;
 
+            initiliezed = false;
+
             UpdateAnalyzers();
+        }
+
+        public void Reset() {
+            analyzers.Clear();
+            namesSet.Clear();
+
+            foreach (var item in charts) {
+                item.Clear();
+            }
+
+            initiliezed = false;
+            SpectrePanel.Children.Clear();
         }
 
         public void AddChannel(Channel channel) {
@@ -66,8 +73,8 @@ namespace CGProject1
 
             samplesCount = analyzer.SamplesCount;
 
-            if (!initilized) {
-                initilized = true;
+            if (!initiliezed) {
+                initiliezed = true;
                 samplesCount = analyzer.AmplitudeSpectre().SamplesCount - 1;
 
                 FSelector.Minimum = 0;
@@ -88,26 +95,21 @@ namespace CGProject1
             UpdatePanel();
         }
 
-        private void UpdatePanel()
-        {
+        private void UpdatePanel() {
             if (SpectrePanel != null) SpectrePanel.Children.Clear();
-            
-            if (ComboBoxMode.SelectedIndex >= 0 && ComboBoxMode.SelectedIndex < charts.Count)
-            {
-                for (int i = 0; i < charts[ComboBoxMode.SelectedIndex].Count; i++)
-                {
+
+            if (ComboBoxMode.SelectedIndex >= 0 && ComboBoxMode.SelectedIndex < charts.Count) {
+                for (int i = 0; i < charts[ComboBoxMode.SelectedIndex].Count; i++) {
                     var item = charts[ComboBoxMode.SelectedIndex][i];
                     item.DisplayHAxisTitle = false;
                     item.DisplayHAxisInfo = false;
                     item.HAxisAlligment = ChartLine.HAxisAlligmentEnum.Top;
 
-                    if (i == 0 || i + 1 == charts[ComboBoxMode.SelectedIndex].Count)
-                    {
+                    if (i == 0 || i + 1 == charts[ComboBoxMode.SelectedIndex].Count) {
                         item.DisplayHAxisInfo = true;
                         item.DisplayHAxisTitle = true;
                     }
-                    if (i + 1 == charts[ComboBoxMode.SelectedIndex].Count)
-                    {
+                    if (i + 1 == charts[ComboBoxMode.SelectedIndex].Count) {
                         item.HAxisAlligment = ChartLine.HAxisAlligmentEnum.Bottom;
                     }
 
@@ -122,7 +124,7 @@ namespace CGProject1
                 b = GetBegin();
                 e = GetEnd();
             }
-            
+
 
             foreach (var chartList in charts) {
                 chartList.Clear();
@@ -131,6 +133,25 @@ namespace CGProject1
             foreach (var analyzer in analyzers) {
                 analyzer.HalfWindowSmoothing = this.halfWindowSmoothing;
                 analyzer.SetupChannel(this.begin, this.end);
+
+                if (!initiliezed) {
+                    initiliezed = true;
+                    samplesCount = analyzer.AmplitudeSpectre().SamplesCount - 1;
+
+                    FSelector.Minimum = 0;
+                    FSelector.LeftSlider = 0;
+
+                    if (samplesCount < 1) {
+                        FSelector.Maximum = 1;
+                        FSelector.RightSlider = 1;
+                    }
+
+
+                    BeginBox.Text = GetBegin().ToString();
+                    EndBox.Text = GetEnd().ToString();
+
+                    InputBeginEnd(GetBegin(), GetEnd());
+                }
 
                 SetupCharts(analyzer);
             }
@@ -151,17 +172,29 @@ namespace CGProject1
         private void SetupCharts(Analyzer analyzer) {
             Channel amp = analyzer.AmplitudeSpectre();
 
+            var menuItems = new MenuItem[4];
+            for (int i = 0; i < 4; i++) {
+                menuItems[i] = new MenuItem();
+                menuItems[i].Header = "Закрыть канал";
+                menuItems[i].Click += (object sender, RoutedEventArgs args) => {
+                    analyzers.Remove(analyzer);
+                    UpdateAnalyzers();
+                };
+            }
+           
+
             var ampChart = new ChartLine(amp);
             ampChart.Height = 200;
             ampChart.Begin = 0;
             ampChart.End = amp.SamplesCount;
-            if (charts[1].Count != 0)
-            {
+            if (charts[1].Count != 0) {
                 ampChart.Begin = charts[1][0].Begin;
                 ampChart.End = charts[1][0].End;
             }
             FrequencyChartSetup(ampChart);
             ampChart.Scaling = ChartLine.ScalingMode.LocalZeroed;
+            ampChart.ContextMenu = new ContextMenu();
+            ampChart.ContextMenu.Items.Add(menuItems[1]);
             charts[1].Add(ampChart);
 
             var psd = analyzer.PowerSpectralDensity();
@@ -169,13 +202,14 @@ namespace CGProject1
             psdChart.Height = 200;
             psdChart.Begin = 0;
             psdChart.End = psd.SamplesCount;
-            if (charts[0].Count != 0)
-            {
+            if (charts[0].Count != 0) {
                 psdChart.Begin = charts[0][0].Begin;
                 psdChart.End = charts[0][0].End;
             }
             FrequencyChartSetup(psdChart);
             psdChart.Scaling = ChartLine.ScalingMode.LocalZeroed;
+            psdChart.ContextMenu = new ContextMenu();
+            psdChart.ContextMenu.Items.Add(menuItems[0]);
             charts[0].Add(psdChart);
 
             var lgPSD = analyzer.LogarithmicPSD();
@@ -183,13 +217,14 @@ namespace CGProject1
             logPSDChart.Height = 200;
             logPSDChart.Begin = 0;
             logPSDChart.End = lgPSD.SamplesCount;
-            if (charts[2].Count != 0)
-            {
+            if (charts[2].Count != 0) {
                 logPSDChart.Begin = charts[2][0].Begin;
                 logPSDChart.End = charts[2][0].End;
             }
             FrequencyChartSetup(logPSDChart);
             logPSDChart.Scaling = ChartLine.ScalingMode.Local;
+            logPSDChart.ContextMenu = new ContextMenu();
+            logPSDChart.ContextMenu.Items.Add(menuItems[2]);
             charts[2].Add(logPSDChart);
 
             var lg = analyzer.LogarithmicSpectre();
@@ -197,32 +232,28 @@ namespace CGProject1
             logChart.Height = 200;
             logChart.Begin = 0;
             logChart.End = lg.SamplesCount;
-            if (charts[3].Count != 0)
-            {
+            if (charts[3].Count != 0) {
                 logChart.Begin = charts[3][0].Begin;
                 logChart.End = charts[3][0].End;
             }
             FrequencyChartSetup(logChart);
             logChart.Scaling = ChartLine.ScalingMode.Local;
+            logChart.ContextMenu = new ContextMenu();
+            logChart.ContextMenu.Items.Add(menuItems[3]);
             charts[3].Add(logChart);
 
             FSelector.Maximum = lg.SamplesCount - 1;
         }
 
-        private string MappingXAxis(int idx, ChartLine chart)
-        {
+        private string MappingXAxis(int idx, ChartLine chart) {
             double curVal = chart.Channel.DeltaTime * idx;
             return curVal.ToString("N6", CultureInfo.InvariantCulture);
         }
 
-        private void OnMouseSelect(ChartLine sender, int newBegin, int newEnd)
-        {
-            for (int i = 0; i < charts.Count; i++)
-            {
-                foreach(var chart in charts[i])
-                {
-                    if (chart != sender)
-                    {
+        private void OnMouseSelect(ChartLine sender, int newBegin, int newEnd) {
+            for (int i = 0; i < charts.Count; i++) {
+                foreach (var chart in charts[i]) {
+                    if (chart != sender) {
                         chart.Begin = sender.Begin;
                         chart.End = sender.End;
                     }
@@ -232,8 +263,7 @@ namespace CGProject1
             InputBeginEnd(sender.Begin, sender.End);
         }
 
-        private void ComboBoxMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
+        private void ComboBoxMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
             UpdatePanel();
         }
 
@@ -295,39 +325,32 @@ namespace CGProject1
             }
         }
 
-        private bool TextIsNumeric(string input)
-        {
+        private bool TextIsNumeric(string input) {
             return input.All(c => char.IsDigit(c) || char.IsControl(c));
         }
 
-        private void textBox_ValueChanged(object sender, EventArgs e)
-        {
-            if (!int.TryParse(BeginBox.Text, out int begin))
-            {
+        private void textBox_ValueChanged(object sender, EventArgs e) {
+            if (!int.TryParse(BeginBox.Text, out int begin)) {
                 begin = 0;
             }
 
-            if (!int.TryParse(EndBox.Text, out int end))
-            {
+            if (!int.TryParse(EndBox.Text, out int end)) {
                 end = samplesCount;
             }
 
             InputBeginEnd(begin, end);
         }
 
-        private void InputBeginEnd(int begin, int end)
-        {
-            if (samplesCount == 0) {
+        private void InputBeginEnd(int begin, int end) {
+            if (samplesCount <= 0 || end - begin <= 0) {
                 return;
             }
 
             end = Math.Clamp(end, 0, samplesCount - 1);
             begin = Math.Clamp(begin, 0, end - 1);
 
-            for (int i = 0; i < charts.Count; i++)
-            {
-                foreach (var chart in charts[i])
-                {
+            for (int i = 0; i < charts.Count; i++) {
+                foreach (var chart in charts[i]) {
                     chart.Begin = begin;
                     chart.End = end;
                 }
@@ -338,8 +361,7 @@ namespace CGProject1
             if (BeginBox.Text != begin.ToString()) BeginBox.Text = begin.ToString();
             if (EndBox.Text != end.ToString()) EndBox.Text = end.ToString();
 
-            if (charts.Count != 0 && charts[0].Count != 0)
-            {
+            if (charts.Count != 0 && charts[0].Count != 0) {
                 BeginFrequencyLabel.Content = "Begin Frequency: " + MappingXAxis(charts[0][0].Begin, charts[0][0]);
                 EndFrequencyLabel.Content = "End Frequency: " + MappingXAxis(charts[0][0].End, charts[0][0]);
             }
@@ -356,8 +378,7 @@ namespace CGProject1
             chart.OnMouseSelect += OnMouseSelect;
         }
 
-        private void FSelector_IntervalUpdate(object sender, EventArgs e)
-        {
+        private void FSelector_IntervalUpdate(object sender, EventArgs e) {
             InputBeginEnd(GetBegin(), GetEnd());
         }
     }
