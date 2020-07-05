@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using CGProject1.Pages;
 using CGProject1.SignalProcessing;
 using Microsoft.Win32;
-using WAVE;
+using FileFormats;
 
 using Xceed.Wpf.AvalonDock.Layout;
 
@@ -236,40 +236,143 @@ namespace CGProject1
 
         private void OpenFileClick(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog() { Filter = "txt files (*.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave" };
+            var openFileDialog = new OpenFileDialog() {
+                Filter = "txt files (*.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave|dat files (*.dat)|*.dat|mp3 files (*.mp3)|*.mp3"
+            };
 
             if (openFileDialog.ShowDialog() == true)
             {
-                switch(Path.GetExtension(openFileDialog.FileName))
+                IReader reader;
+                switch (Path.GetExtension(openFileDialog.FileName))
                 {
+                    case ".mp3":
+                        reader = new MP3Reader();
+                        break;
+                    case ".dat":
+                        reader = new DatReader();
+                        break;
                     case ".wav":
                     case ".wave":
-                        if (WaveReader.TryRead(File.ReadAllBytes(openFileDialog.FileName), out var waveFile))
-                        {
-                            var signal = new Signal(Path.GetFileName(openFileDialog.FileName));
-                            signal.SamplingFrq = waveFile.nSamplesPerSec;
-
-                            for (int i = 0; i < waveFile.nChannels; i++)
-                            {
-                                signal.channels.Add(new Channel(waveFile.data.GetLength(0)));
-                                signal.channels[i].Source = signal.fileName;
-                                signal.channels[i].Name = signal.fileName + "_" + i;
-                                for (int j = 0; j < waveFile.data.GetLength(0); j++)
-                                {
-                                    signal.channels[i].values[j] = waveFile.data[j, i];
-                                }
-                            }
-
-                            signal.UpdateChannelsInfo();
-
-                            ResetSignal(signal);
-                        }
+                        reader = new WaveReader();
                         break;
                     case ".txt":
-                        ResetSignal(Parser.Parse(openFileDialog.FileName));
+                        reader = new TxtReader();
                         break;
-                    default: throw new NotImplementedException();
+                    default:
+                        throw new NotImplementedException();
                 }
+
+                if (reader.TryRead(File.ReadAllBytes(openFileDialog.FileName), out var waveFile))
+                {
+                    var signal = new Signal(Path.GetFileName(openFileDialog.FileName));
+                    signal.SamplingFrq = waveFile.nSamplesPerSec;
+                    signal.StartDateTime = waveFile.dateTime;
+
+                    for (int i = 0; i < waveFile.nChannels; i++)
+                    {
+                        signal.channels.Add(new Channel(waveFile.data.GetLength(0)));
+                        signal.channels[i].Source = signal.fileName;
+                        signal.channels[i].Name = waveFile.channelNames[i] ?? ("Channel " + i);
+                        for (int j = 0; j < waveFile.data.GetLength(0); j++)
+                        {
+                            signal.channels[i].values[j] = waveFile.data[j, i];
+                        }
+                    }
+
+                    signal.UpdateChannelsInfo();
+
+                    ResetSignal(signal);
+                }
+            }
+        }
+
+        private void OnChannelClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            var point = Mouse.GetPosition(channels);
+
+            int row = 0;
+            double accumulatedHeight = 0.0;
+
+            foreach (var chart in charts) {
+                accumulatedHeight += chart.ActualHeight;
+                if (accumulatedHeight >= point.Y)
+                    break;
+                row++;
+            }
+
+            if (currentSignal == null || row >= currentSignal.channels.Count) {
+                return;
+            }
+
+            foreach (var chart in charts) {
+                chart.Selected = false;
+                chart.InvalidateVisual();
+            }
+
+            charts[row].Selected = true;
+            charts[row].InvalidateVisual();
+        }
+
+        private void AboutSignalClick(object sender, RoutedEventArgs e) {
+            if (!this.isAboutSignalShowing)
+            {
+                aboutSignalWindow = new AboutSignal();
+                aboutSignalWindow.UpdateInfo(currentSignal);
+                aboutSignalWindow.Closed += (object sender, System.EventArgs e) => this.isAboutSignalShowing = false;
+                aboutSignalWindow.Show();
+                isAboutSignalShowing = true;
+            } else {
+                aboutSignalWindow.Topmost = true;
+                aboutSignalWindow.Topmost = false;
+            }
+        }
+
+        private void OscillogramsClick(object sender, RoutedEventArgs e) {
+            OpenOscillograms();
+        }
+
+        private void AnalyzatorClick(object sender, RoutedEventArgs e) {
+            OpenAnalyzer();
+        }
+
+        private void SpectrogramsClick(object sender, RoutedEventArgs e) {
+            OpenSpectrograms();
+        }
+
+        private void OpenOscillograms() {
+            if (!this.isOscillogramShowing) {
+                isOscillogramShowing = true;
+                oscillogramWindow = new Oscillograms();
+                oscillogramWindow.Closed += (object sender, System.EventArgs e) => this.isOscillogramShowing = false;
+                oscillogramWindow.Update(currentSignal);
+                oscillogramWindow.Show();
+            } else {
+                oscillogramWindow.Topmost = true;
+                oscillogramWindow.Topmost = false;
+            }
+        }
+
+        private void OpenAnalyzer() {
+            if (!this.isAnalyzerShowing) {
+                isAnalyzerShowing = true;
+
+                int begin = 0;
+                int end = 0;
+
+                if (this.currentSignal != null) {
+                    end = this.currentSignal.SamplesCount - 1;
+                }
+
+                if (isOscillogramShowing) {
+                    begin = oscillogramWindow.GetBegin();
+                    end = oscillogramWindow.GetEnd();
+                }
+
+                analyzerWindow = new AnalyzerWindow(begin, end);
+                analyzerWindow.Closed += (object sender, System.EventArgs e) => this.isAnalyzerShowing = false;
+                analyzerWindow.Show();
+            } else {
+                analyzerWindow.Topmost = true;
+                analyzerWindow.Topmost = false;
             }
         }
 

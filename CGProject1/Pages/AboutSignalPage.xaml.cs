@@ -44,8 +44,8 @@ namespace CGProject1.Pages {
             channelNumberText.Content = signal.channels.Count;
             samplesNumberText.Content = signal.SamplesCount;
             samplingFrqText.Content = $"{signal.SamplingFrq} Гц (шаг между отсчетами {signal.DeltaTime} сек)";
-            startDateTimeText.Content = signal.StartDateTime.ToString("dd-MM-yyyy hh\\:mm\\:ss\\.fff");
-            endDateTimeText.Content = signal.EndTime.ToString("dd-MM-yyyy hh\\:mm\\:ss\\.fff");
+            startDateTimeText.Content = signal.StartDateTime.ToString("dd-MM-yyyy HH\\:mm\\:ss\\.fff");
+            endDateTimeText.Content = signal.EndTime.ToString("dd-MM-yyyy HH\\:mm\\:ss\\.fff");
             TimeSpan duration = signal.Duration;
             durationText.Content = $"{duration.Days} суток {duration.Hours} часов {duration.Minutes} минут {(duration.Seconds + (double)duration.Milliseconds / 1000).ToString("0.000", CultureInfo.InvariantCulture)} секунд";
             ChannelsTable.ItemsSource = signal.channels;
