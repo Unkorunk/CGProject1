@@ -234,23 +234,21 @@ namespace CGProject1.Chart {
                     curSelectedX = GetXIdx(position);
                     curSelectedY = GetYIdx(position);
                 }
-
-                InvalidateVisual();
             } else if (curSelectedX != -1) {
                 //tooltip.IsOpen = false;
                 curSelectedX = -1;
                 curSelectedY = -1;
-                InvalidateVisual();
             }
+            InvalidateVisual();
         }
 
         protected override void OnMouseLeave(MouseEventArgs e) {
-            base.OnMouseLeave(e);
             base.OnMouseLeave(e);
             if (ShowCurrentXY) {
                 if (curSelectedX != -1) {
                     curSelectedX = -1;
                     curSelectedY = -1;
+                    InvalidateVisual();
                 }
             }
         }
