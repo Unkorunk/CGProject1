@@ -11,6 +11,22 @@ namespace FileFormats
             var stream = new MemoryStream();
 
             const int bytesPerSample = 4;
+            for (int i = 0; i < fileInfo.nChannels; i++)
+            {
+                double minValue = double.MaxValue;
+                double maxValue = double.MinValue;
+
+                for (int j = 0; j < fileInfo.data.GetLength(0); j++)
+                {
+                    minValue = Math.Min(minValue, fileInfo.data[j, i]);
+                    maxValue = Math.Max(maxValue, fileInfo.data[j, i]);
+                }
+
+                for (int j = 0; j < fileInfo.data.GetLength(0); j++)
+                {
+                    fileInfo.data[j, i] = 2.0 * (fileInfo.data[j, i] - minValue) / (maxValue - minValue) - 1.0;
+                }
+            }
 
             // ckID
             stream.Write(Encoding.ASCII.GetBytes("RIFF"));
@@ -48,13 +64,43 @@ namespace FileFormats
                     switch (bytesPerSample)
                     {
                         case 2:
-                            stream.Write(BitConverter.GetBytes((short)fileInfo.data[i, j]));
+                            short curVal1;
+                            if (fileInfo.data[i, j] > 0)
+                            {
+                                curVal1 = (short)(short.MaxValue * fileInfo.data[i, j]);
+                            }
+                            else
+                            {
+                                curVal1 = (short)(short.MinValue * fileInfo.data[i, j]);
+                            }
+
+                            stream.Write(BitConverter.GetBytes(curVal1));
                             break;
                         case 4:
-                            stream.Write(BitConverter.GetBytes((int)fileInfo.data[i, j]));
+                            int curVal2;
+                            if (fileInfo.data[i, j] > 0)
+                            {
+                                curVal2 = (int)(int.MaxValue * fileInfo.data[i, j]);
+                            }
+                            else
+                            {
+                                curVal2 = (int)(int.MinValue * fileInfo.data[i, j]);
+                            }
+
+                            stream.Write(BitConverter.GetBytes(curVal2));
                             break;
                         case 8:
-                            stream.Write(BitConverter.GetBytes((long)fileInfo.data[i, j]));
+                            long curVal3;
+                            if (fileInfo.data[i, j] > 0)
+                            {
+                                curVal3 = (long)(long.MaxValue * fileInfo.data[i, j]);
+                            }
+                            else
+                            {
+                                curVal3 = (long)(long.MinValue * fileInfo.data[i, j]);
+                            }
+
+                            stream.Write(BitConverter.GetBytes(curVal3));
                             break;
                         default:
                             return null;
