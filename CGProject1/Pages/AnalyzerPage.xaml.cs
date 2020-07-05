@@ -343,7 +343,7 @@ namespace CGProject1.Pages {
         }
 
         private void InputBeginEnd(int begin, int end) {
-            if (samplesCount <= 0 || end - begin <= 0) {
+            if (samplesCount <= 1 || end - begin <= 0) {
                 return;
             }
 
