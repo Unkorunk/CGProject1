@@ -24,6 +24,7 @@
                 </MenuItem>
                 <MenuItem Header="Моделирование" Click="ModelingClick"></MenuItem>
                 <MenuItem Header="Инструменты">
+                    <MenuItem Header="Список каналов" Click="OpenChannelsPage"></MenuItem>
                     <MenuItem Header="Информация о сигнале" Click="OpenAboutSignalPage"></MenuItem>
                     <MenuItem Header="Статистики" Click="OpenStatisticsPage"></MenuItem>
                     <MenuItem Header="Осциллограмма" Click="OpenOscillogramsPage"></MenuItem>

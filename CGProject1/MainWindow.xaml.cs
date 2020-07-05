@@ -112,16 +112,19 @@ namespace CGProject1
         public void AddOscillogram(Channel channel) {
             oscillogramsPage.AddChannel(channel);
             oscillogramsPane.Show();
+            oscillogramsPane.IsSelected = true;
         }
 
         public void AddAnalyze(Channel channel) {
             analyzerPage.AddChannel(channel);
             analyzerPane.Show();
+            analyzerPane.IsSelected = true;
         }
 
         public void AddSpectrogram(Channel channel) {
             spectrogramsPage.AddChannel(channel);
             spectrogramsPane.Show();
+            spectrogramsPane.IsSelected = true;
         }
 
         public void UpdateActiveSegment(int begin, int end) {
@@ -157,22 +160,32 @@ namespace CGProject1
 
         private void OpenStatisticsPage(object sender, RoutedEventArgs e) {
             statisticsPane.Show();
+            statisticsPane.IsSelected = true;
         }
 
         private void OpenAnalyzerPage(object sender, RoutedEventArgs e) {
             analyzerPane.Show();
+            analyzerPane.IsSelected = true;
         }
 
         private void OpenOscillogramsPage(object sender, RoutedEventArgs e) {
             oscillogramsPane.Show();
+            oscillogramsPane.IsSelected = true;
         }
 
         private void OpenSpectrogramsPage(object sender, RoutedEventArgs e) {
             spectrogramsPane.Show();
+            spectrogramsPane.IsSelected = true;
         }
 
         private void OpenAboutSignalPage(object sender, RoutedEventArgs e) {
             aboutSignalPane.Show();
+            aboutSignalPane.IsSelected = true;
+        }
+
+        private void OpenChannelsPage(object sender, RoutedEventArgs e) {
+            channelsPane.Show();
+            channelsPane.IsSelected = true;
         }
 
         private void CloseAll() {
