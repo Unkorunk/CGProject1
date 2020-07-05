@@ -193,7 +193,7 @@ namespace CGProject1
         private void OpenFileClick(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog() {
-                Filter = "txt files (*.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave|dat files (*.dat)|*.dat"
+                Filter = "txt files (*.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave|dat files (*.dat)|*.dat|mp3 files (*.mp3)|*.mp3"
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -201,6 +201,9 @@ namespace CGProject1
                 IReader reader;
                 switch (Path.GetExtension(openFileDialog.FileName))
                 {
+                    case ".mp3":
+                        reader = new MP3Reader();
+                        break;
                     case ".dat":
                         reader = new DatReader();
                         break;
