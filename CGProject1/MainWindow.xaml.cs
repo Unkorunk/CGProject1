@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using CGProject1.Chart;
@@ -12,7 +10,7 @@ using Microsoft.Win32;
 using WAVE;
 
 using Xceed.Wpf.AvalonDock.Layout;
-using Xceed.Wpf.Toolkit.Primitives;
+
 
 namespace CGProject1
 {
@@ -20,16 +18,11 @@ namespace CGProject1
         public static MainWindow instance = null;
 
         #region(DEPRECATED)
-        private AboutSignal aboutSignalWindow;
         private ModelingWindow modelingWindow;
         private SaveWindow savingWindow;
-        public SpectrogramWindow spectrogramWindow;
 
-
-        private bool isAboutSignalShowing = false;
         private bool isModelingWindowShowing = false;
         private bool isSavingWindowShowing = false;
-        public bool isSpectrogramsShowing = false;
         #endregion
 
         private StatisticsPage statisticsPage = null;
@@ -47,9 +40,10 @@ namespace CGProject1
         private SpectrogramsPage spectrogramsPage = null;
         private LayoutAnchorable spectrogramsPane = null;
 
-        public Signal currentSignal;
+        private AboutSignalPage aboutSignalPage = null;
+        private LayoutAnchorable aboutSignalPane = null;
 
-        private List<ChartLine> charts = new List<ChartLine>();
+        public Signal currentSignal;
 
         private int begin;
         private int end;
@@ -117,6 +111,17 @@ namespace CGProject1
             spectrogramsPane.Content = spectrogramsFrame;
 
             UpperMiddlePane.Children.Add(spectrogramsPane);
+
+
+            aboutSignalPage = new AboutSignalPage();
+            var aboutSignalFrame = new Frame();
+            aboutSignalFrame.Navigate(aboutSignalPage);
+
+            aboutSignalPane = new LayoutAnchorable();
+            aboutSignalPane.Title = "О сигнале";
+            aboutSignalPane.Content = aboutSignalFrame;
+
+            RightPane.Children.Add(aboutSignalPane);
         }
 
         public void AddStatistics(ChartLine chart) {
@@ -146,6 +151,7 @@ namespace CGProject1
             statisticsPage.UpdateActiveSegment(begin, end);
             analyzerPage.UpdateActiveSegment(begin, end);
             spectrogramsPage.UpdateActiveFragment(begin, end);
+            aboutSignalPage.UpdateActiveSegment(begin, end);
         }
 
         private void OpenStatisticsPage(object sender, RoutedEventArgs e) {
@@ -165,19 +171,12 @@ namespace CGProject1
         }
 
         private void CloseAll() {
-            if (isAboutSignalShowing) {
-                aboutSignalWindow.Close();
-            }
-
             if (isModelingWindowShowing) {
                 modelingWindow.Close();
             }
 
             if (isSavingWindowShowing) {
                 savingWindow.Close();
-            }
-            if (isSpectrogramsShowing) {
-                spectrogramWindow.Close();
             }
         }
 
@@ -208,10 +207,6 @@ namespace CGProject1
 
             this.currentSignal.channels.Add(channel);
 
-            if (aboutSignalWindow != null) {
-                aboutSignalWindow.Close();
-            }
-
             if (modelingWindow != null) {
                 modelingWindow.Close();
             }
@@ -230,8 +225,7 @@ namespace CGProject1
             channelsPage.Reset();
             analyzerPage.Reset();
             spectrogramsPage.Reset();
-
-            charts.Clear();
+            aboutSignalPage.Reset(newSignal);
 
             Modelling.ResetCounters();
 
@@ -287,44 +281,8 @@ namespace CGProject1
             }
         }
 
-        private void OnChannelClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
-            //var point = Mouse.GetPosition(channels);
-
-            //int row = 0;
-            //double accumulatedHeight = 0.0;
-
-            //foreach (var chart in charts) {
-            //    accumulatedHeight += chart.ActualHeight;
-            //    if (accumulatedHeight >= point.Y)
-            //        break;
-            //    row++;
-            //}
-
-            //if (currentSignal == null || row >= currentSignal.channels.Count) {
-            //    return;
-            //}
-
-            //foreach (var chart in charts) {
-            //    chart.Selected = false;
-            //    chart.InvalidateVisual();
-            //}
-
-            //charts[row].Selected = true;
-            //charts[row].InvalidateVisual();
-        }
-
         private void AboutSignalClick(object sender, RoutedEventArgs e) {
-            if (!this.isAboutSignalShowing)
-            {
-                aboutSignalWindow = new AboutSignal();
-                aboutSignalWindow.UpdateInfo(currentSignal);
-                aboutSignalWindow.Closed += (object sender, System.EventArgs e) => this.isAboutSignalShowing = false;
-                aboutSignalWindow.Show();
-                isAboutSignalShowing = true;
-            } else {
-                aboutSignalWindow.Topmost = true;
-                aboutSignalWindow.Topmost = false;
-            }
+            aboutSignalPane.Show();
         }
 
         private void SaveAs_Click(object sender, RoutedEventArgs e) {

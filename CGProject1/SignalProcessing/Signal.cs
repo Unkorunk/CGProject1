@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace CGProject1 {
     public class Signal {
         public string fileName;
-        public List<Channel> channels;
+        public ObservableCollection<Channel> channels;
 
         /// <summary>
         /// Sampling rate (frequency)
@@ -53,13 +54,13 @@ namespace CGProject1 {
         public Signal() {
             this.fileName = "НовыйФайл.txt";
             this.StartDateTime = SignalProcessing.Modelling.defaultStartDateTime;
-            this.channels = new List<Channel>();
+            this.channels = new ObservableCollection<Channel>();
         }
 
         public Signal(string name) {
             this.fileName = name;
             this.StartDateTime = SignalProcessing.Modelling.defaultStartDateTime;
-            this.channels = new List<Channel>();
+            this.channels = new ObservableCollection<Channel>();
         }
 
         public void UpdateChannelsInfo() {

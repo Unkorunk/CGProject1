@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Controls;
 
-namespace CGProject1 {
-    public partial class AboutSignal : Window {
+
+namespace CGProject1.Pages {
+    public partial class AboutSignalPage : Page {
         private int curRow = 1;
 
         private Label channelNumberText;
@@ -15,7 +15,7 @@ namespace CGProject1 {
         private Label durationText;
         private Label activeSegmentText;
 
-        public AboutSignal() {
+        public AboutSignalPage() {
             InitializeComponent();
 
             InfoLabelInit(ref channelNumberText);
@@ -27,7 +27,7 @@ namespace CGProject1 {
             InfoLabelInit(ref activeSegmentText);
         }
 
-        public void UpdateInfo(Signal signal) {
+        public void Reset(Signal signal) {
             if (signal == null) {
                 channelNumberText.Content = "No signal";
                 samplesNumberText.Content = "No signal";

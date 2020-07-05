@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -41,7 +42,7 @@ namespace CGProject1 {
                     switch (curState) {
                         case ParseState.NeedChannelNumber: {
                                 channelsNum = Int32.Parse(trimmed);
-                                result.channels = new List<Channel>();
+                                result.channels = new ObservableCollection<Channel>();
                                 break;
                             }
                         case ParseState.NeedSamplesNumber: {

@@ -8,6 +8,7 @@ using System.Windows.Input;
 using CGProject1.Chart;
 using CGProject1.SignalProcessing;
 
+
 namespace CGProject1.Pages {
     public partial class AnalyzerPage : Page {
         private List<Analyzer> analyzers = new List<Analyzer>();

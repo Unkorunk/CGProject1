@@ -145,6 +145,7 @@ namespace CGProject1.Pages {
             sp.SpectrogramHeight = this.spectrogramHeight;
             sp.ShowCurrentXY = true;
             sp.ContextMenu = new ContextMenu();
+            
             channelPanel.Children.Add(sp);
 
             spectrograms.Add(sp);
@@ -170,6 +171,18 @@ namespace CGProject1.Pages {
                 return t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss");
             };
             charts.Add(chart);
+
+            var item = new MenuItem();
+            item.Header = "Закрыть канал";
+            item.Click += (object sender, RoutedEventArgs args) => {
+                channelNames.Remove(channel.Name);
+                channels.Remove(channel);
+                spectrograms.Remove(sp);
+                charts.Remove(chart);
+                Spectrograms.Children.Remove(border);
+
+            };
+            sp.ContextMenu.Items.Add(item);
 
             bottomGrid.Children.Add(chart);
 
