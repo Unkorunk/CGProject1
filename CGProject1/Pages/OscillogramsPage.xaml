@@ -3,9 +3,11 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:CGProject1" xmlns:chart="clr-namespace:CGProject1.Chart"
+      xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+      xmlns:chart="clr-namespace:CGProject1.Chart"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
+      SizeChanged="Page_SizeChanged"
       Title="OscillogramsPage">
 
     <Grid>
@@ -19,13 +21,14 @@
             <RowDefinition Height="125"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-            <StackPanel Name="OscillogramsField">
+        <ScrollViewer x:Name="OscillogramScrollViewer" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+            <StackPanel Name="OscillogramsField" Margin="0, 0, 5, 0">
 
             </StackPanel>
         </ScrollViewer>
         <Menu Grid.ColumnSpan="2" Height="20">
             <MenuItem Name="ScalingChooser" Header="Масштабирование"></MenuItem>
+            <xctk:IntegerUpDown x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
         </Menu>
         <StackPanel Grid.Row="2" Grid.Column="1">
             <Label Name="BeginTimeLabel">Start Time:</Label>

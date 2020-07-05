@@ -3,9 +3,10 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:CGProject1.Pages" xmlns:chart="clr-namespace:CGProject1.Chart"
+      xmlns:local="clr-namespace:CGProject1.Pages" xmlns:chart="clr-namespace:CGProject1.Chart" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
+      SizeChanged="Page_SizeChanged"
       Title="AnalyzerPage">
 
     <Grid>
@@ -21,10 +22,10 @@
 
         <Menu Grid.Row="0" Grid.ColumnSpan="2">
             <ComboBox SelectedIndex="0" Name="ComboBoxMode" SelectionChanged="ComboBoxMode_SelectionChanged">
-                <ComboBoxItem Content="Спектральная плотность мощности"/>
-                <ComboBoxItem Content="Амплитудный спектр"/>
-                <ComboBoxItem Content="Логарифмический режим (СПМ)"/>
-                <ComboBoxItem Content="Логарифмический режим (Амп. спектр)"/>
+                <ComboBoxItem Content="СПМ"/>
+                <ComboBoxItem Content="Ампл. спектр"/>
+                <ComboBoxItem Content="Лог. режим (СПМ)"/>
+                <ComboBoxItem Content="Лог. режим (Ампл. спектр)"/>
             </ComboBox>
 
             <ComboBox x:Name="ZeroModeSelector" SelectedIndex="0" SelectionChanged="ZeroMode_SelectionChanged">
@@ -32,19 +33,23 @@
                 <ComboBoxItem Content="X(0) = 0"/>
                 <ComboBoxItem Content="X(0) = |X(1)|"/>
             </ComboBox>
+
+            <Label>Отображать каналов:</Label>
+            <xctk:IntegerUpDown x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
+            
             <Border BorderThickness="1" BorderBrush="Black">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal">
                         <Label>L:</Label>
-                        <TextBox x:Name="HalfWindowTextBox" Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting"></TextBox>
+                        <TextBox x:Name="HalfWindowTextBox" Width="50" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting"></TextBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>BEGIN</Label>
-                        <TextBox x:Name="BeginSelector" Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" IsEnabled="False"></TextBox>
+                        <TextBox x:Name="BeginSelector" Width="50" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" IsEnabled="False"></TextBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>END</Label>
-                        <TextBox x:Name="EndSelector" Width="64" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" IsEnabled="False"></TextBox>
+                        <TextBox x:Name="EndSelector" Width="50" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" IsEnabled="False"></TextBox>
                     </StackPanel>
 
                     <Button Content="Обновить спектры" Margin="8,0,0,0" Click="SelectInterval"></Button>
@@ -52,7 +57,7 @@
             </Border>
         </Menu>
 
-        <ScrollViewer Grid.Row="1" Grid.ColumnSpan="2">
+        <ScrollViewer x:Name="AnalyzerScrollViewer" Grid.Row="1" Grid.ColumnSpan="2">
             <StackPanel x:Name="SpectrePanel"></StackPanel>
         </ScrollViewer>
 

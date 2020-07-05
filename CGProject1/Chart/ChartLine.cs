@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -233,8 +231,8 @@ namespace CGProject1.Chart
                 interfaceOffset.Height = formText1.Height + 1;
             }
 
-            Size actSize = new Size(ActualWidth - interfaceOffset.Width,
-                ActualHeight - interfaceOffset.Height);
+            Size actSize = new Size(Math.Max(0, ActualWidth - interfaceOffset.Width),
+                Math.Max(0 ,ActualHeight - interfaceOffset.Height));
 
             if ((DisplayHAxisTitle || DisplayHAxisInfo) && HAxisAlligment == HAxisAlligmentEnum.Bottom)
             {

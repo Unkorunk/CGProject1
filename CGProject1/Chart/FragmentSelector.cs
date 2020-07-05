@@ -70,8 +70,8 @@ namespace CGProject1.Chart
             drawingContext.DrawRectangle(Brushes.Gray, new Pen(Brushes.Black, 1.0), new Rect(
                 SliderWidth,
                 visualPadding,
-                this.ActualWidth - 2 * SliderWidth,
-                this.ActualHeight - 2 * visualPadding
+                Math.Max(0, this.ActualWidth - 2 * SliderWidth),
+                Math.Max(0, this.ActualHeight - 2 * visualPadding)
             ));
 
             double visualLength = (ActualWidth - 2 * SliderWidth) / (Maximum - Minimum);

@@ -24,8 +24,14 @@ namespace CGProject1.Pages {
 
         private bool initiliezed = false;
 
+        private double chartHeight = 100;
+
         public AnalyzerPage() {
             InitializeComponent();
+
+            CountPerPage.Minimum = 1;
+            CountPerPage.Maximum = 6;
+            CountPerPage.Value = 1;
 
             for (int i = 0; i < ComboBoxMode.Items.Count; i++) charts.Add(new List<ChartLine>());
 
@@ -33,6 +39,8 @@ namespace CGProject1.Pages {
                 BeginFrequencyLabel.Content = "Begin frequency: 0";
                 EndFrequencyLabel.Content = $"End frequency: {(MainWindow.instance.currentSignal.SamplingFrq / 2).ToString(CultureInfo.InvariantCulture)}";
             }
+
+            RecalculateHeight(1);
         }
 
         public int GetBegin() => FSelector.LeftSlider;
@@ -185,7 +193,7 @@ namespace CGProject1.Pages {
            
 
             var ampChart = new ChartLine(amp);
-            ampChart.Height = 200;
+            ampChart.Height = this.chartHeight;
             ampChart.Begin = 0;
             ampChart.End = amp.SamplesCount;
             if (charts[1].Count != 0) {
@@ -200,7 +208,7 @@ namespace CGProject1.Pages {
 
             var psd = analyzer.PowerSpectralDensity();
             var psdChart = new ChartLine(psd);
-            psdChart.Height = 200;
+            psdChart.Height = this.chartHeight;
             psdChart.Begin = 0;
             psdChart.End = psd.SamplesCount;
             if (charts[0].Count != 0) {
@@ -215,7 +223,7 @@ namespace CGProject1.Pages {
 
             var lgPSD = analyzer.LogarithmicPSD();
             var logPSDChart = new ChartLine(lgPSD);
-            logPSDChart.Height = 200;
+            logPSDChart.Height = this.chartHeight;
             logPSDChart.Begin = 0;
             logPSDChart.End = lgPSD.SamplesCount;
             if (charts[2].Count != 0) {
@@ -230,7 +238,7 @@ namespace CGProject1.Pages {
 
             var lg = analyzer.LogarithmicSpectre();
             var logChart = new ChartLine(lg);
-            logChart.Height = 200;
+            logChart.Height = this.chartHeight;
             logChart.Begin = 0;
             logChart.End = lg.SamplesCount;
             if (charts[3].Count != 0) {
@@ -381,6 +389,29 @@ namespace CGProject1.Pages {
 
         private void FSelector_IntervalUpdate(object sender, EventArgs e) {
             InputBeginEnd(GetBegin(), GetEnd());
+        }
+
+        private void RecalculateHeight(int count) {
+            if (AnalyzerScrollViewer.ActualHeight <= 0) {
+                return;
+            }
+
+            double newHeight = (AnalyzerScrollViewer.ActualHeight) / count;
+            this.chartHeight = newHeight;
+
+            foreach (var chartList in charts) {
+                foreach (var chart in chartList) {
+                    chart.Height = this.chartHeight;
+                }
+            }
+        }
+
+        private void CountPerPage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+            RecalculateHeight((int)e.NewValue);
+        }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e) {
+            RecalculateHeight((int)CountPerPage.Value);
         }
     }
 }

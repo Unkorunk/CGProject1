@@ -3,9 +3,11 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       xmlns:local="clr-namespace:CGProject1.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
+      SizeChanged="Page_SizeChanged"
       Title="SpectrogramsPage">
 
     <Grid>
@@ -22,14 +24,14 @@
                     <Label Content="Яркость:"/>
                     <TextBox x:Name="BrightnessField" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center">1.0</TextBox>
 
-                    <Label Content="Высота"/>
-                    <TextBox x:Name="HeightField" Width="50" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center">150</TextBox>
-
                     <Label Content="Нахлёст:"/>
                     <TextBox x:Name="CoeffSelector" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center">1.0</TextBox>
                     <Slider x:Name="CoeffSlider" Margin="5, 1, 5, 1" Width="100" Minimum="1" Maximum="10" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"></Slider>
                 </StackPanel>
             </Border>
+
+            <Label Content="Отображать каналов:"/>
+            <xctk:IntegerUpDown x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
 
             <ComboBox SelectedIndex="0" x:Name="PaletteSelector" SelectionChanged="ComboBoxMode_SelectionChanged">
                 <ComboBoxItem Content="GRAY"/>

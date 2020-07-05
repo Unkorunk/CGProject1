@@ -235,7 +235,6 @@ namespace CGProject1.Chart {
                     curSelectedY = GetYIdx(position);
                 }
             } else if (curSelectedX != -1) {
-                //tooltip.IsOpen = false;
                 curSelectedX = -1;
                 curSelectedY = -1;
             }
@@ -312,7 +311,7 @@ namespace CGProject1.Chart {
             bitmap.WritePixels(new Int32Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight),
                 rawImg, bitmap.PixelWidth * bitmap.Format.BitsPerPixel / 8, 0);
 
-            drawingContext.DrawImage(bitmap, new Rect(leftOffset, titleOffset, ActualWidth - rightOffset - leftOffset, bitmap.PixelHeight));
+            drawingContext.DrawImage(bitmap, new Rect(leftOffset, titleOffset, Math.Max(0, ActualWidth - rightOffset - leftOffset), bitmap.PixelHeight));
 
             double minFrq = 0;
             double maxFrq = curChannel.SamplingFrq / 2;
@@ -350,7 +349,7 @@ namespace CGProject1.Chart {
                 drawingContext.DrawText(formText1, new Point(leftOffset - 5, titleOffset + y - formText1.Height / 2));
             }
 
-            drawingContext.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 1.0), new Rect(leftOffset, titleOffset, ActualWidth - rightOffset - leftOffset, bitmap.PixelHeight));
+            drawingContext.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 1.0), new Rect(leftOffset, titleOffset, Math.Max(0, ActualWidth - rightOffset - leftOffset), bitmap.PixelHeight));
         }
 
         private void DrawBrightness(DrawingContext drawingContext) {
@@ -431,6 +430,10 @@ namespace CGProject1.Chart {
             // step 1
             int sectionsCount = width;
             int samplesPerSection = height;
+
+            if (width <= 0 || height <= 0 ) {
+                return null;
+            }
 
             var spectrogramMatrix = new double[samplesPerSection, sectionsCount];
 

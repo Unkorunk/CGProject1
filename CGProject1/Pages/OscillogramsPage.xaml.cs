@@ -17,10 +17,16 @@ namespace CGProject1 {
         private DateTime startTime;
         private double deltaTime;
 
+        private double chartHeight = 100;
+
         private bool isReset = false;
 
         public OscillogramsPage() {
             InitializeComponent();
+
+            CountPerPage.Minimum = 1;
+            CountPerPage.Maximum = 6;
+            CountPerPage.Value = 1;
 
             var globalScaling = new MenuItem();
             globalScaling.Header = "Глобальное";
@@ -46,6 +52,8 @@ namespace CGProject1 {
             uniformLocalScaling.Header = "Единое локальное";
             uniformLocalScaling.Click += UniformLocalScaling_Click;
             ScalingChooser.Items.Add(uniformLocalScaling);
+
+            RecalculateHeight(1);
         }
 
         public int GetBegin() => FSelector.LeftSlider;
@@ -103,7 +111,7 @@ namespace CGProject1 {
                 FSelector.RightSlider = newEnd;
             };
 
-            newChart.Height = 300;
+            newChart.Height = this.chartHeight;
             newChart.Margin = new Thickness(0, 2, 0, 2);
 
             OscillogramsField.Children.Add(newChart);
@@ -271,6 +279,27 @@ namespace CGProject1 {
 
         private void FSelector_IntervalUpdate(object sender, EventArgs e) {
             InputBeginEnd(FSelector.LeftSlider, FSelector.RightSlider);
+        }
+
+        private void RecalculateHeight(int count) {
+            if (OscillogramScrollViewer.ActualHeight <= 0) {
+                return;
+            }
+
+            double newHeight = (OscillogramScrollViewer.ActualHeight) / count;
+            this.chartHeight = newHeight;
+
+            foreach (var chart in activeCharts) {
+                chart.Height = this.chartHeight;
+            }
+        }
+
+        private void CountPerPage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+            RecalculateHeight((int)e.NewValue);
+        }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e) {
+            RecalculateHeight((int)CountPerPage.Value);
         }
     }
 }

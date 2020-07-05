@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using CGProject1.Chart;
 using CGProject1.Pages;
 using CGProject1.SignalProcessing;
 using Microsoft.Win32;
@@ -271,7 +270,7 @@ namespace CGProject1
 
             if (!this.isSavingWindowShowing) {
                 savingWindow = new SaveWindow(this.currentSignal, this.begin, this.end);
-                savingWindow.Closed += (object sender, System.EventArgs e) => this.isSavingWindowShowing = false;
+                savingWindow.Closed += (object sender, EventArgs e) => this.isSavingWindowShowing = false;
                 savingWindow.Show();
                 this.isSavingWindowShowing = true;
             } else {

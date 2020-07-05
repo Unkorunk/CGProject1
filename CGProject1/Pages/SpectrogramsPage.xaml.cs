@@ -38,6 +38,12 @@ namespace CGProject1.Pages {
             end = 0;
 
             InitializeComponent();
+
+            CountPerPage.Maximum = 6;
+            CountPerPage.Minimum = 1;
+            CountPerPage.Value = 1;
+
+            RecalculateHeight(1);
         }
 
         static SpectrogramsPage() {
@@ -115,15 +121,6 @@ namespace CGProject1.Pages {
             channelNames.Add(channel.Name);
             channels.Add(channel);
 
-            if (begin == 0 && end == 0) {
-                //if (MainWindow.instance.isOscillogramShowing) {
-                //    SetSegment(MainWindow.instance.oscillogramWindow.GetBegin(),
-                //        MainWindow.instance.oscillogramWindow.GetEnd());
-                //} else {
-                //    SetSegment(0, channel.SamplesCount - 1);
-                //}
-            }
-
             var border = new Border();
             border.BorderThickness = new Thickness(1);
             border.BorderBrush = Brushes.Black;
@@ -152,7 +149,7 @@ namespace CGProject1.Pages {
             bottomGrid.ColumnDefinitions.Add(cd1);
 
             var chart = new ChartLine(in channel);
-            chart.Height = 100;
+            chart.Height = 45;
             chart.Margin = new Thickness(sp.LeftOffset, 2, 2, 2);
             chart.Begin = this.begin;
             chart.End = this.end;
@@ -189,7 +186,6 @@ namespace CGProject1.Pages {
 
         private void UpdateSpectrograms(object sender, RoutedEventArgs e) {
             if (!double.TryParse(BrightnessField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newBrightness)
-                    || !double.TryParse(HeightField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newHeight)
                     || !double.TryParse(CoeffSelector.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newCoeff)) {
                 MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -202,16 +198,10 @@ namespace CGProject1.Pages {
                 newCoeff = 10;
             }
 
-            if (newHeight < 64) {
-                newHeight = 64;
-            }
-
             BrightnessField.Text = newBrightness.ToString(CultureInfo.InvariantCulture);
-            HeightField.Text = newHeight.ToString(CultureInfo.InvariantCulture);
             CoeffSelector.Text = newCoeff.ToString(CultureInfo.InvariantCulture);
 
             this.boostCoeff = newBrightness;
-            this.spectrogramHeight = newHeight;
             this.coeffN = newCoeff;
 
             this.CoeffSlider.Value = newCoeff;
@@ -257,6 +247,27 @@ namespace CGProject1.Pages {
             foreach (var sp in spectrograms) {
                 sp.CoeffN = coeffN;
             }
+        }
+
+        private void RecalculateHeight(int count) {
+            if (this.ActualHeight <= 0) {
+                return;
+            }
+
+            double newHeight = (this.ActualHeight) / count;
+            this.spectrogramHeight = newHeight;
+
+            foreach (var spectrogram in spectrograms) {
+                spectrogram.SpectrogramHeight = this.spectrogramHeight;
+            }
+        }
+
+        private void CountPerPage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+            RecalculateHeight((int)e.NewValue);
+        }
+
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e) {
+            RecalculateHeight((int)CountPerPage.Value);
         }
     }
 }
