@@ -2,6 +2,6 @@
 {
     public interface IReader
     {
-        public abstract bool TryRead(byte[] data, out FileInfo waveFile);
+        public abstract bool TryRead(byte[] data, out FileInfo fileInfo);
     }
 }

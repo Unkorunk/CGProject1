@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using FileFormats;
 using Microsoft.Win32;
 
 namespace CGProject1 {
@@ -92,10 +87,54 @@ namespace CGProject1 {
             }
 
             var saveDialog = new SaveFileDialog();
-            saveDialog.Filter = "Text file (.txt)|*.txt";
+            saveDialog.Filter = "txt files (.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave|dat files (*.dat)|*.dat";
             if (saveDialog.ShowDialog() == true) {
-                SignalProcessing.Serializer.Serialize(saveDialog.FileName, signalToSave, begin, end);
+                IWriter writer;
+                switch (System.IO.Path.GetExtension(saveDialog.FileName))
+                {
+                    case ".txt":
+                        writer = new TXTWriter();
+                        break;
+                    case ".wav":
+                    case ".wave":
+                        writer = new WAVEWriter();
+                        break;
+                    case ".dat":
+                        writer = new DATWriter();
+                        break;
+                    default: throw new NotImplementedException();
+                }
+
+                File.WriteAllBytes(saveDialog.FileName,
+                    writer.TryWrite(SignalToFileInfo(signalToSave, begin, end)));
             }
+        }
+
+        private FileFormats.FileInfo SignalToFileInfo(Signal signal, int begin, int end)
+        {
+            var fileInfo = new FileFormats.FileInfo
+            {
+                nChannels = signal.channels.Count,
+                nSamplesPerSec = signal.SamplingFrq,
+                dateTime = signal.StartDateTime + TimeSpan.FromSeconds(begin * signal.DeltaTime)
+            };
+
+            fileInfo.channelNames = new string[fileInfo.nChannels];
+            for (int i = 0; i < fileInfo.nChannels; i++)
+            {
+                fileInfo.channelNames[i] = signal.channels[i].Name;
+            }
+
+            fileInfo.data = new double[end - begin + 1, fileInfo.nChannels];
+            for (int i = 0; i < fileInfo.data.GetLength(0); i++)
+            {
+                for (int j = 0; j < fileInfo.data.GetLength(1); j++)
+                {
+                    fileInfo.data[i, j] = signal.channels[j].values[begin + i];
+                }
+            }
+
+            return fileInfo;
         }
 
         private void previewTextInput(object sender, TextCompositionEventArgs e) {

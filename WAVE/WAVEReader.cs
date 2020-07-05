@@ -2,7 +2,7 @@
 
 namespace FileFormats
 {
-    public class WaveReader : IReader
+    public class WAVEReader : IReader
     {
         private const ushort WAVE_FORMAT_PCM = 0x0001;
 
@@ -19,9 +19,9 @@ namespace FileFormats
             public int cksize;
         }
 
-        public bool TryRead(byte[] data, out FileInfo waveFile)
+        public bool TryRead(byte[] data, out FileInfo fileInfo)
         {
-            waveFile = new FileInfo();
+            fileInfo = new FileInfo();
 
             int offset = 0;
 
@@ -53,7 +53,7 @@ namespace FileFormats
                 {
                     if (headerInfo1.cksize != 16) return false;
 
-                    if (!fmtChunk(data, ref offset, ref waveFile, out fmtInfo))
+                    if (!fmtChunk(data, ref offset, ref fileInfo, out fmtInfo))
                     {
                         return false;
                     }
@@ -62,7 +62,7 @@ namespace FileFormats
                 }
                 else if (headerInfo1.ckID == "data")
                 {
-                    if (fmtInfoSet && dataChunk(data, ref offset, ref waveFile, fmtInfo, headerInfo1))
+                    if (fmtInfoSet && dataChunk(data, ref offset, ref fileInfo, fmtInfo, headerInfo1))
                     {
                         return true;
                     }

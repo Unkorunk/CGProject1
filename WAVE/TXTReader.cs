@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FileFormats
 {
-    public class TxtReader : IReader
+    public class TXTReader : IReader
     {
         private enum ParseState
         {
@@ -18,9 +18,9 @@ namespace FileFormats
             NeedValues
         }
 
-        public bool TryRead(byte[] data, out FileInfo waveFile)
+        public bool TryRead(byte[] data, out FileInfo fileInfo)
         {
-            waveFile = new FileInfo();
+            fileInfo = new FileInfo();
 
             Stream stream = new MemoryStream(data);
 
@@ -46,9 +46,9 @@ namespace FileFormats
                     {
                         case ParseState.NeedChannelNumber:
                             {
-                                if (int.TryParse(trimmed, out waveFile.nChannels))
+                                if (int.TryParse(trimmed, out fileInfo.nChannels))
                                 {
-                                    waveFile.channelNames = new string[waveFile.nChannels];
+                                    fileInfo.channelNames = new string[fileInfo.nChannels];
                                 }
                                 else
                                 {
@@ -60,7 +60,7 @@ namespace FileFormats
                             {
                                 if (int.TryParse(trimmed, out int samplesCount))
                                 {
-                                    waveFile.data = new double[samplesCount, waveFile.nChannels];
+                                    fileInfo.data = new double[samplesCount, fileInfo.nChannels];
                                 }
                                 else
                                 {
@@ -71,7 +71,7 @@ namespace FileFormats
                         case ParseState.NeedSamplingFrq:
                             {
                                 if (!double.TryParse(trimmed, NumberStyles.AllowThousands | NumberStyles.Float,
-                                    CultureInfo.InvariantCulture, out waveFile.nSamplesPerSec))
+                                    CultureInfo.InvariantCulture, out fileInfo.nSamplesPerSec))
                                 {
                                     return false;
                                 }
@@ -80,7 +80,7 @@ namespace FileFormats
                         case ParseState.NeedDate:
                             {
                                 if (!DateTime.TryParseExact(trimmed, "dd-MM-yyyy", CultureInfo.InvariantCulture,
-                                    DateTimeStyles.None, out waveFile.dateTime))
+                                    DateTimeStyles.None, out fileInfo.dateTime))
                                 {
                                     return false;
                                 }
@@ -90,7 +90,7 @@ namespace FileFormats
                             {
                                 if (TimeSpan.TryParse(trimmed, CultureInfo.InvariantCulture, out var ts))
                                 {
-                                    waveFile.dateTime += ts;
+                                    fileInfo.dateTime += ts;
                                 }
                                 else
                                 {
@@ -103,14 +103,14 @@ namespace FileFormats
                                 int curStart = 0;
                                 int curOffset = 0;
 
-                                for (int i = 0; i < waveFile.nChannels; i++)
+                                for (int i = 0; i < fileInfo.nChannels; i++)
                                 {
                                     while (curStart + curOffset < trimmed.Length && trimmed[curStart + curOffset] != ';')
                                     {
                                         curOffset++;
                                     }
 
-                                    waveFile.channelNames[i] = trimmed[curStart..(curStart + curOffset)];
+                                    fileInfo.channelNames[i] = trimmed[curStart..(curStart + curOffset)];
                                     curStart += curOffset + 1;
                                     curOffset = 0;
                                 }
@@ -122,7 +122,7 @@ namespace FileFormats
                                 int curStart = 0;
                                 int curOffset = 0;
 
-                                for (int i = 0; i < waveFile.nChannels; i++)
+                                for (int i = 0; i < fileInfo.nChannels; i++)
                                 {
                                     while (curStart + curOffset < trimmed.Length && trimmed[curStart + curOffset] != ' ')
                                     {
@@ -130,7 +130,7 @@ namespace FileFormats
                                     }
 
                                     var indice = trimmed[curStart..(curStart + curOffset)];
-                                    waveFile.data[curRow, i] = double.Parse(indice, CultureInfo.InvariantCulture);
+                                    fileInfo.data[curRow, i] = double.Parse(indice, CultureInfo.InvariantCulture);
                                     curStart += curOffset + 1;
                                     curOffset = 0;
                                 }

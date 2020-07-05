@@ -282,33 +282,33 @@ namespace CGProject1
                         reader = new MP3Reader();
                         break;
                     case ".dat":
-                        reader = new DatReader();
+                        reader = new DATReader();
                         break;
                     case ".wav":
                     case ".wave":
-                        reader = new WaveReader();
+                        reader = new WAVEReader();
                         break;
                     case ".txt":
-                        reader = new TxtReader();
+                        reader = new TXTReader();
                         break;
                     default:
                         throw new NotImplementedException();
                 }
 
-                if (reader.TryRead(File.ReadAllBytes(openFileDialog.FileName), out var waveFile))
+                if (reader.TryRead(File.ReadAllBytes(openFileDialog.FileName), out var fileInfo))
                 {
                     var signal = new Signal(Path.GetFileName(openFileDialog.FileName));
-                    signal.SamplingFrq = waveFile.nSamplesPerSec;
-                    signal.StartDateTime = waveFile.dateTime;
+                    signal.SamplingFrq = fileInfo.nSamplesPerSec;
+                    signal.StartDateTime = fileInfo.dateTime;
 
-                    for (int i = 0; i < waveFile.nChannels; i++)
+                    for (int i = 0; i < fileInfo.nChannels; i++)
                     {
-                        signal.channels.Add(new Channel(waveFile.data.GetLength(0)));
+                        signal.channels.Add(new Channel(fileInfo.data.GetLength(0)));
                         signal.channels[i].Source = signal.fileName;
-                        signal.channels[i].Name = waveFile.channelNames[i] ?? ("Channel " + i);
-                        for (int j = 0; j < waveFile.data.GetLength(0); j++)
+                        signal.channels[i].Name = fileInfo.channelNames[i] ?? ("Channel " + i);
+                        for (int j = 0; j < fileInfo.data.GetLength(0); j++)
                         {
-                            signal.channels[i].values[j] = waveFile.data[j, i];
+                            signal.channels[i].values[j] = fileInfo.data[j, i];
                         }
                     }
 

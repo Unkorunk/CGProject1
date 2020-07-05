@@ -4,14 +4,14 @@ using System.Text;
 
 namespace FileFormats
 {
-    public class DatReader : IReader
+    public class DATReader : IReader
     {
-        public bool TryRead(byte[] data, out FileInfo waveFile)
+        public bool TryRead(byte[] data, out FileInfo fileInfo)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var windows1251 = Encoding.GetEncoding("windows-1251");
 
-            waveFile = new FileInfo();
+            fileInfo = new FileInfo();
 
             if (data.Length < 128) return false;
 
@@ -47,18 +47,18 @@ namespace FileFormats
 
             if (data.Length < 128 + n_points * n_chan * 4) return false;
 
-            waveFile.nChannels = n_chan;
-            waveFile.nSamplesPerSec = 1e6 / timecad;
+            fileInfo.nChannels = n_chan;
+            fileInfo.nSamplesPerSec = 1e6 / timecad;
 
-            waveFile.dateTime = DateTime.ParseExact(begtime, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            fileInfo.dateTime = DateTime.ParseExact(begtime, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
 
-            waveFile.data = new double[n_points, n_chan];
+            fileInfo.data = new double[n_points, n_chan];
             for (int i = 0; i < n_points; i++)
             {
                 for (int j = 0; j < n_chan; j++)
                 {
                     if (offset >= data.Length) return false;
-                    waveFile.data[i, j] = BitConverter.ToSingle(data, offset);
+                    fileInfo.data[i, j] = BitConverter.ToSingle(data, offset);
                     offset += 4;
                 }
             }
@@ -66,13 +66,13 @@ namespace FileFormats
             // TODO: specify format description
 
             var rawChannelNames = windows1251.GetString(data, offset, data.Length - offset).Split(';');
-            if (rawChannelNames.Length != 0)
+            if (rawChannelNames.Length == n_chan)
             {
-                if (Math.Abs(rawChannelNames.Length - n_chan) > 1) return false;
-                waveFile.channelNames = rawChannelNames[0..n_chan];
-            } else
+                fileInfo.channelNames = rawChannelNames[0..n_chan];
+            }
+            else
             {
-                waveFile.channelNames = new string[n_chan];
+                fileInfo.channelNames = new string[n_chan];
             }
 
             return true;
