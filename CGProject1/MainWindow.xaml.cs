@@ -106,6 +106,8 @@ namespace CGProject1
                 frame.Navigate(pages[i]);
                 panes[i].Content = frame;
             }
+
+            ResetSignal(null);
         }
 
         public void AddStatistics(Channel channel)
@@ -156,12 +158,13 @@ namespace CGProject1
 
             this.currentSignal = newSignal;
             oscillogramsPage.Reset(newSignal);
-            UpdateActiveSegment(0, newSignal.SamplesCount - 1);
 
             if (this.currentSignal == null)
             {
                 return;
             }
+
+            UpdateActiveSegment(0, newSignal.SamplesCount - 1);
 
             for (int i = 0; i < currentSignal.channels.Count; i++)
             {
@@ -173,7 +176,6 @@ namespace CGProject1
         {
             pane.Show();
             pane.IsSelected = true;
-            pane.IsActive = true;
         }
 
         private void OpenStatisticsPage(object sender, RoutedEventArgs e)

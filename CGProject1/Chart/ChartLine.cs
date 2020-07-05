@@ -625,10 +625,9 @@ namespace CGProject1.Chart
                 if (ShowCurrentXY)
                 { 
                     curSelected = GetIdx(position);
-                    //tooltip.IsOpen = true;
-                    //tooltip.HorizontalOffset = 1;//position.X;
-                    //tooltip.VerticalOffset = ActualHeight - 26;// position.Y - 20;
-                    //tooltip.Content = $"X: {this.MappingXAxis(curSelected, this)}; Y: {Channel.values[curSelected]}";
+                    if (curSelected >= this.Channel.SamplesCount) {
+                        curSelected = this.Channel.SamplesCount - 1;
+                    }
                 }
 
                 if (enableSelectInterval && IsMouseSelect)
@@ -651,7 +650,6 @@ namespace CGProject1.Chart
             }
             else if (curSelected != -1)
             {
-                //tooltip.IsOpen = false;
                 curSelected = -1;
                 InvalidateVisual();
             }
