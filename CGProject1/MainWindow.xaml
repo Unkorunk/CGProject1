@@ -23,11 +23,13 @@
                     <MenuItem Header="Сохранить как" Click="SaveAs_Click"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="Моделирование" Click="ModelingClick"></MenuItem>
-                <MenuItem Header="Инструменты">
+                <MenuItem Header="Сигнал">
                     <MenuItem Header="Список каналов" Click="OpenChannelsPage"></MenuItem>
                     <MenuItem Header="Информация о сигнале" Click="OpenAboutSignalPage"></MenuItem>
-                    <MenuItem Header="Статистики" Click="OpenStatisticsPage"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Анализ">
                     <MenuItem Header="Осциллограмма" Click="OpenOscillogramsPage"></MenuItem>
+                    <MenuItem Header="Статистики" Click="OpenStatisticsPage"></MenuItem>
                     <MenuItem Header="Анализ Фурье" Click="OpenAnalyzerPage"/>
                     <MenuItem Header="Спектрограмма" Click="OpenSpectrogramsPage"/>
                 </MenuItem>
