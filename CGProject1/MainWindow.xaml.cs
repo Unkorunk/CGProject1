@@ -13,7 +13,8 @@ using Xceed.Wpf.AvalonDock.Layout;
 
 namespace CGProject1
 {
-    public partial class MainWindow : Window {
+    public partial class MainWindow : Window
+    {
         public static MainWindow instance = null;
 
         #region(DEPRECATED)
@@ -50,7 +51,8 @@ namespace CGProject1
         private int begin;
         private int end;
 
-        public MainWindow() {
+        public MainWindow()
+        {
             instance = this;
             InitializeComponent();
 
@@ -93,50 +95,60 @@ namespace CGProject1
             pages = new IChannelComponent[] { channelsPage, aboutSignalPage, statisticsPage, oscillogramsPage, analyzerPage, spectrogramsPage };
             panes = new LayoutAnchorable[] { channelsPane, aboutSignalPane, statisticsPane, oscillogramsPane, analyzerPane, spectrogramsPane };
 
-            if (pages.Length != panes.Length) {
+            if (pages.Length != panes.Length)
+            {
                 throw new InvalidDataException("Invalid count of panes / pages");
             }
 
-            for (int i = 0; i < panes.Length; i++) {
+            for (int i = 0; i < panes.Length; i++)
+            {
                 var frame = new Frame();
                 frame.Navigate(pages[i]);
                 panes[i].Content = frame;
             }
         }
 
-        public void AddStatistics(Channel channel) {
+        public void AddStatistics(Channel channel)
+        {
             statisticsPage.AddChannel(channel);
             OpenPane(statisticsPane);
         }
 
-        public void AddOscillogram(Channel channel) {
+        public void AddOscillogram(Channel channel)
+        {
             oscillogramsPage.AddChannel(channel);
             OpenPane(oscillogramsPane);
         }
 
-        public void AddAnalyze(Channel channel) {
+        public void AddAnalyze(Channel channel)
+        {
             analyzerPage.AddChannel(channel);
             OpenPane(analyzerPane);
         }
 
-        public void AddSpectrogram(Channel channel) {
+        public void AddSpectrogram(Channel channel)
+        {
             spectrogramsPage.AddChannel(channel);
             OpenPane(spectrogramsPane);
         }
 
-        public void UpdateActiveSegment(int begin, int end) {
+        public void UpdateActiveSegment(int begin, int end)
+        {
             this.begin = begin;
             this.end = end;
 
-            foreach (var page in pages) {
+            foreach (var page in pages)
+            {
                 page.UpdateActiveSegment(begin, end);
             }
         }
 
-        public void ResetSignal(Signal newSignal) {
+        public void ResetSignal(Signal newSignal)
+        {
             CloseAll();
 
-            foreach (var page in pages) {
+            foreach (var page in pages)
+            {
                 page.Reset(newSignal);
             }
 
@@ -146,57 +158,70 @@ namespace CGProject1
             oscillogramsPage.Reset(newSignal);
             UpdateActiveSegment(0, newSignal.SamplesCount - 1);
 
-            if (this.currentSignal == null) {
+            if (this.currentSignal == null)
+            {
                 return;
             }
 
-            for (int i = 0; i < currentSignal.channels.Count; i++) {
+            for (int i = 0; i < currentSignal.channels.Count; i++)
+            {
                 channelsPage.AddChannel(currentSignal.channels[i]);
             }
         }
 
-        private void OpenPane(LayoutAnchorable pane) {
+        private void OpenPane(LayoutAnchorable pane)
+        {
             pane.Show();
             pane.IsSelected = true;
             pane.IsActive = true;
         }
 
-        private void OpenStatisticsPage(object sender, RoutedEventArgs e) {
+        private void OpenStatisticsPage(object sender, RoutedEventArgs e)
+        {
             OpenPane(statisticsPane);
         }
 
-        private void OpenAnalyzerPage(object sender, RoutedEventArgs e) {
+        private void OpenAnalyzerPage(object sender, RoutedEventArgs e)
+        {
             OpenPane(analyzerPane);
         }
 
-        private void OpenOscillogramsPage(object sender, RoutedEventArgs e) {
+        private void OpenOscillogramsPage(object sender, RoutedEventArgs e)
+        {
             OpenPane(oscillogramsPane);
-            
+
         }
 
-        private void OpenSpectrogramsPage(object sender, RoutedEventArgs e) {
+        private void OpenSpectrogramsPage(object sender, RoutedEventArgs e)
+        {
             OpenPane(spectrogramsPane);
         }
 
-        private void OpenAboutSignalPage(object sender, RoutedEventArgs e) {
+        private void OpenAboutSignalPage(object sender, RoutedEventArgs e)
+        {
             OpenPane(aboutSignalPane);
         }
 
-        private void OpenChannelsPage(object sender, RoutedEventArgs e) {
+        private void OpenChannelsPage(object sender, RoutedEventArgs e)
+        {
             OpenPane(channelsPane);
         }
 
-        private void CloseAll() {
-            if (isModelingWindowShowing) {
+        private void CloseAll()
+        {
+            if (isModelingWindowShowing)
+            {
                 modelingWindow.Close();
             }
 
-            if (isSavingWindowShowing) {
+            if (isSavingWindowShowing)
+            {
                 savingWindow.Close();
             }
         }
 
-        private void AboutClick(object sender, RoutedEventArgs e) {
+        private void AboutClick(object sender, RoutedEventArgs e)
+        {
             MessageBox.Show("Система визуализации и анализа многоканальных сигналов\r\n" +
                 "Авторы:\r\n" +
                 "Михалев Юрий (SmelJey)\r\n" +
@@ -205,29 +230,36 @@ namespace CGProject1
                 "О программе", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        private void ModelingClick(object sender, RoutedEventArgs e) {
-            if (!this.isModelingWindowShowing) {
+        private void ModelingClick(object sender, RoutedEventArgs e)
+        {
+            if (!this.isModelingWindowShowing)
+            {
                 this.modelingWindow = new ModelingWindow(currentSignal);
                 this.modelingWindow.Closed += (object sender, EventArgs e) => this.isModelingWindowShowing = false;
                 this.modelingWindow.Show();
                 this.isModelingWindowShowing = true;
-            } else {
+            }
+            else
+            {
                 this.modelingWindow.Topmost = true;
                 this.modelingWindow.Topmost = false;
             }
         }
 
-        public void AddChannel(Channel channel) {
+        public void AddChannel(Channel channel)
+        {
             channel.StartDateTime = this.currentSignal.StartDateTime;
             channel.SamplingFrq = this.currentSignal.SamplingFrq;
 
             this.currentSignal.channels.Add(channel);
 
-            if (modelingWindow != null) {
+            if (modelingWindow != null)
+            {
                 modelingWindow.Close();
             }
 
-            if (isSavingWindowShowing) {
+            if (isSavingWindowShowing)
+            {
                 savingWindow.Close();
             }
 
@@ -236,7 +268,8 @@ namespace CGProject1
 
         private void OpenFileClick(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog() {
+            var openFileDialog = new OpenFileDialog()
+            {
                 Filter = "txt files (*.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave|dat files (*.dat)|*.dat|mp3 files (*.mp3)|*.mp3"
             };
 
@@ -286,108 +319,23 @@ namespace CGProject1
             }
         }
 
-        private void OnChannelClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
-            var point = Mouse.GetPosition(channels);
-
-            int row = 0;
-            double accumulatedHeight = 0.0;
-
-            foreach (var chart in charts) {
-                accumulatedHeight += chart.ActualHeight;
-                if (accumulatedHeight >= point.Y)
-                    break;
-                row++;
-            }
-
-            if (currentSignal == null || row >= currentSignal.channels.Count) {
-                return;
-            }
-
-            foreach (var chart in charts) {
-                chart.Selected = false;
-                chart.InvalidateVisual();
-            }
-
-            charts[row].Selected = true;
-            charts[row].InvalidateVisual();
-        }
-
-        private void AboutSignalClick(object sender, RoutedEventArgs e) {
-            if (!this.isAboutSignalShowing)
+        private void SaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.currentSignal == null)
             {
-                aboutSignalWindow = new AboutSignal();
-                aboutSignalWindow.UpdateInfo(currentSignal);
-                aboutSignalWindow.Closed += (object sender, System.EventArgs e) => this.isAboutSignalShowing = false;
-                aboutSignalWindow.Show();
-                isAboutSignalShowing = true;
-            } else {
-                aboutSignalWindow.Topmost = true;
-                aboutSignalWindow.Topmost = false;
-            }
-        }
-
-        private void OscillogramsClick(object sender, RoutedEventArgs e) {
-            OpenOscillograms();
-        }
-
-        private void AnalyzatorClick(object sender, RoutedEventArgs e) {
-            OpenAnalyzer();
-        }
-
-        private void SpectrogramsClick(object sender, RoutedEventArgs e) {
-            OpenSpectrograms();
-        }
-
-        private void OpenOscillograms() {
-            if (!this.isOscillogramShowing) {
-                isOscillogramShowing = true;
-                oscillogramWindow = new Oscillograms();
-                oscillogramWindow.Closed += (object sender, System.EventArgs e) => this.isOscillogramShowing = false;
-                oscillogramWindow.Update(currentSignal);
-                oscillogramWindow.Show();
-            } else {
-                oscillogramWindow.Topmost = true;
-                oscillogramWindow.Topmost = false;
-            }
-        }
-
-        private void OpenAnalyzer() {
-            if (!this.isAnalyzerShowing) {
-                isAnalyzerShowing = true;
-
-                int begin = 0;
-                int end = 0;
-
-                if (this.currentSignal != null) {
-                    end = this.currentSignal.SamplesCount - 1;
-                }
-
-                if (isOscillogramShowing) {
-                    begin = oscillogramWindow.GetBegin();
-                    end = oscillogramWindow.GetEnd();
-                }
-
-                analyzerWindow = new AnalyzerWindow(begin, end);
-                analyzerWindow.Closed += (object sender, System.EventArgs e) => this.isAnalyzerShowing = false;
-                analyzerWindow.Show();
-            } else {
-                analyzerWindow.Topmost = true;
-                analyzerWindow.Topmost = false;
-            }
-        }
-
-        private void SaveAs_Click(object sender, RoutedEventArgs e) {
-            if (this.currentSignal == null) {
                 MessageBox.Show("Нет сигнала для сохранения", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            if (!this.isSavingWindowShowing) {
+            if (!this.isSavingWindowShowing)
+            {
                 savingWindow = new SaveWindow(this.currentSignal, this.begin, this.end);
                 savingWindow.Closed += (object sender, EventArgs e) => this.isSavingWindowShowing = false;
                 savingWindow.Show();
                 this.isSavingWindowShowing = true;
-            } else {
+            }
+            else
+            {
                 savingWindow.Topmost = true;
                 savingWindow.Topmost = false;
             }
