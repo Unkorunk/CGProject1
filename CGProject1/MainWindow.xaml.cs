@@ -106,25 +106,22 @@ namespace CGProject1
 
         public void AddStatistics(Channel channel) {
             statisticsPage.AddChannel(channel);
-            statisticsPane.Show();
+            OpenPane(statisticsPane);
         }
 
         public void AddOscillogram(Channel channel) {
             oscillogramsPage.AddChannel(channel);
-            oscillogramsPane.Show();
-            oscillogramsPane.IsSelected = true;
+            OpenPane(oscillogramsPane);
         }
 
         public void AddAnalyze(Channel channel) {
             analyzerPage.AddChannel(channel);
-            analyzerPane.Show();
-            analyzerPane.IsSelected = true;
+            OpenPane(analyzerPane);
         }
 
         public void AddSpectrogram(Channel channel) {
             spectrogramsPage.AddChannel(channel);
-            spectrogramsPane.Show();
-            spectrogramsPane.IsSelected = true;
+            OpenPane(spectrogramsPane);
         }
 
         public void UpdateActiveSegment(int begin, int end) {
@@ -158,34 +155,35 @@ namespace CGProject1
             }
         }
 
+        private void OpenPane(LayoutAnchorable pane) {
+            pane.Show();
+            pane.IsSelected = true;
+            pane.IsActive = true;
+        }
+
         private void OpenStatisticsPage(object sender, RoutedEventArgs e) {
-            statisticsPane.Show();
-            statisticsPane.IsSelected = true;
+            OpenPane(statisticsPane);
         }
 
         private void OpenAnalyzerPage(object sender, RoutedEventArgs e) {
-            analyzerPane.Show();
-            analyzerPane.IsSelected = true;
+            OpenPane(analyzerPane);
         }
 
         private void OpenOscillogramsPage(object sender, RoutedEventArgs e) {
-            oscillogramsPane.Show();
-            oscillogramsPane.IsSelected = true;
+            OpenPane(oscillogramsPane);
+            
         }
 
         private void OpenSpectrogramsPage(object sender, RoutedEventArgs e) {
-            spectrogramsPane.Show();
-            spectrogramsPane.IsSelected = true;
+            OpenPane(spectrogramsPane);
         }
 
         private void OpenAboutSignalPage(object sender, RoutedEventArgs e) {
-            aboutSignalPane.Show();
-            aboutSignalPane.IsSelected = true;
+            OpenPane(aboutSignalPane);
         }
 
         private void OpenChannelsPage(object sender, RoutedEventArgs e) {
-            channelsPane.Show();
-            channelsPane.IsSelected = true;
+            OpenPane(channelsPane);
         }
 
         private void CloseAll() {
