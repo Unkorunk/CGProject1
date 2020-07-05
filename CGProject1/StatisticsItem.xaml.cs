@@ -13,23 +13,23 @@ namespace CGProject1
     /// </summary>
     public partial class StatisticsItem : UserControl
     {
-        private ChartLine _subscriber;
+        private Channel _subscriber;
 
         private int begin;
         private int end;
         private int length { get => end - begin + 1; }
 
-        public ChartLine Subscriber
+        public Channel Subscriber
         {
             get => _subscriber;
             set
             {
                 _subscriber = value;
-                UpdateInfo(0, value.Channel.SamplesCount - 1);
+                UpdateInfo(0, value.SamplesCount - 1);
             }
         }
 
-        public StatisticsItem(ChartLine subscriber)
+        public StatisticsItem(Channel subscriber)
         {
             InitializeComponent();
 
@@ -43,7 +43,7 @@ namespace CGProject1
             this.begin = begin;
             this.end = end;
 
-            ChannelNameLabel.Content = "Name: " + Subscriber.Channel.Name;
+            ChannelNameLabel.Content = "Name: " + Subscriber.Name;
             ChannelIntervalLabel.Content = "Begin: " + (this.begin + 1) + "; End: " + (this.end + 1);
 
             var leftColumn = new StringBuilder();
@@ -86,7 +86,7 @@ namespace CGProject1
                     int[] cnt = new int[K];
                     for (int i = 0; i < this.length; i++)
                     {
-                        double p = (Subscriber.Channel.values[this.begin + i] - minValue) / (maxValue - minValue);
+                        double p = (Subscriber.values[this.begin + i] - minValue) / (maxValue - minValue);
                         if (Math.Abs(maxValue - minValue) < 1e-6) p = 0.0;
                         cnt[(int)((K - 1) * p)]++;
                     }
@@ -131,28 +131,28 @@ namespace CGProject1
             return input.All(c => char.IsDigit(c) || char.IsControl(c));
         }
 
-        public double CalcAverage(ChartLine chart)
+        public double CalcAverage(Channel chart)
         {
             if (length <= 0) return 0.0;
 
             double average = 0.0;
             for (int i = this.begin; i <= this.end; i++)
             {
-                average += chart.Channel.values[i];
+                average += chart.values[i];
             }
             average /= length;
 
             return average;
         }
 
-        public double CalcVariance(double average, ChartLine chart)
+        public double CalcVariance(double average, Channel chart)
         {
             if (length <= 0) return 0.0;
 
             double variance = 0.0;
             for (int i = this.begin; i <= this.end; i++)
             {
-                variance += Math.Pow(chart.Channel.values[i] - average, 2);
+                variance += Math.Pow(chart.values[i] - average, 2);
             }
             variance /= length;
 
@@ -163,7 +163,7 @@ namespace CGProject1
 
         public double CalcVariability(double sd, double average) => sd / average;
 
-        public double CalcSkewness(double variance, double average, ChartLine chart)
+        public double CalcSkewness(double variance, double average, Channel chart)
         {
             if (length <= 0) return 0.0;
 
@@ -172,14 +172,14 @@ namespace CGProject1
             double skewness = 0.0;
             for (int i = this.begin; i <= this.end; i++)
             {
-                skewness += Math.Pow(chart.Channel.values[i] - average, 3);
+                skewness += Math.Pow(chart.values[i] - average, 3);
             }
             skewness /= length * mse3;
 
             return skewness;
         }
 
-        public double CalcKurtosis(double variance, double average, ChartLine chart)
+        public double CalcKurtosis(double variance, double average, Channel chart)
         {
             if (length <= 0) return 0.0;
 
@@ -188,14 +188,14 @@ namespace CGProject1
             double kurtosis = 0.0;
             for (int i = this.begin; i <= this.end; i++)
             {
-                kurtosis += Math.Pow(chart.Channel.values[i] - average, 4);
+                kurtosis += Math.Pow(chart.values[i] - average, 4);
             }
             kurtosis = kurtosis / (length * mse4) - 3.0;
 
             return kurtosis;
         }
 
-        public double CalcQuantile(ChartLine chart, double p)
+        public double CalcQuantile(Channel chart, double p)
         {
             if (length <= 0) return 0.0;
 
@@ -205,33 +205,33 @@ namespace CGProject1
             double[] arr = new double[length];
             for (int i = 0; i < arr.Length; i++)
             {
-                arr[i] = chart.Channel.values[this.begin + i];
+                arr[i] = chart.values[this.begin + i];
             }
 
             return OrderStatistics(arr, k);
         }
 
-        public double CalcMinValue(ChartLine chart)
+        public double CalcMinValue(Channel chart)
         {
             if (length <= 0) return 0.0;
 
             double minValue = double.MaxValue;
             for (int i = this.begin; i <= this.end; i++)
             {
-                minValue = Math.Min(minValue, chart.Channel.values[i]);
+                minValue = Math.Min(minValue, chart.values[i]);
             }
 
             return minValue;
         }
 
-        public double CalcMaxValue(ChartLine chart)
+        public double CalcMaxValue(Channel chart)
         {
             if (length <= 0) return 0.0;
 
             double maxValue = double.MinValue;
             for (int i = this.begin; i <= this.end; i++)
             {
-                maxValue = Math.Max(maxValue, chart.Channel.values[i]);
+                maxValue = Math.Max(maxValue, chart.values[i]);
             }
 
             return maxValue;

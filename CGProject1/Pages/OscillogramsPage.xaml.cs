@@ -6,15 +6,18 @@ using System.Windows.Controls;
 using System.Windows.Input;
 
 using CGProject1.Chart;
+using CGProject1.Pages;
 
 namespace CGProject1 {
-    public partial class OscillogramsPage : Page {
+    public partial class OscillogramsPage : Page, IPageComponent {
         private readonly HashSet<ChartLine> activeCharts = new HashSet<ChartLine>();
         private readonly HashSet<string> activeChartsNames = new HashSet<string>();
 
         private int samplesCount = 0;
         private DateTime startTime;
         private double deltaTime;
+
+        private bool isReset = false;
 
         public OscillogramsPage() {
             InitializeComponent();
@@ -49,7 +52,11 @@ namespace CGProject1 {
 
         public int GetEnd() => FSelector.RightSlider;
 
-        public void Update(Signal signal) {
+        public void UpdateActiveSegment(int begin, int end) { }
+
+        public void Reset(Signal signal) {
+            isReset = true;
+
             FSelector.IsEnabled = signal != null;
             BeginBox.IsEnabled = signal != null;
             EndBox.IsEnabled = signal != null;
@@ -74,6 +81,8 @@ namespace CGProject1 {
 
                 InputBeginEnd(GetBegin(), GetEnd());
             }
+
+            isReset = false;
         }
 
         public void AddChannel(Channel channel) {
@@ -163,7 +172,7 @@ namespace CGProject1 {
             var statisticsMenuItem = new MenuItem();
             statisticsMenuItem.Header = "Статистика";
             statisticsMenuItem.Click += (object sender, RoutedEventArgs e) => {
-                MainWindow.instance.AddStatistics(newChart);
+                MainWindow.instance.AddStatistics(channel);
             };
             newChart.ContextMenu.Items.Add(statisticsMenuItem);
 
@@ -199,15 +208,9 @@ namespace CGProject1 {
             BeginTimeLabel.Content = "Start Time: " + (startTime + TimeSpan.FromSeconds(deltaTime * begin)).ToString("dd-MM-yyyy hh\\:mm\\:ss");
             EndTimeLabel.Content = "End Time: " + (startTime + TimeSpan.FromSeconds(deltaTime * end)).ToString("dd-MM-yyyy hh\\:mm\\:ss");
 
-            MainWindow.instance.UpdateActiveSegment(begin, end);
-
-            //if (MainWindow.instance.isSpectrogramsShowing) {
-            //    MainWindow.instance.spectrogramWindow.SetSegment(begin, end);
-            //}
-
-            //if (MainWindow.instance.isAnalyzerShowing) {
-            //    MainWindow.instance.analyzerWindow.SetupSegment(begin, end);
-            //}
+            if (!isReset) {
+                MainWindow.instance.UpdateActiveSegment(begin, end);
+            }
         }
 
         private void previewTextInput(object sender, TextCompositionEventArgs e) {

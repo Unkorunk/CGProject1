@@ -2,20 +2,15 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using CGProject1.Chart;
 
+
 namespace CGProject1.Pages {
-    public partial class SpectrogramsPage : Page {
+    public partial class SpectrogramsPage : Page, IPageComponent {
         private static List<byte[][]> palettes;
 
         private byte[][] curPalette = palettes[1];
@@ -85,7 +80,7 @@ namespace CGProject1.Pages {
             palettes.Add(blueRedYellow);
         }
 
-        public void Reset() {
+        public void Reset(Signal signal) {
             channelNames.Clear();
             spectrograms.Clear();
             channels.Clear();
@@ -94,7 +89,7 @@ namespace CGProject1.Pages {
             Spectrograms.Children.Clear();
         }
 
-        public void UpdateActiveFragment(int begin, int end) {
+        public void UpdateActiveSegment(int begin, int end) {
             this.begin = begin;
             this.end = end;
 

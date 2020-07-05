@@ -10,7 +10,7 @@ using CGProject1.SignalProcessing;
 
 
 namespace CGProject1.Pages {
-    public partial class AnalyzerPage : Page {
+    public partial class AnalyzerPage : Page, IPageComponent {
         private List<Analyzer> analyzers = new List<Analyzer>();
         private HashSet<string> namesSet = new HashSet<string>();
 
@@ -50,7 +50,7 @@ namespace CGProject1.Pages {
             UpdateAnalyzers();
         }
 
-        public void Reset() {
+        public void Reset(Signal signal) {
             analyzers.Clear();
             namesSet.Clear();
 

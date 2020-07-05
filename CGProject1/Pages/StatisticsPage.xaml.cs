@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using CGProject1.Chart;
+using CGProject1.Pages;
 
 namespace CGProject1 {
     /// <summary>
     /// Interaction logic for StatisticsPage.xaml
     /// </summary>
-    public partial class StatisticsPage : Page {
+    public partial class StatisticsPage : Page, IPageComponent {
         private readonly Dictionary<string, StatisticsItem> subscribed = new Dictionary<string, StatisticsItem>();
 
         private int begin;
@@ -26,23 +17,23 @@ namespace CGProject1 {
             InitializeComponent();
         }
 
-        public void Reset() {
+        public void Reset(Signal signal) {
             subscribed.Clear();
             ChannelsPanel.Children.Clear();
         }
 
-        public void Update(ChartLine chart) {
-            if (!subscribed.ContainsKey(chart.Channel.Name)) {
+        public void AddChannel(Channel chart) {
+            if (!subscribed.ContainsKey(chart.Name)) {
                 StatisticsItem item = new StatisticsItem(chart);
 
-                ChartLine.OnChangeIntervalDel onChangeInterval = (sender) =>
-                    item.UpdateInfo(begin, end);
+                //ChartLine.OnChangeIntervalDel onChangeInterval = (sender) =>
+                //    item.UpdateInfo(begin, end);
 
                 MenuItem closeChannel = new MenuItem();
                 closeChannel.Header = "Закрыть канал";
 
                 closeChannel.Click += (object sender, RoutedEventArgs args) => {
-                    subscribed.Remove(chart.Channel.Name);
+                    subscribed.Remove(chart.Name);
                     ChannelsPanel.Children.Remove(item);
                 };
                 //this.Closed += (object sender, EventArgs e) => {
@@ -54,7 +45,7 @@ namespace CGProject1 {
                 item.ContextMenu.Items.Add(closeChannel);
 
                 ChannelsPanel.Children.Add(item);
-                subscribed.Add(chart.Channel.Name, item);
+                subscribed.Add(chart.Name, item);
             }
         }
 

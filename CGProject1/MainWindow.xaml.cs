@@ -43,6 +43,8 @@ namespace CGProject1
         private AboutSignalPage aboutSignalPage = null;
         private LayoutAnchorable aboutSignalPane = null;
 
+        private IPageComponent[] pages;
+
         public Signal currentSignal;
 
         private int begin;
@@ -122,25 +124,27 @@ namespace CGProject1
             aboutSignalPane.Content = aboutSignalFrame;
 
             RightPane.Children.Add(aboutSignalPane);
+
+            pages = new IPageComponent[] { channelsPage, aboutSignalPage, statisticsPage, oscillogramsPage, analyzerPage, spectrogramsPage };
         }
 
-        public void AddStatistics(ChartLine chart) {
-            statisticsPage.Update(chart);
+        public void AddStatistics(Channel channel) {
+            statisticsPage.AddChannel(channel);
             statisticsPane.Show();
         }
 
-        public void AddOscillogram(ChartLine chart) {
-            oscillogramsPage.AddChannel(chart.Channel);
+        public void AddOscillogram(Channel channel) {
+            oscillogramsPage.AddChannel(channel);
             oscillogramsPane.Show();
         }
 
-        public void AddAnalyze(ChartLine chart) {
-            analyzerPage.AddChannel(chart.Channel);
+        public void AddAnalyze(Channel channel) {
+            analyzerPage.AddChannel(channel);
             analyzerPane.Show();
         }
 
-        public void AddSpectrogram(ChartLine chart) {
-            spectrogramsPage.AddChannel(chart.Channel);
+        public void AddSpectrogram(Channel channel) {
+            spectrogramsPage.AddChannel(channel);
             spectrogramsPane.Show();
         }
 
@@ -148,10 +152,9 @@ namespace CGProject1
             this.begin = begin;
             this.end = end;
 
-            statisticsPage.UpdateActiveSegment(begin, end);
-            analyzerPage.UpdateActiveSegment(begin, end);
-            spectrogramsPage.UpdateActiveFragment(begin, end);
-            aboutSignalPage.UpdateActiveSegment(begin, end);
+            foreach (var page in pages) {
+                page.UpdateActiveSegment(begin, end);
+            }
         }
 
         private void OpenStatisticsPage(object sender, RoutedEventArgs e) {
@@ -225,16 +228,14 @@ namespace CGProject1
         public void ResetSignal(Signal newSignal) {
             CloseAll();
 
-            statisticsPage.Reset();
-            channelsPage.Reset();
-            analyzerPage.Reset();
-            spectrogramsPage.Reset();
-            aboutSignalPage.Reset(newSignal);
+            foreach (var page in pages) {
+                page.Reset(newSignal);
+            }
 
             Modelling.ResetCounters();
 
             this.currentSignal = newSignal;
-            oscillogramsPage.Update(newSignal);
+            oscillogramsPage.Reset(newSignal);
             UpdateActiveSegment(0, newSignal.SamplesCount - 1);
 
             if (this.currentSignal == null) {

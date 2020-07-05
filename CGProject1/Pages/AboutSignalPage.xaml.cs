@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 
 namespace CGProject1.Pages {
-    public partial class AboutSignalPage : Page {
+    public partial class AboutSignalPage : Page, IPageComponent {
         private int curRow = 1;
 
         private Label channelNumberText;
@@ -50,6 +50,8 @@ namespace CGProject1.Pages {
             durationText.Content = $"{duration.Days} суток {duration.Hours} часов {duration.Minutes} минут {(duration.Seconds + (double)duration.Milliseconds / 1000).ToString("0.000", CultureInfo.InvariantCulture)} секунд";
             ChannelsTable.ItemsSource = signal.channels;
         }
+
+        public void AddChannel(Channel channel) { }
 
         public void UpdateActiveSegment(int start, int end) {
             activeSegmentText.Content = $"Активный сегмент: [{start}; {end}]";
