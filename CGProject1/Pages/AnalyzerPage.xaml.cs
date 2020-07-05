@@ -77,6 +77,17 @@ namespace CGProject1.Pages {
 
             namesSet.Add(channel.Name);
             var analyzer = new Analyzer(channel);
+            switch (ZeroModeSelector.SelectedIndex) {
+                case 0:
+                    analyzer.zeroMode = Analyzer.ZeroMode.Nothing;
+                    break;
+                case 1:
+                    analyzer.zeroMode = Analyzer.ZeroMode.Null;
+                    break;
+                case 2:
+                    analyzer.zeroMode = Analyzer.ZeroMode.Smooth;
+                    break;
+            }
 
             analyzer.SetupChannel(begin, end);
 
@@ -314,7 +325,7 @@ namespace CGProject1.Pages {
             }
         }
 
-        private void ZeroMode_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) {
+        private void ZeroMode_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (ZeroModeSelector.SelectedIndex >= 0 && ZeroModeSelector.SelectedIndex < 3) {
                 foreach (var analyzer in analyzers) {
                     switch (ZeroModeSelector.SelectedIndex) {
