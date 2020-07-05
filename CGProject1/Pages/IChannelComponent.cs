@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Windows.Controls;
 
 namespace CGProject1.Pages {
-    interface IPageComponent {
+    public interface IChannelComponent {
         void Reset(Signal signal);
 
         void AddChannel(Channel channel);

@@ -9,7 +9,7 @@ using CGProject1.Chart;
 using CGProject1.Pages;
 
 namespace CGProject1 {
-    public partial class OscillogramsPage : Page, IPageComponent {
+    public partial class OscillogramsPage : Page, IChannelComponent {
         private readonly HashSet<ChartLine> activeCharts = new HashSet<ChartLine>();
         private readonly HashSet<string> activeChartsNames = new HashSet<string>();
 

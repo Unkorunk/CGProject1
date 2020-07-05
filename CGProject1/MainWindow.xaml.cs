@@ -43,7 +43,8 @@ namespace CGProject1
         private AboutSignalPage aboutSignalPage = null;
         private LayoutAnchorable aboutSignalPane = null;
 
-        private IPageComponent[] pages;
+        private IChannelComponent[] pages;
+        private LayoutAnchorable[] panes;
 
         public Signal currentSignal;
 
@@ -61,71 +62,47 @@ namespace CGProject1
             };
 
             statisticsPage = new StatisticsPage();
-            var statisticFrame = new Frame();
-            statisticFrame.Navigate(statisticsPage);
-
             statisticsPane = new LayoutAnchorable();
             statisticsPane.Title = "Статистики";
-            statisticsPane.Content = statisticFrame;
-            
             RightPane.Children.Add(statisticsPane);
 
-
             channelsPage = new ChannelsPage();
-            var channelsFrame = new Frame();
-            channelsFrame.Navigate(channelsPage);
-
             channelsPane = new LayoutAnchorable();
             channelsPane.Title = "Каналы";
-            channelsPane.Content = channelsFrame;
-
             LeftPane.Children.Add(channelsPane);
 
-
             oscillogramsPage = new OscillogramsPage();
-            var oscillogramsFrame = new Frame();
-            oscillogramsFrame.Navigate(oscillogramsPage);
-
             oscillogramsPane = new LayoutAnchorable();
             oscillogramsPane.Title = "Осциллограммы";
-            oscillogramsPane.Content = oscillogramsFrame;
-
             LowerMiddlePane.Children.Add(oscillogramsPane);
 
-
             analyzerPage = new AnalyzerPage();
-            var analyzerFrame = new Frame();
-            analyzerFrame.Navigate(analyzerPage);
-
             analyzerPane = new LayoutAnchorable();
             analyzerPane.Title = "Анализ Фурье";
-            analyzerPane.Content = analyzerFrame;
-
             UpperMiddlePane.Children.Add(analyzerPane);
 
-
             spectrogramsPage = new SpectrogramsPage();
-            var spectrogramsFrame = new Frame();
-            spectrogramsFrame.Navigate(spectrogramsPage);
-
             spectrogramsPane = new LayoutAnchorable();
             spectrogramsPane.Title = "Спектрограммы";
-            spectrogramsPane.Content = spectrogramsFrame;
-
             UpperMiddlePane.Children.Add(spectrogramsPane);
 
-
             aboutSignalPage = new AboutSignalPage();
-            var aboutSignalFrame = new Frame();
-            aboutSignalFrame.Navigate(aboutSignalPage);
-
             aboutSignalPane = new LayoutAnchorable();
             aboutSignalPane.Title = "О сигнале";
-            aboutSignalPane.Content = aboutSignalFrame;
-
             RightPane.Children.Add(aboutSignalPane);
 
-            pages = new IPageComponent[] { channelsPage, aboutSignalPage, statisticsPage, oscillogramsPage, analyzerPage, spectrogramsPage };
+            pages = new IChannelComponent[] { channelsPage, aboutSignalPage, statisticsPage, oscillogramsPage, analyzerPage, spectrogramsPage };
+            panes = new LayoutAnchorable[] { channelsPane, aboutSignalPane, statisticsPane, oscillogramsPane, analyzerPane, spectrogramsPane };
+
+            if (pages.Length != panes.Length) {
+                throw new InvalidDataException("Invalid count of panes / pages");
+            }
+
+            for (int i = 0; i < panes.Length; i++) {
+                var frame = new Frame();
+                frame.Navigate(pages[i]);
+                panes[i].Content = frame;
+            }
         }
 
         public void AddStatistics(Channel channel) {
@@ -154,6 +131,28 @@ namespace CGProject1
 
             foreach (var page in pages) {
                 page.UpdateActiveSegment(begin, end);
+            }
+        }
+
+        public void ResetSignal(Signal newSignal) {
+            CloseAll();
+
+            foreach (var page in pages) {
+                page.Reset(newSignal);
+            }
+
+            Modelling.ResetCounters();
+
+            this.currentSignal = newSignal;
+            oscillogramsPage.Reset(newSignal);
+            UpdateActiveSegment(0, newSignal.SamplesCount - 1);
+
+            if (this.currentSignal == null) {
+                return;
+            }
+
+            for (int i = 0; i < currentSignal.channels.Count; i++) {
+                channelsPage.AddChannel(currentSignal.channels[i]);
             }
         }
 
@@ -223,28 +222,6 @@ namespace CGProject1
             }
 
             channelsPage.AddChannel(channel);
-        }
-
-        public void ResetSignal(Signal newSignal) {
-            CloseAll();
-
-            foreach (var page in pages) {
-                page.Reset(newSignal);
-            }
-
-            Modelling.ResetCounters();
-
-            this.currentSignal = newSignal;
-            oscillogramsPage.Reset(newSignal);
-            UpdateActiveSegment(0, newSignal.SamplesCount - 1);
-
-            if (this.currentSignal == null) {
-                return;
-            }
-
-            for (int i = 0; i < currentSignal.channels.Count; i++) {
-                channelsPage.AddChannel(currentSignal.channels[i]);
-            }
         }
 
         private void OpenFileClick(object sender, RoutedEventArgs e)

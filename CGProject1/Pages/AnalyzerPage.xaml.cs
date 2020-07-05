@@ -10,7 +10,7 @@ using CGProject1.SignalProcessing;
 
 
 namespace CGProject1.Pages {
-    public partial class AnalyzerPage : Page, IPageComponent {
+    public partial class AnalyzerPage : Page, IChannelComponent {
         private List<Analyzer> analyzers = new List<Analyzer>();
         private HashSet<string> namesSet = new HashSet<string>();
 

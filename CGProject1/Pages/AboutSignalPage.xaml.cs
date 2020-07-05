@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 
 namespace CGProject1.Pages {
-    public partial class AboutSignalPage : Page, IPageComponent {
+    public partial class AboutSignalPage : Page, IChannelComponent {
         private int curRow = 1;
 
         private Label channelNumberText;

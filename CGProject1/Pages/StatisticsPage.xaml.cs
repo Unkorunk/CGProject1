@@ -7,7 +7,7 @@ namespace CGProject1 {
     /// <summary>
     /// Interaction logic for StatisticsPage.xaml
     /// </summary>
-    public partial class StatisticsPage : Page, IPageComponent {
+    public partial class StatisticsPage : Page, IChannelComponent {
         private readonly Dictionary<string, StatisticsItem> subscribed = new Dictionary<string, StatisticsItem>();
 
         private int begin;

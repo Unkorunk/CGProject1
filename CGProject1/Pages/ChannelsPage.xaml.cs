@@ -6,7 +6,7 @@ using CGProject1.Chart;
 using CGProject1.Pages;
 
 namespace CGProject1 {
-    public partial class ChannelsPage : Page, IPageComponent {
+    public partial class ChannelsPage : Page, IChannelComponent {
         private readonly List<ChartLine> charts;
 
         public ChannelsPage() {

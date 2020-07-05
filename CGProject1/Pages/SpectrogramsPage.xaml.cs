@@ -10,7 +10,7 @@ using CGProject1.Chart;
 
 
 namespace CGProject1.Pages {
-    public partial class SpectrogramsPage : Page, IPageComponent {
+    public partial class SpectrogramsPage : Page, IChannelComponent {
         private static List<byte[][]> palettes;
 
         private byte[][] curPalette = palettes[1];
