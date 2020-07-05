@@ -58,7 +58,7 @@
         </Menu>
 
         <ScrollViewer x:Name="AnalyzerScrollViewer" Grid.Row="1" Grid.ColumnSpan="2">
-            <StackPanel x:Name="SpectrePanel"></StackPanel>
+            <StackPanel x:Name="SpectrePanel" Margin="0, 0, 5, 0"></StackPanel>
         </ScrollViewer>
 
         <StackPanel Grid.Row="2" Grid.Column="1">

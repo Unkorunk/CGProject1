@@ -47,7 +47,7 @@
         </Menu>
 
         <ScrollViewer Grid.Row="1">
-            <StackPanel  x:Name="Spectrograms">
+            <StackPanel  x:Name="Spectrograms" Margin="0, 0, 5, 0">
 
             </StackPanel>
         </ScrollViewer>
