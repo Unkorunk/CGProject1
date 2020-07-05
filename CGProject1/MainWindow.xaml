@@ -24,10 +24,10 @@
                 </MenuItem>
                 <MenuItem Header="Моделирование" Click="ModelingClick"></MenuItem>
                 <MenuItem Header="Инструменты">
-                    <MenuItem Header="Информация о сигнале" Click="AboutSignalClick"></MenuItem>
+                    <MenuItem Header="Информация о сигнале" Click="OpenAboutSignalPage"></MenuItem>
                     <MenuItem Header="Статистики" Click="OpenStatisticsPage"></MenuItem>
                     <MenuItem Header="Осциллограмма" Click="OpenOscillogramsPage"></MenuItem>
-                    <MenuItem Header="Анализ" Click="OpenAnalyzerPage"/>
+                    <MenuItem Header="Анализ Фурье" Click="OpenAnalyzerPage"/>
                     <MenuItem Header="Спектрограмма" Click="OpenSpectrogramsPage"/>
                 </MenuItem>
                 <MenuItem Header="О программе" Click="AboutClick"></MenuItem>

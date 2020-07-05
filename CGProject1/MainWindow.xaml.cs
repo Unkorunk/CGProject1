@@ -170,6 +170,10 @@ namespace CGProject1
             spectrogramsPane.Show();
         }
 
+        private void OpenAboutSignalPage(object sender, RoutedEventArgs e) {
+            aboutSignalPane.Show();
+        }
+
         private void CloseAll() {
             if (isModelingWindowShowing) {
                 modelingWindow.Close();
@@ -279,10 +283,6 @@ namespace CGProject1
                     default: throw new NotImplementedException();
                 }
             }
-        }
-
-        private void AboutSignalClick(object sender, RoutedEventArgs e) {
-            aboutSignalPane.Show();
         }
 
         private void SaveAs_Click(object sender, RoutedEventArgs e) {
