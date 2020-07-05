@@ -30,8 +30,10 @@
                 </StackPanel>
             </Border>
 
-            <Label Content="Отображать каналов:"/>
-            <xctk:IntegerUpDown x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Отображать каналов: "></Label>
+                <xctk:IntegerUpDown x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
+            </StackPanel>
 
             <ComboBox SelectedIndex="0" x:Name="PaletteSelector" SelectionChanged="ComboBoxMode_SelectionChanged">
                 <ComboBoxItem Content="GRAY"/>

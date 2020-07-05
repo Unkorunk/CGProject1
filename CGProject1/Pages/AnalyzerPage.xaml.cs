@@ -115,6 +115,13 @@ namespace CGProject1.Pages {
             UpdatePanel();
         }
 
+        private void ResetSegmentClick(object sender, RoutedEventArgs e) {
+            if (samplesCount > 2) {
+                FSelector.LeftSlider = FSelector.Minimum;
+                FSelector.RightSlider = FSelector.Maximum;
+            }
+        }
+
         private void UpdatePanel() {
             if (SpectrePanel != null) SpectrePanel.Children.Clear();
 

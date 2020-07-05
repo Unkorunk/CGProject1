@@ -34,9 +34,13 @@
                 <ComboBoxItem Content="X(0) = |X(1)|"/>
             </ComboBox>
 
-            <Label>Отображать каналов:</Label>
-            <xctk:IntegerUpDown x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
-            
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Отображать каналов: "></Label>
+                <xctk:IntegerUpDown x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
+            </StackPanel>
+
+            <Button Content="Сбросить фрагмент" Click="ResetSegmentClick"/>
+
             <Border BorderThickness="1" BorderBrush="Black">
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal">

@@ -187,13 +187,17 @@ namespace CGProject1 {
             InputBeginEnd(GetBegin(), GetEnd());
         }
 
+        private void ResetSegmentClick(object sender, RoutedEventArgs e) {
+            InputBeginEnd(0, samplesCount - 1);
+        }
+
         private void textBox_ValueChanged(object sender, EventArgs e) {
             if (!int.TryParse(BeginBox.Text, out int begin)) {
                 begin = 0;
             }
 
             if (!int.TryParse(EndBox.Text, out int end)) {
-                end = samplesCount;
+                end = samplesCount - 1;
             }
 
             InputBeginEnd(begin, end);
