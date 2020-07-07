@@ -2,22 +2,27 @@
 using System.Text;
 using System.Linq;
 using System.Windows;
-using CGProject1.Chart;
 using System.Windows.Input;
 using System.Windows.Controls;
+using System.Threading.Tasks;
+using System.Threading;
+using System.Transactions;
 
 namespace CGProject1
 {
     /// <summary>
     /// Interaction logic for StatisticsItem.xaml
     /// </summary>
-    public partial class StatisticsItem : UserControl
+    public partial class StatisticsItem : UserControl, IDisposable
     {
         private Channel _subscriber;
 
         private int begin;
         private int end;
         private int length { get => end - begin + 1; }
+
+        private CancellationTokenSource tokenSource;
+        private bool tokenSourceDisposed = true;
 
         public Channel Subscriber
         {
@@ -40,65 +45,123 @@ namespace CGProject1
         {
             if (Subscriber == null) return;
 
+            if (tokenSource != null) {
+                tokenSource.Cancel();
+                if (!tokenSourceDisposed)
+                {
+                    tokenSource.Dispose();
+                    tokenSourceDisposed = true;
+                }
+            }
+            tokenSource = new CancellationTokenSource();
+            tokenSourceDisposed = false;
+            var token = tokenSource.Token;
+
             this.begin = begin;
             this.end = end;
 
             ChannelNameLabel.Content = "Name: " + Subscriber.Name;
             ChannelIntervalLabel.Content = "Begin: " + (this.begin + 1) + "; End: " + (this.end + 1);
 
-            var leftColumn = new StringBuilder();
-            var rightColumn = new StringBuilder();
-
-            var average = CalcAverage(Subscriber);
-            leftColumn.AppendLine(string.Format("Среднее: {0:0.##}", average));
-            var variance = CalcVariance(average, Subscriber);
-            leftColumn.AppendLine(string.Format("Дисперсия: {0:0.##}", variance));
-            var sd = CalcSD(variance);
-            leftColumn.AppendLine(string.Format("Ср.кв.откл: {0:0.##}", sd));
-            var variability = CalcVariability(sd, average);
-            leftColumn.AppendLine(string.Format("Вариация: {0:0.##}", variability));
-            var skewness = CalcSkewness(variance, average, Subscriber);
-            leftColumn.AppendLine(string.Format("Асимметрия: {0:0.##}", skewness));
-            var kurtosis = CalcKurtosis(variance, average, Subscriber);
-            leftColumn.Append(string.Format("Эксцесс: {0:0.##}", kurtosis));
-
-            var minValue = CalcMinValue(Subscriber);
-            rightColumn.AppendLine(string.Format("Минимум: {0:0.##}", minValue));
-            var maxValue = CalcMaxValue(Subscriber);
-            rightColumn.AppendLine(string.Format("Максимум: {0:0.##}", maxValue));
-            var quantile5 = CalcQuantile(Subscriber, 0.05);
-            rightColumn.AppendLine(string.Format("Квантиль 0.05: {0:0.##}", quantile5));
-            var quantile95 = CalcQuantile(Subscriber, 0.95);
-            rightColumn.AppendLine(string.Format("Квантиль 0.95: {0:0.##}", quantile95));
-            var median = CalcQuantile(Subscriber, 0.5);
-            rightColumn.Append(string.Format("Медиана: {0:0.##}", median));
-
-            LeftLabel.Content = leftColumn.ToString();
-            RightLabel.Content = rightColumn.ToString();
-
-            Histogram.Data.Clear();
-
-            if (this.length > 0)
+            Task.Factory.StartNew(() =>
             {
-                if (int.TryParse(IntervalTextBox.Text, out int K))
+                var leftColumn = new StringBuilder();
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var average = CalcAverage(Subscriber);
+                leftColumn.AppendLine(string.Format("Среднее: {0:0.##}", average));
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var variance = CalcVariance(average, Subscriber);
+                leftColumn.AppendLine(string.Format("Дисперсия: {0:0.##}", variance));
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var sd = CalcSD(variance);
+                leftColumn.AppendLine(string.Format("Ср.кв.откл: {0:0.##}", sd));
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var variability = CalcVariability(sd, average);
+                leftColumn.AppendLine(string.Format("Вариация: {0:0.##}", variability));
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var skewness = CalcSkewness(variance, average, Subscriber);
+                leftColumn.AppendLine(string.Format("Асимметрия: {0:0.##}", skewness));
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var kurtosis = CalcKurtosis(variance, average, Subscriber);
+                leftColumn.Append(string.Format("Эксцесс: {0:0.##}", kurtosis));
+
+                return leftColumn.ToString();
+            }, token).ContinueWith((task) => LeftLabel.Content = task.Result, token,
+                TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+
+            Task.Factory.StartNew(() =>
+            {
+                var rightColumn = new StringBuilder();
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var minValue = CalcMinValue(Subscriber);
+                rightColumn.AppendLine(string.Format("Минимум: {0:0.##}", minValue));
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var maxValue = CalcMaxValue(Subscriber);
+                rightColumn.AppendLine(string.Format("Максимум: {0:0.##}", maxValue));
+                
+                if (token.IsCancellationRequested) return string.Empty;
+                var quantile5 = CalcQuantile(Subscriber, 0.05);
+                rightColumn.AppendLine(string.Format("Квантиль 0.05: {0:0.##}", quantile5));
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var quantile95 = CalcQuantile(Subscriber, 0.95);
+                rightColumn.AppendLine(string.Format("Квантиль 0.95: {0:0.##}", quantile95));
+
+                if (token.IsCancellationRequested) return string.Empty;
+                var median = CalcQuantile(Subscriber, 0.5);
+                rightColumn.Append(string.Format("Медиана: {0:0.##}", median));
+
+                return rightColumn.ToString();
+            }, token).ContinueWith((task) => RightLabel.Content = task.Result, token,
+                TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+
+            if (int.TryParse(IntervalTextBox.Text, out int K))
+            {
+                K = Math.Max(1, K);
+
+                Task.Factory.StartNew(() =>
                 {
-                    K = Math.Max(1, K);
-                    int[] cnt = new int[K];
-                    for (int i = 0; i < this.length; i++)
+                    var minValue = CalcMinValue(Subscriber);
+                    var maxValue = CalcMaxValue(Subscriber);
+
+                    if (this.length > 0)
                     {
-                        double p = (Subscriber.values[this.begin + i] - minValue) / (maxValue - minValue);
-                        if (Math.Abs(maxValue - minValue) < 1e-6) p = 0.0;
-                        cnt[(int)((K - 1) * p)]++;
+                        int[] cnt = new int[K];
+                        for (int i = 0; i < this.length; i++)
+                        {
+                            if (token.IsCancellationRequested) return null;
+                            double p = (Subscriber.values[this.begin + i] - minValue) / (maxValue - minValue);
+                            if (Math.Abs(maxValue - minValue) < 1e-6) p = 0.0;
+                            cnt[(int)((K - 1) * p)]++;
+                        }
+
+                        double[] newData = new double[K];
+                        for (int i = 0; i < K; i++)
+                        {
+                            if (token.IsCancellationRequested) return null;
+                            newData[i] = cnt[i] * 1.0 / this.length;
+                        }
+
+                        return newData;
                     }
 
-                    for (int i = 0; i < K; i++)
+                    return null;
+                }, token).ContinueWith((task) => {
+                    if (task.Result != null)
                     {
-                        Histogram.Data.Add(cnt[i] * 1.0 / this.length);
+                        Histogram.Data = task.Result;
+                        Histogram.InvalidateVisual();
                     }
-                }
+                }, token, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
             }
-
-            Histogram.InvalidateVisual();
         }
 
         private void previewTextInput(object sender, TextCompositionEventArgs e)
@@ -291,6 +354,15 @@ namespace CGProject1
                 {
                     left = mid + 1;
                 }
+            }
+        }
+
+        public void Dispose()
+        {
+            if (!tokenSourceDisposed)
+            {
+                tokenSource.Dispose();
+                tokenSourceDisposed = true;
             }
         }
     }

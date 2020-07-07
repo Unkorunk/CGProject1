@@ -10,7 +10,7 @@ using System.Windows.Media.Imaging;
 
 namespace CGProject1.Chart
 {
-    public class Spectrogram : FrameworkElement
+    public class Spectrogram : FrameworkElement, IDisposable
     {
         public Spectrogram(Channel channel)
         {
@@ -112,7 +112,8 @@ namespace CGProject1.Chart
         private readonly Channel curChannel;
         
         private CancellationTokenSource tokenSource;
-        
+        private bool tokenSourceDisposed = true;
+
         private double[,] matrix;
         private double minValue;
         private double maxValue;
@@ -448,8 +449,16 @@ namespace CGProject1.Chart
 
         private void SetupChannel(Channel channel)
         {
-            if (tokenSource != null) tokenSource.Cancel();
+            if (tokenSource != null) {
+                tokenSource.Cancel();
+                if (!tokenSourceDisposed)
+                {
+                    tokenSource.Dispose();
+                    tokenSourceDisposed = true;
+                }
+            }
             tokenSource = new CancellationTokenSource();
+            tokenSourceDisposed = false;
 
             Task.Factory.StartNew(() => CalculateMatrix(channel, this.begin, this.end, tokenSource.Token), tokenSource.Token)
                 .ContinueWith((mtx) =>
@@ -519,10 +528,7 @@ namespace CGProject1.Chart
 
                 for (int i = offset; i < sectionsCount; i += threadCount)
                 {
-                    if (token.IsCancellationRequested)
-                    {
-                        break;
-                    }
+                    if (token.IsCancellationRequested) break;
 
                     double[] x = new double[NN];
 
@@ -552,6 +558,7 @@ namespace CGProject1.Chart
                         x[j] -= avrg;
                     }
 
+                    if (token.IsCancellationRequested) break;
                     // step 5.4
                     for (int j = 0; j < sectionN; j++)
                     {
@@ -565,13 +572,14 @@ namespace CGProject1.Chart
                         x[j] = 0;
                     }
 
+                    if (token.IsCancellationRequested) break;
                     // step 5.6
                     var analyzer = new Analyzer(x, channel.SamplingFrq);
                     analyzer.SetupChannel(0, x.Length, true, true);
                     Channel amps = analyzer.AmplitudeSpectre();
 
                     int L1 = -(l - 1) / 2, L2 = l / 2;
-                    for (int k = 0; k < samplesPerSection; k++)
+                    for (int k = 0; k < samplesPerSection && !token.IsCancellationRequested; k++)
                     {
                         double sumAvg = 0.0;
                         for (int j = L1; j <= L2; j++)
@@ -581,6 +589,7 @@ namespace CGProject1.Chart
                         amps.values[k] = sumAvg / l;
                     }
 
+                    if (token.IsCancellationRequested) break;
                     // step 5.7
                     for (int j = 0; j < samplesPerSection; j++)
                     {
@@ -621,6 +630,15 @@ namespace CGProject1.Chart
 
                 height = spectrogramHeight
             };
+        }
+
+        public void Dispose()
+        {
+            if (!tokenSourceDisposed)
+            {
+                tokenSource.Dispose();
+                tokenSourceDisposed = true;
+            }
         }
     }
 }
