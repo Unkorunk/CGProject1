@@ -71,7 +71,7 @@ namespace FileFormats
                             }
                             else
                             {
-                                curVal1 = (short)(short.MinValue * fileInfo.data[i, j]);
+                                curVal1 = (short)(short.MinValue * -fileInfo.data[i, j]);
                             }
 
                             stream.Write(BitConverter.GetBytes(curVal1));
@@ -84,7 +84,7 @@ namespace FileFormats
                             }
                             else
                             {
-                                curVal2 = (int)(int.MinValue * fileInfo.data[i, j]);
+                                curVal2 = (int)(int.MinValue * -fileInfo.data[i, j]);
                             }
 
                             stream.Write(BitConverter.GetBytes(curVal2));
@@ -97,7 +97,7 @@ namespace FileFormats
                             }
                             else
                             {
-                                curVal3 = (long)(long.MinValue * fileInfo.data[i, j]);
+                                curVal3 = (long)(long.MinValue * -fileInfo.data[i, j]);
                             }
 
                             stream.Write(BitConverter.GetBytes(curVal3));

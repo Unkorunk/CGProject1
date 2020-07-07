@@ -318,6 +318,10 @@ namespace CGProject1
 
                     ResetSignal(signal);
                 }
+                else
+                {
+                    MessageBox.Show("Incorrect format", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 

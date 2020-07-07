@@ -50,7 +50,10 @@ namespace FileFormats
             fileInfo.nChannels = n_chan;
             fileInfo.nSamplesPerSec = 1e6 / timecad;
 
-            fileInfo.dateTime = DateTime.ParseExact(begtime, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            if (!DateTime.TryParseExact(begtime, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out fileInfo.dateTime))
+            {
+                return false;
+            }
 
             fileInfo.data = new double[n_points, n_chan];
             for (int i = 0; i < n_points; i++)

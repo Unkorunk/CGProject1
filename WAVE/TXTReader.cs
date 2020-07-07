@@ -130,7 +130,11 @@ namespace FileFormats
                                     }
 
                                     var indice = trimmed[curStart..(curStart + curOffset)];
-                                    fileInfo.data[curRow, i] = double.Parse(indice, CultureInfo.InvariantCulture);
+                                    if (!double.TryParse(indice, NumberStyles.AllowThousands | NumberStyles.Float,
+                                        CultureInfo.InvariantCulture, out fileInfo.data[curRow, i]))
+                                    {
+                                        return false;
+                                    }
                                     curStart += curOffset + 1;
                                     curOffset = 0;
                                 }
