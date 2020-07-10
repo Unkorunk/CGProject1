@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,7 +12,7 @@ using CGProject1.SignalProcessing;
 
 
 namespace CGProject1.Pages {
-    public partial class AnalyzerPage : Page, IChannelComponent {
+    public partial class AnalyzerPage : Page, IChannelComponent, IDisposable {
         private List<Analyzer> analyzers = new List<Analyzer>();
         private HashSet<string> namesSet = new HashSet<string>();
 
@@ -49,7 +51,7 @@ namespace CGProject1.Pages {
         public void UpdateActiveSegment(int begin, int end) {
             BeginSelector.Text = begin.ToString();
             EndSelector.Text = end.ToString();
-
+            
             this.begin = begin;
             this.end = end;
 
@@ -123,8 +125,7 @@ namespace CGProject1.Pages {
         }
 
         private void UpdatePanel() {
-            if (SpectrePanel != null) SpectrePanel.Children.Clear();
-
+            SpectrePanel?.Children.Clear();
             if (ComboBoxMode.SelectedIndex >= 0 && ComboBoxMode.SelectedIndex < charts.Count) {
                 for (int i = 0; i < charts[ComboBoxMode.SelectedIndex].Count; i++) {
                     var item = charts[ComboBoxMode.SelectedIndex][i];
@@ -140,60 +141,112 @@ namespace CGProject1.Pages {
                         item.HAxisAlligment = ChartLine.HAxisAlligmentEnum.Bottom;
                     }
 
-                    SpectrePanel.Children.Add(item);
+                    SpectrePanel?.Children.Add(item);
                 }
+            }
+        }
+        
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private bool tokenSourceDisposed = true;
+        
+        private object ultralock = new object();
+
+        public void Dispose()
+        {
+            if (!tokenSourceDisposed)
+            {
+                cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
+                tokenSourceDisposed = true;
             }
         }
 
         private void UpdateAnalyzers() {
+            if (!tokenSourceDisposed)
+            {
+                cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
+                tokenSourceDisposed = true;
+            }
+            cancellationTokenSource = new CancellationTokenSource();
+            tokenSourceDisposed = false;
+            
+            var cancellationToken = cancellationTokenSource.Token;
+
             int b = 0, e = samplesCount - 1;
             if (FSelector != null) {
                 b = GetBegin();
                 e = GetEnd();
             }
 
+            Task.Factory.StartNew(() =>
+            {
+                lock (ultralock)
+                {
+                    foreach (var chartList in charts)
+                    {
+                        if (cancellationToken.IsCancellationRequested) return;
+                        chartList.Clear();
+                    }
+                    
+                    foreach (var analyzer in analyzers)
+                    {
+                        if (cancellationToken.IsCancellationRequested) return;
+                        analyzer.HalfWindowSmoothing = this.halfWindowSmoothing;
+                        analyzer.SetupChannel(this.begin, this.end);
+                    }
+                }
+            }, cancellationToken).ContinueWith((task) =>
+            {
+                lock (ultralock)
+                {
+                    foreach (var analyzer in analyzers)
+                    {
+                        if (cancellationToken.IsCancellationRequested) return;
 
-            foreach (var chartList in charts) {
-                chartList.Clear();
-            }
+                        if (!initiliezed)
+                        {
+                            initiliezed = true;
+                            samplesCount = analyzer.AmplitudeSpectre().SamplesCount - 1;
 
-            foreach (var analyzer in analyzers) {
-                analyzer.HalfWindowSmoothing = this.halfWindowSmoothing;
-                analyzer.SetupChannel(this.begin, this.end);
+                            FSelector.Minimum = 0;
+                            FSelector.LeftSlider = 0;
 
-                if (!initiliezed) {
-                    initiliezed = true;
-                    samplesCount = analyzer.AmplitudeSpectre().SamplesCount - 1;
+                            if (samplesCount < 1)
+                            {
+                                FSelector.Maximum = 1;
+                                FSelector.RightSlider = 1;
+                            }
 
-                    FSelector.Minimum = 0;
-                    FSelector.LeftSlider = 0;
+                            BeginBox.Text = GetBegin().ToString();
+                            EndBox.Text = GetEnd().ToString();
 
-                    if (samplesCount < 1) {
-                        FSelector.Maximum = 1;
-                        FSelector.RightSlider = 1;
+                            InputBeginEnd(GetBegin(), GetEnd());
+                        }
+
+                        SetupCharts(analyzer);
                     }
 
+                    if (cancellationToken.IsCancellationRequested) return;
 
-                    BeginBox.Text = GetBegin().ToString();
-                    EndBox.Text = GetEnd().ToString();
+                    UpdatePanel();
 
-                    InputBeginEnd(GetBegin(), GetEnd());
+                    if (FSelector != null)
+                    {
+                        if (b >= FSelector.Maximum)
+                        {
+                            b = FSelector.Maximum - 1;
+                        }
+
+                        if (e > FSelector.Maximum)
+                        {
+                            e = FSelector.Maximum;
+                        }
+
+                        InputBeginEnd(b, e);
+                    }
                 }
-
-                SetupCharts(analyzer);
-            }
-
-            UpdatePanel();
-            if (FSelector != null) {
-                if (b >= FSelector.Maximum) {
-                    b = FSelector.Maximum - 1;
-                }
-                if (e > FSelector.Maximum) {
-                    e = FSelector.Maximum;
-                }
-
-                InputBeginEnd(b, e);
-            }
+            }, cancellationToken, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
         private void SetupCharts(Analyzer analyzer) {
