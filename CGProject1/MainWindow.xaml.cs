@@ -15,7 +15,7 @@ namespace CGProject1
 {
     public partial class MainWindow : Window
     {
-        public static MainWindow instance = null;
+        public static MainWindow Instance { get; private set; }
 
         #region(DEPRECATED)
         private ModelingWindow modelingWindow;
@@ -53,13 +53,16 @@ namespace CGProject1
 
         public MainWindow()
         {
-            instance = this;
+            Instance = this;
             InitializeComponent();
 
-            this.Closed += (object sender, EventArgs e) => {
+            Closed += (sender, e) =>
+            {
                 CloseAll();
 
-                Serializer.SerializeModels(Modelling.defaultPath, new List<ChannelConstructor>[] { Modelling.discreteModels, Modelling.continiousModels, Modelling.randomModels });
+                Serializer.SerializeModels(Modelling.defaultPath,
+                    new List<ChannelConstructor>[]
+                        {Modelling.discreteModels, Modelling.continiousModels, Modelling.randomModels});
                 Settings.Instance.Save();
             };
 
@@ -93,8 +96,10 @@ namespace CGProject1
             aboutSignalPane.Title = "О сигнале";
             RightPane.Children.Add(aboutSignalPane);
 
-            pages = new IChannelComponent[] { channelsPage, aboutSignalPage, statisticsPage, oscillogramsPage, analyzerPage, spectrogramsPage };
-            panes = new LayoutAnchorable[] { channelsPane, aboutSignalPane, statisticsPane, oscillogramsPane, analyzerPane, spectrogramsPane };
+            pages = new IChannelComponent[]
+                {channelsPage, aboutSignalPage, statisticsPage, oscillogramsPage, analyzerPage, spectrogramsPage};
+            panes = new LayoutAnchorable[]
+                {channelsPane, aboutSignalPane, statisticsPane, oscillogramsPane, analyzerPane, spectrogramsPane};
 
             if (pages.Length != panes.Length)
             {

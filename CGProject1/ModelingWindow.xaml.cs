@@ -51,7 +51,7 @@ namespace CGProject1
                 RandomModelPanel.Children.Add(modelBtn);
             }
 
-            if (MainWindow.instance.currentSignal != null) {
+            if (MainWindow.Instance.currentSignal != null) {
                 var linearSuperposBtn = new Button();
                 linearSuperposBtn.Content = "Линейная суперпозиция";
                 linearSuperposBtn.Click += OpenLinearSuperpos;
@@ -300,14 +300,14 @@ namespace CGProject1
             channelSelector.Children.Add(titleBorder);
             channelSelector.Children.Add(emptyBorder);
 
-            channelMultipliers = new TextBox[MainWindow.instance.currentSignal.channels.Count];
+            channelMultipliers = new TextBox[MainWindow.Instance.currentSignal.channels.Count];
 
             for (int i = 0; i < channelMultipliers.Length; i++) {
                 var row = new RowDefinition();
                 row.Height = new GridLength(25);
                 channelSelector.RowDefinitions.Add(row);
 
-                var channel = MainWindow.instance.currentSignal.channels[i];
+                var channel = MainWindow.Instance.currentSignal.channels[i];
 
                 var channelLabel = new Label();
                 channelLabel.Content = channel.Name;
@@ -419,9 +419,9 @@ namespace CGProject1
                 }
 
                 if (this.curModelType == ModelType.LinearSuperpos) {
-                    channel = Modelling.LinearSuperpos(a, MainWindow.instance.currentSignal.channels.ToArray(), true);
+                    channel = Modelling.LinearSuperpos(a, MainWindow.Instance.currentSignal.channels.ToArray(), true);
                 } else {
-                    channel = Modelling.MultiplicativeSuperpos(a, MainWindow.instance.currentSignal.channels.ToArray(), true);
+                    channel = Modelling.MultiplicativeSuperpos(a, MainWindow.Instance.currentSignal.channels.ToArray(), true);
                 }
             } else {
                 double[] args = ValidateArguments();
@@ -451,9 +451,6 @@ namespace CGProject1
             chart.ShowCurrentXY = true;
 
             ChartPreview.Children.Add(chart);
-
-            chart.Begin = 0;
-            chart.End = this.samplesCount;
         }
 
         private void OnSave_Click(object sender, RoutedEventArgs e) {
@@ -467,9 +464,9 @@ namespace CGProject1
                 }
 
                 if (this.curModelType == ModelType.LinearSuperpos) {
-                    channel = Modelling.LinearSuperpos(a, MainWindow.instance.currentSignal.channels.ToArray(), false);
+                    channel = Modelling.LinearSuperpos(a, MainWindow.Instance.currentSignal.channels.ToArray(), false);
                 } else {
-                    channel = Modelling.MultiplicativeSuperpos(a, MainWindow.instance.currentSignal.channels.ToArray(), false);
+                    channel = Modelling.MultiplicativeSuperpos(a, MainWindow.Instance.currentSignal.channels.ToArray(), false);
                 }
             } else {
                 var args = ValidateArguments();
@@ -487,7 +484,7 @@ namespace CGProject1
                 channel = this.currentModel.CreateChannel(this.samplesCount, args, varargs, this.samplingFrq, Modelling.defaultStartDateTime);
             }
 
-            var curSignal = MainWindow.instance.currentSignal;
+            var curSignal = MainWindow.Instance.currentSignal;
 
             if (curSignal == null || Math.Abs(curSignal.SamplingFrq - this.samplingFrq) > 1e-8 || curSignal.SamplesCount != this.samplesCount) {
                 var newSignal = new Signal("Model signal");
@@ -495,12 +492,12 @@ namespace CGProject1
                 newSignal.StartDateTime = Modelling.defaultStartDateTime;
                 newSignal.channels.Add(channel);
                 newSignal.UpdateChannelsInfo();
-                MainWindow.instance.ResetSignal(newSignal);
+                MainWindow.Instance.ResetSignal(newSignal);
                 this.currentModel.IncCounter();
                 return;
             }
 
-            MainWindow.instance.AddChannel(channel);
+            MainWindow.Instance.AddChannel(channel);
         }
 
         private void previewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e) {

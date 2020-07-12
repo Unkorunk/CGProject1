@@ -2,8 +2,8 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:CGProject1.Pages" xmlns:chart="clr-namespace:CGProject1.Chart" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       SizeChanged="Page_SizeChanged"
@@ -13,7 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition></RowDefinition>
-            <RowDefinition Height="125"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="125"></ColumnDefinition>
@@ -36,7 +36,7 @@
 
             <StackPanel Orientation="Horizontal">
                 <Label Content="Отображать каналов: "></Label>
-                <xctk:IntegerUpDown x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
+                <xctk:IntegerUpDown x:Name="CountPerPage" Minimum="1" Maximum="6" Value="1" ValueChanged="CountPerPage_ValueChanged"/>
             </StackPanel>
 
             <Button Content="Сбросить фрагмент" Click="ResetSegmentClick"/>
@@ -45,15 +45,15 @@
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Horizontal">
                         <Label>L:</Label>
-                        <TextBox x:Name="HalfWindowTextBox" Width="50" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting"></TextBox>
+                        <TextBox x:Name="HalfWindowTextBox" Width="50" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="PreviewTextInputHandle" DataObject.Pasting="PreviewPastingHandle"></TextBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>BEGIN</Label>
-                        <TextBox x:Name="BeginSelector" Width="50" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" IsEnabled="False"></TextBox>
+                        <TextBox x:Name="BeginSelector" Width="50" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="PreviewTextInputHandle" DataObject.Pasting="PreviewPastingHandle" IsEnabled="False"></TextBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Label>END</Label>
-                        <TextBox x:Name="EndSelector" Width="50" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" IsEnabled="False"></TextBox>
+                        <TextBox x:Name="EndSelector" Width="50" Text="0" TextAlignment="Center" VerticalAlignment="Center" PreviewTextInput="PreviewTextInputHandle" DataObject.Pasting="PreviewPastingHandle" IsEnabled="False"></TextBox>
                     </StackPanel>
 
                     <Button Content="Обновить спектры" Margin="8,0,0,0" Click="SelectInterval"></Button>
@@ -61,32 +61,11 @@
             </Border>
         </Menu>
 
-        <ScrollViewer x:Name="AnalyzerScrollViewer" Grid.Row="1" Grid.ColumnSpan="2">
+        <ScrollViewer x:Name="AnalyzerScrollViewer" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
             <StackPanel x:Name="SpectrePanel" Margin="0, 0, 5, 0"></StackPanel>
         </ScrollViewer>
 
-        <StackPanel Grid.Row="2" Grid.Column="1">
-            <Label Name="BeginFrequencyLabel">Begin Frequency: 0</Label>
-            <Label Name="EndFrequencyLabel">End Frequency: 0</Label>
-
-            <chart:FragmentSelector x:Name="FSelector" Height="20" TBPadding="0.15" IntervalUpdate="FSelector_IntervalUpdate"></chart:FragmentSelector>
-        </StackPanel>
-
-        <Grid Grid.Row="2" Grid.Column="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="40"></ColumnDefinition>
-                <ColumnDefinition></ColumnDefinition>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition></RowDefinition>
-                <RowDefinition></RowDefinition>
-                <RowDefinition></RowDefinition>
-                <RowDefinition></RowDefinition>
-            </Grid.RowDefinitions>
-            <Label Grid.Row="1">Begin</Label>
-            <Label Grid.Row="2">End</Label>
-            <TextBox Name="BeginBox" Grid.Row="1" Grid.Column="1" MaxLength="9" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" TextChanged="textBox_ValueChanged"></TextBox>
-            <TextBox Name="EndBox" Grid.Row="2" Grid.Column="1" MaxLength="9" PreviewTextInput="previewTextInput" DataObject.Pasting="previewPasting" TextChanged="textBox_ValueChanged"></TextBox>
-        </Grid>
+        <Border Name="ContainerSegmentControl" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" BorderBrush="LightGray"
+                BorderThickness="0 1 0 0" Margin="0 8 0 8"/>
     </Grid>
 </Page>

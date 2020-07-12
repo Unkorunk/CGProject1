@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using CGProject1.SignalProcessing;
 
 namespace CGProject1 {
     public class Signal {
@@ -68,6 +69,12 @@ namespace CGProject1 {
                 channel.StartDateTime = this.StartDateTime;
                 channel.SamplingFrq = this.SamplingFrq;
             }
+        }
+
+        public DateTime GetDateTimeAtIndex(int index)
+        {
+            if (index < 0 || index >= this.SamplesCount) throw new ArgumentException();
+            return StartDateTime + TimeSpan.FromSeconds(DeltaTime * index);
         }
     }
 }

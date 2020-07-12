@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Transactions;
+using CGProject1.SignalProcessing;
 
 namespace CGProject1
 {

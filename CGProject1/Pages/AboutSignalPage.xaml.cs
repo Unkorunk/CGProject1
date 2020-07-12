@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Windows.Controls;
+using CGProject1.SignalProcessing;
 
 
 namespace CGProject1.Pages {
