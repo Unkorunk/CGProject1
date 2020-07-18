@@ -16,7 +16,7 @@ namespace CGProject1
         
         public delegate void DelChange(Segment sender, SegmentChange segmentChange);
 
-        public DelChange OnChange;
+        public event DelChange OnChange;
 
         private int _minValue = 0;
         private int _maxValue = 0;

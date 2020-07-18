@@ -1,210 +1,166 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
-
+using System.Collections.Generic;
 using MathNet.Numerics.IntegralTransforms;
 
-namespace CGProject1.SignalProcessing {
-    public class Analyzer {
-        private Channel curChannel;
-        private Complex[] ft;
+namespace CGProject1.SignalProcessing
+{
+    public class Analyzer
+    {
+        private readonly Channel myChannel;
 
         public int HalfWindowSmoothing { get; set; }
 
-        private double[] amps = null;
-        private double[] psds = null;
+        private double[] asd;
+        private double[] psd;
 
-        public enum ZeroMode {
-            Nothing,
-            Null,
-            Smooth
+        public ZeroModeEnum ZeroMode { get; set; } = ZeroModeEnum.Nothing;
+
+        public int SamplesCount { get; private set; }
+
+        public Analyzer(Channel channel)
+        {
+            myChannel = channel;
         }
 
-        public ZeroMode zeroMode = ZeroMode.Nothing;
+        public Analyzer(double[] vals, double frq)
+        {
+            myChannel = new Channel(vals.Length);
+            myChannel.SamplingFrq = frq;
 
-        public int SamplesCount { get {
-                if (ft == null) {
-                    return 0; 
-                }
-                return ft.Length / 2; 
-            } 
-        }
-
-        public string OriginalName { get => this.curChannel.Name; }
-
-        public Analyzer(Channel channel) {
-            this.curChannel = channel;
-        }
-
-        public Analyzer(double[] vals, double frq) {
-            curChannel = new Channel(vals.Length);
-            curChannel.SamplingFrq = frq;
-
-            for (int i = 0; i < vals.Length; i++) {
-                curChannel.values[i] = vals[i];
+            for (int i = 0; i < vals.Length; i++)
+            {
+                myChannel.values[i] = vals[i];
             }
         }
 
-        public void SetupChannel(int begin, int end, bool forceFast = false, bool expand = false) {
+        public void SetupChannel(int begin, int end)
+        {
             int len = end - begin;
-            Complex[] vals = new Complex[len];
-            for (int i = 0; i < len; i++) {
-                vals[i] = curChannel.values[i + begin];
+            var values = new Complex[len];
+            for (int i = 0; i < len; i++)
+            {
+                values[i] = myChannel.values[i + begin];
             }
 
-            Fourier.Forward(vals, FourierOptions.NoScaling);
-            ft = vals;
+            Fourier.Forward(values, FourierOptions.NoScaling);
+            var ft = values;
 
-            amps = new double[ft.Length];
+            SamplesCount = ft.Length / 2;
 
-            for (int i = 0; i < ft.Length; i++) {
-                amps[i] = curChannel.DeltaTime * Complex.Abs(ft[i]);
+            asd = new double[ft.Length];
+            for (int i = 0; i < ft.Length; i++)
+            {
+                asd[i] = myChannel.DeltaTime * Complex.Abs(ft[i]);
             }
 
-            var sqrDt = curChannel.DeltaTime * curChannel.DeltaTime;
-            psds = new double[ft.Length];
-
-            for (int i = 0; i < ft.Length; i++) {
-                psds[i] = sqrDt * Math.Pow(Complex.Abs(ft[i]), 2);
+            psd = new double[ft.Length];
+            for (int i = 0; i < ft.Length; i++)
+            {
+                psd[i] = Math.Pow(asd[i], 2);
             }
         }
 
-        public Channel LogarithmicSpectre() {
-            int n = ft.Length / 2;
-            var res = new Channel(n);
-            res.Name = "Лог. Спектр " + curChannel.Name;
-            res.Source = "Analyzer";
+        public Channel LogarithmicAsd()
+        {
+            var res = new Channel(SamplesCount) {Name = $"[Logarithmic ASD] {myChannel.Name}", Source = "Analyzer"};
 
-            for (int i = 0; i < n; i++) {
-                res.values[i] = 20 * Math.Log10(amps[i]);
+            for (int i = 0; i < SamplesCount; i++)
+            {
+                res.values[i] = 20 * Math.Log10(asd[i]);
             }
 
-            switch (this.zeroMode) {
-                case ZeroMode.Smooth:
-                    if (res.values.Length > 1) {
-                        res.values[0] = res.values[1];
-                    }
-                    break;
-                case ZeroMode.Null:
-                    res.values[0] = 0;
-                    break;
-                default:
-                    break;
-            }
-
-            WindowSmoothing(res, HalfWindowSmoothing);
-
-            res.SamplingFrq = 2.0 / (curChannel.SamplingFrq / res.SamplesCount);
+            FinalSetup(res);
 
             return res;
         }
 
-        public Channel LogarithmicPSD() {
-            int n = ft.Length / 2;
-            var res = new Channel(n);
-            res.Name = "Лог. Спектр " + curChannel.Name;
-            res.Source = "Analyzer";
+        public Channel LogarithmicPsd()
+        {
+            var res = new Channel(SamplesCount) {Name = $"[Logarithmic PSD] {myChannel.Name}", Source = "Analyzer"};
 
-            for (int i = 0; i < n; i++) {
-                res.values[i] = 10 * Math.Log10(psds[i]);
+            for (int i = 0; i < SamplesCount; i++)
+            {
+                res.values[i] = 10 * Math.Log10(psd[i]);
             }
 
-            switch (this.zeroMode) {
-                case ZeroMode.Smooth:
-                    if (res.values.Length > 1) {
-                        res.values[0] = res.values[1];
-                    }
-                    break;
-                case ZeroMode.Null:
-                    res.values[0] = 0;
-                    break;
-                default:
-                    break;
-            }
-
-            WindowSmoothing(res, HalfWindowSmoothing);
-
-            res.SamplingFrq = 2.0 / (curChannel.SamplingFrq / res.SamplesCount);
+            FinalSetup(res);
 
             return res;
         }
 
-        public Channel AmplitudeSpectre() {
-            int n = ft.Length / 2;
-            var res = new Channel(n);
-            res.Name = "Спектр " + curChannel.Name;
-            res.Source = "Analyzer";
+        public Channel AmplitudeSpectralDensity()
+        {
+            var res = new Channel(SamplesCount) {Name = $"[ASD] {myChannel.Name}", Source = "Analyzer"};
 
-            for (int i = 0; i < n; i++) {
-                res.values[i] = amps[i];
+            for (int i = 0; i < SamplesCount; i++)
+            {
+                res.values[i] = asd[i];
             }
 
-            switch (this.zeroMode) {
-                case ZeroMode.Smooth:
-                    if (res.values.Length > 1) {
-                        res.values[0] = res.values[1];
-                    }
-                    break;
-                case ZeroMode.Null:
-                    res.values[0] = 0;
-                    break;
-                default:
-                    break;
-            }
-
-            WindowSmoothing(res, HalfWindowSmoothing);
-
-            //var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
-            //res.SamplingFrq = 1.0 / newDx;
-
-            res.SamplingFrq = 2.0 / (curChannel.SamplingFrq / res.SamplesCount);
+            FinalSetup(res);
 
             return res;
         }
 
-        public Channel PowerSpectralDensity() {
-            int n = ft.Length / 2;
-            var res = new Channel(n);
-            res.Name = "Спектр " + curChannel.Name;
-            res.Source = "Analyzer";
+        public Channel PowerSpectralDensity()
+        {
+            var res = new Channel(SamplesCount) {Name = $"[PSD] {myChannel.Name}", Source = "Analyzer"};
 
-            for (int i = 0; i < n; i++) {
-                res.values[i] = psds[i]; ;
+            for (int i = 0; i < SamplesCount; i++)
+            {
+                res.values[i] = psd[i];
             }
 
-            switch (this.zeroMode) {
-                case ZeroMode.Smooth:
-                    if (res.values.Length > 1) {
-                        res.values[0] = res.values[1];
-                    }
-                    break;
-                case ZeroMode.Null:
-                    res.values[0] = 0;
-                    break;
-                default:
-                    break;
-            }
-
-            WindowSmoothing(res, HalfWindowSmoothing);
-
-            //var newDx = 1.0 / (2 * curChannel.DeltaTime * res.SamplesCount);
-            //res.SamplingFrq = 1.0 / newDx;
-
-            res.SamplingFrq = 2.0 / (curChannel.SamplingFrq / res.SamplesCount);
+            FinalSetup(res);
 
             return res;
         }
 
-        private void WindowSmoothing(Channel channel, int halfWindow) {
-            if (halfWindow != 0 && channel.values.Length > 0) {
+        private void FinalSetup(Channel channel)
+        {
+            switch (ZeroMode)
+            {
+                case ZeroModeEnum.Smooth:
+                    if (channel.values.Length > 1)
+                    {
+                        channel.values[0] = channel.values[1];
+                    }
+
+                    break;
+                case ZeroModeEnum.Null:
+                    if (channel.values.Length != 0)
+                    {
+                        channel.values[0] = 0;
+                    }
+
+                    break;
+                case ZeroModeEnum.Nothing:
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            WindowSmoothing(channel, HalfWindowSmoothing);
+
+            channel.SamplingFrq = 2.0 / (myChannel.SamplingFrq / channel.SamplesCount);
+        }
+
+        private void WindowSmoothing(Channel channel, int halfWindow)
+        {
+            if (halfWindow != 0 && channel.values.Length > 0)
+            {
                 var q = new LinkedList<double>();
                 double curWindow = 0;
 
-                for (int i = 0; i < halfWindow * 2 + 1; i++) {
+                for (int i = 0; i < halfWindow * 2 + 1; i++)
+                {
                     int curIdx = Math.Abs(0 - halfWindow + i);
-                    if (curIdx >= channel.values.Length) {
+                    if (curIdx >= channel.values.Length)
+                    {
                         curIdx -= (curIdx % channel.values.Length) + 1;
                     }
+
                     double curVal = channel.values[curIdx];
                     curWindow += curVal;
                     q.AddLast(curVal);
@@ -212,12 +168,14 @@ namespace CGProject1.SignalProcessing {
 
                 channel.values[0] = curWindow / (2 * halfWindow + 1);
 
-                for (int i = 1; i < channel.values.Length; i++) {
+                for (int i = 1; i < channel.values.Length; i++)
+                {
                     curWindow -= q.First.Value;
                     q.RemoveFirst();
 
                     int curIdx = Math.Abs(i + halfWindow);
-                    if (curIdx >= channel.values.Length) {
+                    if (curIdx >= channel.values.Length)
+                    {
                         curIdx -= (curIdx % channel.values.Length) + 1;
                     }
 
@@ -229,94 +187,5 @@ namespace CGProject1.SignalProcessing {
                 }
             }
         }
-
-        private Complex[] SlowFourierTransform(Channel channel, int begin, int end) {
-            int n = end - begin + 1;
-            var res = new Complex[n];
-
-            for (int i = 0; i < n; i++) {
-                var val = Complex.Zero;
-
-                for (int j = 0; j < n; j++) {
-                    val += channel.values[begin + j] * Complex.Exp(-Complex.ImaginaryOne * 2 * Math.PI * j * i / n);
-                }
-
-                res[i] = val;
-            }
-
-            //for (int i = 0; i < n; i++) {
-            //    res[i] *= channel.DeltaTime;
-            //}
-
-            return res;
-        }
-
-        private Complex[] FastFourierTransform(double[] vals, int begin, int end) {
-            int n = end - begin + 1;
-
-            var res = new Complex[n];
-
-            for (int i = 0; i < n; i++) {
-                res[i] = vals[begin + i];
-            }
-
-            InnerFastFourierTransform(ref res);
-
-            //for (int i = 0; i < n; i++) {
-            //    res[i] *= channel.DeltaTime;
-            //}
-
-            return res;
-        }
-
-        private void InnerFastFourierTransform(ref Complex[] a) {
-            int n = a.Length;
-            if (n == 1) {
-                return;
-            }
-
-            double ang = -2 * Math.PI / n;
-
-            var w = Complex.One;
-            var wn = new Complex(Math.Cos(ang), Math.Sin(ang));
-
-            var a0 = new Complex[n / 2];
-            var a1 = new Complex[n / 2];
-
-            for (int i = 0; i * 2 < n; i++) {
-                a0[i] = a[2 * i];
-                a1[i] = a[2 * i + 1];
-            }
-
-            InnerFastFourierTransform(ref a0);
-            InnerFastFourierTransform(ref a1);
-
-            for (int i = 0; i < n / 2; i++) {
-                a[i] = a0[i] + w * a1[i];
-                a[i + n / 2] = a0[i] - w * a1[i];
-                w *= wn;
-            }
-        }
-
-        //private static void InnerSlowFourierTransform(ref Complex[] a) {
-        //    int n = a.Length;
-        //    var res = new Complex[n];
-
-        //    for (int i = 0; i < n; i++) {
-        //        var val = Complex.Zero;
-
-        //        for (int j = 0; j < n; j++) {
-        //            val += a[j] * Complex.Exp(-Complex.ImaginaryOne * 2 * Math.PI * j * i / n);
-        //        }
-
-        //        res[i] = val;
-        //    }
-
-        //    for (int i = 0; i < n; i++) {
-        //        a[i] = res[i];
-        //    }
-
-        //    return;
-        //}
     }
 }

@@ -49,11 +49,11 @@ namespace CGProject1
             var channel = analyzerType switch
             {
                 AnalyzerType.PowerSpectralDensity => logarithmic
-                    ? Analyzer.LogarithmicPSD()
+                    ? Analyzer.LogarithmicPsd()
                     : Analyzer.PowerSpectralDensity(),
                 AnalyzerType.AmplitudeSpectralDensity => logarithmic
-                    ? Analyzer.LogarithmicSpectre()
-                    : Analyzer.AmplitudeSpectre(),
+                    ? Analyzer.LogarithmicAsd()
+                    : Analyzer.AmplitudeSpectralDensity(),
                 _ => throw new NotSupportedException()
             };
 

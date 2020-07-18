@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using CGProject1.Pages;
+using CGProject1.Pages.AnalyzerContainer;
 using CGProject1.SignalProcessing;
 using Microsoft.Win32;
 using FileFormats;

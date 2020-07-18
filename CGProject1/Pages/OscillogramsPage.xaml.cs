@@ -8,13 +8,13 @@ using CGProject1.SignalProcessing;
 
 namespace CGProject1.Pages
 {
-    public partial class OscillogramsPage : IChannelComponent
+    public partial class OscillogramsPage : IChannelComponent, IDisposable
     {
         private readonly List<ChartLine> charts = new List<ChartLine>();
 
         private Signal mySignal;
 
-        private double chartHeight = 100;
+        private double chartHeight = 100.0;
 
         private readonly Segment mySegment = new Segment();
         private readonly SegmentControl mySegmentControl;
@@ -279,6 +279,11 @@ namespace CGProject1.Pages
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (CountPerPage.Value != null) RecalculateHeight((int) CountPerPage.Value);
+        }
+
+        public void Dispose()
+        {
+            mySegment.OnChange -= MySegment_OnChange;
         }
     }
 }
