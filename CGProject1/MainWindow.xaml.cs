@@ -17,13 +17,11 @@ namespace CGProject1
     {
         public static MainWindow instance = null;
 
-        #region(DEPRECATED)
         private ModelingWindow modelingWindow;
         private SaveWindow savingWindow;
 
         private bool isModelingWindowShowing = false;
         private bool isSavingWindowShowing = false;
-        #endregion
 
         private StatisticsPage statisticsPage = null;
         private LayoutAnchorable statisticsPane = null;
@@ -75,17 +73,17 @@ namespace CGProject1
             oscillogramsPage = new OscillogramsPage();
             oscillogramsPane = new LayoutAnchorable();
             oscillogramsPane.Title = "Осциллограммы";
-            LowerMiddlePane.Children.Add(oscillogramsPane);
+            UpperMiddlePane.Children.Add(oscillogramsPane);
 
             analyzerPage = new AnalyzerPage();
             analyzerPane = new LayoutAnchorable();
             analyzerPane.Title = "Анализ Фурье";
-            UpperMiddlePane.Children.Add(analyzerPane);
+            LowerMiddlePane.Children.Add(analyzerPane);
 
             spectrogramsPage = new SpectrogramsPage();
             spectrogramsPane = new LayoutAnchorable();
             spectrogramsPane.Title = "Спектрограммы";
-            UpperMiddlePane.Children.Add(spectrogramsPane);
+            LowerMiddlePane.Children.Add(spectrogramsPane);
 
             aboutSignalPage = new AboutSignalPage();
             aboutSignalPane = new LayoutAnchorable();

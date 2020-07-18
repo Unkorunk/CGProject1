@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Numerics;
 
-using MathNet.Numerics.IntegralTransforms;
+using FFTWSharp;
+
 
 namespace CGProject1.SignalProcessing {
     public class Analyzer {
@@ -52,8 +53,9 @@ namespace CGProject1.SignalProcessing {
                 vals[i] = curChannel.values[i + begin];
             }
 
-            Fourier.Forward(vals, FourierOptions.NoScaling);
-            ft = vals;
+            //Fourier.Forward(vals, FourierOptions.NoScaling);
+            //ft = vals;
+            ft = FFT(vals);
 
             amps = new double[ft.Length];
 
@@ -230,93 +232,14 @@ namespace CGProject1.SignalProcessing {
             }
         }
 
-        private Complex[] SlowFourierTransform(Channel channel, int begin, int end) {
-            int n = end - begin + 1;
-            var res = new Complex[n];
+        private Complex[] FFT(Complex[] input) {
+            var arr = new fftwf_complexarray(input);
+            var outArr = new fftwf_complexarray(input.Length);
 
-            for (int i = 0; i < n; i++) {
-                var val = Complex.Zero;
+            var plan = fftwf_plan.dft_1d(input.Length, arr, outArr, fftw_direction.Forward, fftw_flags.Estimate);
+            plan.Execute();
 
-                for (int j = 0; j < n; j++) {
-                    val += channel.values[begin + j] * Complex.Exp(-Complex.ImaginaryOne * 2 * Math.PI * j * i / n);
-                }
-
-                res[i] = val;
-            }
-
-            //for (int i = 0; i < n; i++) {
-            //    res[i] *= channel.DeltaTime;
-            //}
-
-            return res;
+            return outArr.GetData_Complex();
         }
-
-        private Complex[] FastFourierTransform(double[] vals, int begin, int end) {
-            int n = end - begin + 1;
-
-            var res = new Complex[n];
-
-            for (int i = 0; i < n; i++) {
-                res[i] = vals[begin + i];
-            }
-
-            InnerFastFourierTransform(ref res);
-
-            //for (int i = 0; i < n; i++) {
-            //    res[i] *= channel.DeltaTime;
-            //}
-
-            return res;
-        }
-
-        private void InnerFastFourierTransform(ref Complex[] a) {
-            int n = a.Length;
-            if (n == 1) {
-                return;
-            }
-
-            double ang = -2 * Math.PI / n;
-
-            var w = Complex.One;
-            var wn = new Complex(Math.Cos(ang), Math.Sin(ang));
-
-            var a0 = new Complex[n / 2];
-            var a1 = new Complex[n / 2];
-
-            for (int i = 0; i * 2 < n; i++) {
-                a0[i] = a[2 * i];
-                a1[i] = a[2 * i + 1];
-            }
-
-            InnerFastFourierTransform(ref a0);
-            InnerFastFourierTransform(ref a1);
-
-            for (int i = 0; i < n / 2; i++) {
-                a[i] = a0[i] + w * a1[i];
-                a[i + n / 2] = a0[i] - w * a1[i];
-                w *= wn;
-            }
-        }
-
-        //private static void InnerSlowFourierTransform(ref Complex[] a) {
-        //    int n = a.Length;
-        //    var res = new Complex[n];
-
-        //    for (int i = 0; i < n; i++) {
-        //        var val = Complex.Zero;
-
-        //        for (int j = 0; j < n; j++) {
-        //            val += a[j] * Complex.Exp(-Complex.ImaginaryOne * 2 * Math.PI * j * i / n);
-        //        }
-
-        //        res[i] = val;
-        //    }
-
-        //    for (int i = 0; i < n; i++) {
-        //        a[i] = res[i];
-        //    }
-
-        //    return;
-        //}
     }
 }
