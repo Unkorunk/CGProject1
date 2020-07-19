@@ -81,6 +81,8 @@ namespace CGProject1 {
                 }
             }
 
+            Logger.Instance.Log($"Tried to save signal {signalToSave}");
+
             if (signalToSave.channels.Count == 0) {
                 MessageBox.Show("Не выбрано ни одного канала", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -90,7 +92,7 @@ namespace CGProject1 {
             saveDialog.Filter = "txt files (.txt)|*.txt|wave files (*.wav;*.wave)|*.wav;*.wave|dat files (*.dat)|*.dat";
             if (saveDialog.ShowDialog() == true) {
                 IWriter writer;
-                switch (System.IO.Path.GetExtension(saveDialog.FileName))
+                switch (Path.GetExtension(saveDialog.FileName))
                 {
                     case ".txt":
                         writer = new TXTWriter();

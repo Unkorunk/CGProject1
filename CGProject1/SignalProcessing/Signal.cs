@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
 
 namespace CGProject1 {
     public class Signal {
@@ -68,6 +69,18 @@ namespace CGProject1 {
                 channel.StartDateTime = this.StartDateTime;
                 channel.SamplingFrq = this.SamplingFrq;
             }
+        }
+
+        public override string ToString() {
+            var sb = new StringBuilder();
+            sb.Append($"{{Name: {fileName}, ");
+            sb.Append($"Cnt: {SamplesCount}, ");
+            sb.Append($"Channels: [");
+            foreach (var channel in channels) {
+                sb.Append($"{channel.Name} from {channel.Source}, ");
+            }
+            sb.Append("]}");
+            return sb.ToString();
         }
     }
 }

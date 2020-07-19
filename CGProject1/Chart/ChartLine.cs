@@ -149,9 +149,6 @@ namespace CGProject1.Chart
         {
             Channel = channel;
             _groupedCharts = new List<ChartLine>() { this };
-            //tooltip = new ToolTip();
-            //tooltip.Placement = System.Windows.Controls.Primitives.PlacementMode.Relative;
-            //tooltip.PlacementTarget = this;
 
             DisplayHAxisInfo = true;
             DisplayVAxisInfo = true;
