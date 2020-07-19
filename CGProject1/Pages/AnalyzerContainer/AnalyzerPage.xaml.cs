@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using CGProject1.Chart;
 using System.Windows.Input;
+using System.Globalization;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using CGProject1.SignalProcessing;
@@ -16,6 +17,8 @@ namespace CGProject1.Pages.AnalyzerContainer
         private readonly SegmentControl mySegmentControl;
 
         private double chartHeight = 100.0;
+
+        private bool initialized;
 
         private readonly IReadOnlyList<GroupChartLineFactory> groups = new[]
         {
@@ -34,21 +37,26 @@ namespace CGProject1.Pages.AnalyzerContainer
             foreach (var group in groups)
             {
                 ComboBoxMode.Items.Add(group.Title);
+                group.OnUpdate += Group_OnUpdate;
             }
 
             mySegmentControl = new SegmentControl(myVisibleSegment);
             ContainerSegmentControl.Child = mySegmentControl;
-            
+
             myActiveSegment.OnChange += MyActiveSegment_OnChange;
             myVisibleSegment.OnChange += MyVisibleSegment_OnChange;
-
-            // TODO calculate frequency
-            mySegmentControl.SetLeftFilter(left => mySignal == null ? string.Empty : "LEFT FREQUENCY: TODO");
-            mySegmentControl.SetRightFilter(right => mySignal == null ? string.Empty : "RIGHT FREQUENCY: TODO");
+            
+            mySegmentControl.SetLeftFilter(left => mySignal == null ? string.Empty : $"Left Frequency: {GetFrequency(true)}");
+            mySegmentControl.SetRightFilter(right => mySignal == null ? string.Empty : $"Right Frequency: {GetFrequency(false)}");
 
             if (CountPerPage.Value != null) RecalculateHeight((int) CountPerPage.Value);
         }
 
+        private void Group_OnUpdate()
+        {
+            UpdatePanel();
+        }
+        
         private void MyVisibleSegment_OnChange(Segment sender, Segment.SegmentChange segmentChange)
         {
             if (segmentChange != Segment.SegmentChange.None)
@@ -56,7 +64,7 @@ namespace CGProject1.Pages.AnalyzerContainer
                 UpdatePanel();
             }
         }
-        
+
         private void ChartLine_Segment_OnChange(Segment sender, Segment.SegmentChange segmentChange)
         {
             var isLeft = segmentChange.HasFlag(Segment.SegmentChange.Left);
@@ -82,7 +90,7 @@ namespace CGProject1.Pages.AnalyzerContainer
             {
                 LeftTextBox.Text = sender.Left.ToString();
                 RightTextBox.Text = sender.Right.ToString();
-                
+
                 UpdateAnalyzers();
                 UpdatePanel();
             }
@@ -106,15 +114,14 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         public void Reset(Signal newSignal)
         {
-            // Clear
             foreach (var group in groups)
             {
-                group.Factories.Clear();
+                group.Clear();
             }
 
             ClearSpectrePanel();
+            initialized = false;
 
-            // Init
             mySegmentControl.IsEnabled = newSignal != null;
 
             if (newSignal != null)
@@ -133,11 +140,19 @@ namespace CGProject1.Pages.AnalyzerContainer
             var factory = new ChartLineFactory(analyzer);
             foreach (var group in groups)
             {
-                group.Factories.Add(factory);
+                group.Add(factory);
             }
 
             UpdateAnalyzers();
             UpdatePanel();
+            
+            if (!initialized)
+            {
+                myVisibleSegment.SetMinMax(0, factory.Analyzer.SamplesCount - 1);
+                myVisibleSegment.SetLeftRight(int.MinValue, int.MaxValue);
+
+                initialized = true;
+            }
         }
 
         private void ResetSegmentClick(object sender, RoutedEventArgs e)
@@ -157,6 +172,7 @@ namespace CGProject1.Pages.AnalyzerContainer
         }
 
         #region TextBox Functions
+
         private bool TextIsNumeric(string input)
         {
             return input.All(c => char.IsDigit(c) || char.IsControl(c));
@@ -179,6 +195,7 @@ namespace CGProject1.Pages.AnalyzerContainer
                 e.CancelCommand();
             }
         }
+
         #endregion TextBox Functions
 
         #region Page Functions
@@ -186,7 +203,7 @@ namespace CGProject1.Pages.AnalyzerContainer
         private void RecalculateHeight(int count)
         {
             if (AnalyzerScrollViewer == null || SpectrePanel == null) return;
-            
+
             if (AnalyzerScrollViewer.ActualHeight <= 0) return;
 
             chartHeight = AnalyzerScrollViewer.ActualHeight / count;
@@ -230,8 +247,6 @@ namespace CGProject1.Pages.AnalyzerContainer
                     {
                         factory.Analyzer.HalfWindowSmoothing = halfWindow;
                     }
-                    
-                    myVisibleSegment.SetMinMax(0, factory.Analyzer.SamplesCount - 1);
                 }
             }
         }
@@ -239,14 +254,30 @@ namespace CGProject1.Pages.AnalyzerContainer
         private void UpdatePanel()
         {
             if (SpectrePanel == null || ComboBoxMode == null) return;
-            
+
+            var count = groups[ComboBoxMode.SelectedIndex].Factories.Count;
+            var current = 0;
+
             ClearSpectrePanel();
+            
             foreach (var chartLine in groups[ComboBoxMode.SelectedIndex].Process())
             {
-                // TODO disable horizontal axis for charts between first and last
                 chartLine.Height = chartHeight;
                 chartLine.Segment.SetSegment(myVisibleSegment);
                 chartLine.Segment.OnChange += ChartLine_Segment_OnChange;
+
+                chartLine.DisplayHAxisInfo = false;
+                chartLine.DisplayHAxisTitle = false;
+
+                if (current == 0 || current == count - 1)
+                {
+                    chartLine.DisplayHAxisInfo = true;
+                    chartLine.DisplayHAxisTitle = true;
+                    chartLine.HAxisAlligment = current == 0 ? ChartLine.HAxisAlligmentEnum.Top : ChartLine.HAxisAlligmentEnum.Bottom;
+                }
+
+                current++;
+
                 SpectrePanel.Children.Add(chartLine);
             }
         }
@@ -254,7 +285,7 @@ namespace CGProject1.Pages.AnalyzerContainer
         private void ClearSpectrePanel()
         {
             if (SpectrePanel == null) return;
-            
+
             foreach (var child in SpectrePanel.Children)
             {
                 if (child != null && child is ChartLine chartLine)
@@ -262,6 +293,7 @@ namespace CGProject1.Pages.AnalyzerContainer
                     chartLine.Segment.OnChange -= ChartLine_Segment_OnChange;
                 }
             }
+
             SpectrePanel.Children.Clear();
         }
 
@@ -269,6 +301,35 @@ namespace CGProject1.Pages.AnalyzerContainer
         {
             myActiveSegment.OnChange -= MyActiveSegment_OnChange;
             myVisibleSegment.OnChange -= MyVisibleSegment_OnChange;
+            foreach (var group in groups)
+            {
+                group.OnUpdate -= Group_OnUpdate;
+            }
+        }
+
+        private ChartLine GetFirstChartLineForCurrentMode()
+        {
+            if (SpectrePanel == null) return null;
+
+            foreach (var child in SpectrePanel.Children)
+            {
+                if (child != null && child is ChartLine chartLine)
+                {
+                    return chartLine;
+                }
+            }
+
+            return null;
+        }
+
+        private string GetFrequency(bool left)
+        {
+            var chartLine = GetFirstChartLineForCurrentMode();
+            if (chartLine == null) return double.NaN.ToString(CultureInfo.InvariantCulture);
+
+            return left
+                ? ChartLineFactory.MappingXAxis(chartLine.Segment.Left, chartLine)
+                : ChartLineFactory.MappingXAxis(chartLine.Segment.Right, chartLine);
         }
     }
 }

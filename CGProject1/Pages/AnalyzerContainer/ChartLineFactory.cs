@@ -12,7 +12,21 @@ namespace CGProject1.Pages.AnalyzerContainer
     {
         public Analyzer Analyzer { get; }
 
-        public bool Deleted { get; private set; }
+        private bool deleted = false;
+
+        public bool Deleted
+        {
+            get => deleted;
+            private set
+            {
+                deleted = value;
+                if (deleted) OnDeleted?.Invoke();
+            }
+        }
+
+        public delegate void DelDeleted();
+
+        public event DelDeleted OnDeleted;
 
         public ChartLineFactory([NotNull] Analyzer analyzer)
         {
@@ -45,7 +59,7 @@ namespace CGProject1.Pages.AnalyzerContainer
             {
                 Margin = new Thickness(0, 2, 0, 2),
                 GridDraw = true,
-                HAxisTitle = "Частота (Гц)",
+                HAxisTitle = "Frequency (Hz)",
                 MappingXAxis = MappingXAxis,
                 MaxHeightXAxisString = double.MaxValue.ToString(CultureInfo.InvariantCulture),
                 ShowCurrentXY = true,
@@ -54,14 +68,15 @@ namespace CGProject1.Pages.AnalyzerContainer
                 ContextMenu = new ContextMenu()
             };
             
-            var menuItem = new MenuItem {Header = "Закрыть канал"};
+            var menuItem = new MenuItem {Header = "Close"};
             menuItem.Click += (sender, args) => Deleted = true;
             chartLine.ContextMenu.Items.Add(menuItem);
 
             return chartLine;
         }
         
-        private static string MappingXAxis(int idx, ChartLine chart) {
+        public static string MappingXAxis(int idx, [NotNull] ChartLine chart)
+        {
             var curVal = chart.Channel.DeltaTime * idx;
             return curVal.ToString("N6", CultureInfo.InvariantCulture);
         }
