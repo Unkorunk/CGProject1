@@ -18,13 +18,11 @@ namespace CGProject1
     {
         public static MainWindow Instance { get; private set; }
 
-        #region(DEPRECATED)
         private ModelingWindow modelingWindow;
         private SaveWindow savingWindow;
 
         private bool isModelingWindowShowing = false;
         private bool isSavingWindowShowing = false;
-        #endregion
 
         private StatisticsPage statisticsPage = null;
         private LayoutAnchorable statisticsPane = null;
@@ -80,17 +78,17 @@ namespace CGProject1
             oscillogramsPage = new OscillogramsPage();
             oscillogramsPane = new LayoutAnchorable();
             oscillogramsPane.Title = "Осциллограммы";
-            LowerMiddlePane.Children.Add(oscillogramsPane);
+            UpperMiddlePane.Children.Add(oscillogramsPane);
 
             analyzerPage = new AnalyzerPage();
             analyzerPane = new LayoutAnchorable();
             analyzerPane.Title = "Анализ Фурье";
-            UpperMiddlePane.Children.Add(analyzerPane);
+            LowerMiddlePane.Children.Add(analyzerPane);
 
             spectrogramsPage = new SpectrogramsPage();
             spectrogramsPane = new LayoutAnchorable();
             spectrogramsPane.Title = "Спектрограммы";
-            UpperMiddlePane.Children.Add(spectrogramsPane);
+            LowerMiddlePane.Children.Add(spectrogramsPane);
 
             aboutSignalPage = new AboutSignalPage();
             aboutSignalPane = new LayoutAnchorable();
@@ -168,6 +166,7 @@ namespace CGProject1
 
             if (this.currentSignal == null)
             {
+                Logger.Instance.Log("Signal was reset to null");
                 return;
             }
 
@@ -177,10 +176,14 @@ namespace CGProject1
             {
                 channelsPage.AddChannel(currentSignal.channels[i]);
             }
+
+            Logger.Instance.Log("Signal was reset successfully");
+            Logger.Instance.Log($"Current signal {newSignal}");
         }
 
         private void OpenPane(LayoutAnchorable pane)
         {
+            Logger.Instance.Log($"Layout {pane.Title} opened");
             pane.Show();
             pane.IsSelected = true;
         }
@@ -253,6 +256,7 @@ namespace CGProject1
                 this.modelingWindow.Topmost = true;
                 this.modelingWindow.Topmost = false;
             }
+            Logger.Instance.Log("Modeling window opened");
         }
 
         public void AddChannel(Channel channel)
@@ -330,6 +334,8 @@ namespace CGProject1
                         }
                     }
 
+                    Logger.Instance.Log($"File {openFileDialog.FileName} was opened");
+
                     signal.UpdateChannelsInfo();
 
                     ResetSignal(signal);
@@ -337,6 +343,7 @@ namespace CGProject1
                 else
                 {
                     MessageBox.Show("Incorrect format", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Logger.Instance.Log($"File {openFileDialog.FileName} has incorrect format");
                 }
                 
                 Settings.Instance.Set("filterIndex", openFileDialog.FilterIndex);
@@ -363,6 +370,7 @@ namespace CGProject1
                 savingWindow.Topmost = true;
                 savingWindow.Topmost = false;
             }
+            Logger.Instance.Log("Save window opened");
         }
     }
 }
