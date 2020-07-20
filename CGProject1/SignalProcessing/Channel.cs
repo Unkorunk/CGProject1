@@ -10,7 +10,7 @@ namespace CGProject1.SignalProcessing {
         public string Name { get; set; }
         public string Source { get; set; }
 
-        public double[] values;
+        public readonly double[] values;
 
         public double MaxValue { get => values.Max(); }
         public double MinValue { get => values.Min(); }

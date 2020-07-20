@@ -18,7 +18,7 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         private double chartHeight = 100.0;
 
-        private bool initialized;
+        private bool initialized, isFirstInit;
 
         private readonly IReadOnlyList<GroupChartLineFactory> groups = new[]
         {
@@ -91,6 +91,8 @@ namespace CGProject1.Pages.AnalyzerContainer
                 LeftTextBox.Text = sender.Left.ToString();
                 RightTextBox.Text = sender.Right.ToString();
 
+                initialized = false;
+
                 UpdateAnalyzers();
                 UpdatePanel();
             }
@@ -121,6 +123,7 @@ namespace CGProject1.Pages.AnalyzerContainer
 
             ClearSpectrePanel();
             initialized = false;
+            isFirstInit = true;
 
             mySegmentControl.IsEnabled = newSignal != null;
 
@@ -145,14 +148,6 @@ namespace CGProject1.Pages.AnalyzerContainer
 
             UpdateAnalyzers();
             UpdatePanel();
-            
-            if (!initialized)
-            {
-                myVisibleSegment.SetMinMax(0, factory.Analyzer.SamplesCount - 1);
-                myVisibleSegment.SetLeftRight(int.MinValue, int.MaxValue);
-
-                initialized = true;
-            }
         }
 
         private void ResetSegmentClick(object sender, RoutedEventArgs e)
@@ -249,6 +244,8 @@ namespace CGProject1.Pages.AnalyzerContainer
                     }
                 }
             }
+
+            AfterUpdateAnalyzers();
         }
 
         private void UpdatePanel()
@@ -330,6 +327,41 @@ namespace CGProject1.Pages.AnalyzerContainer
             return left
                 ? ChartLineFactory.MappingXAxis(chartLine.Segment.Left, chartLine)
                 : ChartLineFactory.MappingXAxis(chartLine.Segment.Right, chartLine);
+        }
+
+        private void AfterUpdateAnalyzers()
+        {
+            if (ComboBoxMode != null && ComboBoxMode.SelectedItem != null && !initialized)
+            {
+                var group = groups[ComboBoxMode.SelectedIndex].Factories.FirstOrDefault();
+
+                if (group != null)
+                {
+                    var oldSegment = new Segment();
+                    oldSegment.SetSegment(myVisibleSegment);
+
+                    myVisibleSegment.SetMinMax(0, group.Analyzer.SamplesCount - 1);
+                    if (isFirstInit)
+                    {
+                        myVisibleSegment.SetLeftRight(int.MinValue, int.MaxValue);
+                        isFirstInit = false;
+                    }
+                    else
+                    {
+                        int newLength = myVisibleSegment.MaxValue - myVisibleSegment.MinValue + 1;
+                        int oldLength = oldSegment.MaxValue - oldSegment.MinValue + 1;
+
+                        int left = (int) Math.Round((oldSegment.Left - oldSegment.MinValue + 1.0) * newLength / oldLength +
+                            myVisibleSegment.MinValue - 1);
+                        int right = (int) Math.Round((oldSegment.Right - oldSegment.MinValue + 1.0) * newLength / oldLength +
+                            myVisibleSegment.MinValue - 1);
+
+                        myVisibleSegment.SetLeftRight(left, right);
+                    }
+
+                    initialized = true;
+                }
+            }
         }
     }
 }
