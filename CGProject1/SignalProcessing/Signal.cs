@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
+
 using CGProject1.SignalProcessing;
 
 namespace CGProject1 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using System.Collections.Generic;
-using MathNet.Numerics.IntegralTransforms;
+using FFTWSharp;
 
 namespace CGProject1.SignalProcessing
 {
@@ -43,8 +43,7 @@ namespace CGProject1.SignalProcessing
                 values[i] = myChannel.values[i + begin];
             }
 
-            Fourier.Forward(values, FourierOptions.NoScaling);
-            var ft = values;
+            var ft = FFT(values);
 
             SamplesCount = ft.Length / 2;
 
