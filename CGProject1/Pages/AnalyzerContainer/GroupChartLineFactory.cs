@@ -35,11 +35,7 @@ namespace CGProject1.Pages.AnalyzerContainer
         {
             foreach (var factory in Factories)
             {
-                var chartLine = Selector(factory);
-                if (chartLine != null)
-                {
-                    yield return chartLine;
-                }
+                yield return Selector(factory);
             }
         }
 

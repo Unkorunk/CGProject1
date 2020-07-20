@@ -340,9 +340,8 @@ namespace CGProject1.Pages.AnalyzerContainer
                     var oldSegment = new Segment();
                     oldSegment.SetSegment(myVisibleSegment);
 
-                    if (group.Analyzer.SamplesCount < 1) return;
+                    myVisibleSegment.SetMinMax(0, Math.Max(0, group.Analyzer.SamplesCount - 1));
 
-                    myVisibleSegment.SetMinMax(0, group.Analyzer.SamplesCount - 1);
                     if (isFirstInit)
                     {
                         myVisibleSegment.SetLeftRight(int.MinValue, int.MaxValue);

@@ -115,7 +115,7 @@ namespace CGProject1.Chart
         {
             Channel = channel;
 
-            Segment = new Segment(0, channel.SamplesCount - 1);
+            Segment = new Segment(0, Math.Max(0, channel.SamplesCount - 1));
             Segment.OnChange += (sender, change) => InvalidateVisual();
             
             _groupedCharts = new List<ChartLine>() { this };
