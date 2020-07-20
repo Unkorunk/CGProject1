@@ -114,7 +114,7 @@ namespace CGProject1.Chart
         public ChartLine(Channel channel)
         {
             Channel = channel;
-            
+
             Segment = new Segment(0, channel.SamplesCount - 1);
             Segment.OnChange += (sender, change) => InvalidateVisual();
             

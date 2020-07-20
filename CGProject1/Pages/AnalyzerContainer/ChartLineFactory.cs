@@ -55,6 +55,8 @@ namespace CGProject1.Pages.AnalyzerContainer
         {
             if (Deleted) throw new InvalidOperationException();
 
+            if (channel.SamplesCount < 1) return null;
+
             var chartLine = new ChartLine(channel)
             {
                 Margin = new Thickness(0, 2, 0, 2),
