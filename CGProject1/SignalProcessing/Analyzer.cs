@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using System.Collections.Generic;
-using MathNet.Numerics.IntegralTransforms;
+using FFTWSharp;
 
 namespace CGProject1.SignalProcessing
 {
@@ -43,8 +43,7 @@ namespace CGProject1.SignalProcessing
                 values[i] = myChannel.values[i + begin];
             }
 
-            Fourier.Forward(values, FourierOptions.NoScaling);
-            var ft = values;
+            var ft = FFT(values);
 
             SamplesCount = ft.Length / 2;
 
@@ -186,6 +185,16 @@ namespace CGProject1.SignalProcessing
                     channel.values[i] = curWindow / (2 * halfWindow + 1);
                 }
             }
+        }
+
+        private Complex[] FFT(Complex[] input) {
+            var arr = new fftwf_complexarray(input);
+            var outArr = new fftwf_complexarray(input.Length);
+
+            var plan = fftwf_plan.dft_1d(input.Length, arr, outArr, fftw_direction.Forward, fftw_flags.Estimate);
+            plan.Execute();
+
+            return outArr.GetData_Complex();
         }
     }
 }

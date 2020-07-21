@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
+
 using CGProject1.SignalProcessing;
 
 namespace CGProject1 {
@@ -75,6 +77,18 @@ namespace CGProject1 {
         {
             if (index < 0 || index >= this.SamplesCount) throw new ArgumentException();
             return StartDateTime + TimeSpan.FromSeconds(DeltaTime * index);
+        }
+
+        public override string ToString() {
+            var sb = new StringBuilder();
+            sb.Append($"{{Name: {fileName}, ");
+            sb.Append($"Cnt: {SamplesCount}, ");
+            sb.Append($"Channels: [");
+            foreach (var channel in channels) {
+                sb.Append($"{channel.Name} from {channel.Source}, ");
+            }
+            sb.Append("]}");
+            return sb.ToString();
         }
     }
 }
