@@ -188,6 +188,10 @@ namespace CGProject1.SignalProcessing
         }
 
         private Complex[] FFT(Complex[] input) {
+            if (input.Length < 2) {
+                return new Complex[0];
+            }
+
             var arr = new fftwf_complexarray(input);
             var outArr = new fftwf_complexarray(input.Length);
 
