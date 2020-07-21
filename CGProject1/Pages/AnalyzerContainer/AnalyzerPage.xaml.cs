@@ -7,6 +7,8 @@ using System.Globalization;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using CGProject1.SignalProcessing;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace CGProject1.Pages.AnalyzerContainer
 {
@@ -93,8 +95,7 @@ namespace CGProject1.Pages.AnalyzerContainer
 
                 initialized = false;
 
-                UpdateAnalyzers();
-                UpdatePanel();
+                AsyncUpdateAnalyzerAndPanel();
             }
         }
 
@@ -146,8 +147,7 @@ namespace CGProject1.Pages.AnalyzerContainer
                 group.Add(factory);
             }
 
-            UpdateAnalyzers();
-            UpdatePanel();
+            AsyncUpdateAnalyzerAndPanel();
         }
 
         private void ResetSegmentClick(object sender, RoutedEventArgs e)
@@ -162,8 +162,7 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         private void SelectInterval(object sender, RoutedEventArgs e)
         {
-            UpdateAnalyzers();
-            UpdatePanel();
+            AsyncUpdateAnalyzerAndPanel();
         }
 
         #region TextBox Functions
@@ -226,26 +225,30 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         private void ZeroModeSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            UpdateAnalyzers();
-            UpdatePanel();
+            AsyncUpdateAnalyzerAndPanel();
         }
 
-        private void UpdateAnalyzers()
+        private object updateAnaylyzesLock = new object();
+
+        private void UpdateAnalyzers(CancellationToken token, ZeroModeEnum zeroMode, string halfWindowText)
         {
-            foreach (var group in groups)
+            lock (updateAnaylyzesLock)
             {
-                foreach (var factory in group.Factories)
+                foreach (var group in groups)
                 {
-                    factory.Analyzer.ZeroMode = GetZeroMode();
-                    factory.Analyzer.SetupChannel(myActiveSegment.Left, myActiveSegment.Right);
-                    if (int.TryParse(HalfWindowTextBox.Text, out var halfWindow))
+                    foreach (var factory in group.Factories)
                     {
-                        factory.Analyzer.HalfWindowSmoothing = halfWindow;
+                        if (token.IsCancellationRequested) return;
+
+                        factory.Analyzer.ZeroMode = zeroMode;
+                        factory.Analyzer.SetupChannel(myActiveSegment.Left, myActiveSegment.Right);
+                        if (int.TryParse(halfWindowText, out var halfWindow))
+                        {
+                            factory.Analyzer.HalfWindowSmoothing = halfWindow;
+                        }
                     }
                 }
             }
-
-            AfterUpdateAnalyzers();
         }
 
         private void UpdatePanel()
@@ -296,6 +299,13 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         public void Dispose()
         {
+            if (tokenSourceInit)
+            {
+                tokenSource.Cancel();
+                tokenSource.Dispose();
+                tokenSourceInit = false;
+            }
+
             myActiveSegment.OnChange -= MyActiveSegment_OnChange;
             myVisibleSegment.OnChange -= MyVisibleSegment_OnChange;
             foreach (var group in groups)
@@ -363,6 +373,31 @@ namespace CGProject1.Pages.AnalyzerContainer
                     initialized = true;
                 }
             }
+        }
+
+        private CancellationTokenSource tokenSource;
+        private bool tokenSourceInit = false;
+
+        private void AsyncUpdateAnalyzerAndPanel()
+        {
+            if (HalfWindowTextBox == null) return;
+
+            if (tokenSourceInit)
+            {
+                tokenSource.Cancel();
+                tokenSource.Dispose();
+                tokenSourceInit = false;
+            }
+            tokenSource = new CancellationTokenSource();
+            tokenSourceInit = true;
+
+            var zeroMode = GetZeroMode();
+            var halfWindowText = HalfWindowTextBox.Text;
+
+            Task.Factory.StartNew(() => UpdateAnalyzers(tokenSource.Token, zeroMode, halfWindowText), tokenSource.Token)
+                .ContinueWith((r) => { AfterUpdateAnalyzers(); UpdatePanel(); },
+                tokenSource.Token, TaskContinuationOptions.None,
+                TaskScheduler.FromCurrentSynchronizationContext());
         }
     }
 }
