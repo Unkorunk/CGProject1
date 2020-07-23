@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
+using System.Threading;
 using CGProject1.Chart;
 using System.Windows.Input;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using CGProject1.SignalProcessing;
-using System.Threading.Tasks;
-using System.Threading;
 
 namespace CGProject1.Pages.AnalyzerContainer
 {
@@ -117,23 +117,26 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         public void Reset(Signal newSignal)
         {
-            foreach (var group in groups)
+            lock (updateAnaylyzesLock)
             {
-                group.Clear();
-            }
+                foreach (var group in groups)
+                {
+                    group.Clear();
+                }
 
-            ClearSpectrePanel();
-            initialized = false;
-            isFirstInit = true;
+                ClearSpectrePanel();
+                initialized = false;
+                isFirstInit = true;
 
-            mySegmentControl.IsEnabled = newSignal != null;
+                mySegmentControl.IsEnabled = newSignal != null;
 
-            if (newSignal != null)
-            {
-                mySignal = newSignal;
+                if (newSignal != null)
+                {
+                    mySignal = newSignal;
 
-                myActiveSegment.SetMinMax(0, mySignal.SamplesCount - 1);
-                myActiveSegment.SetLeftRight(int.MinValue, int.MaxValue);
+                    myActiveSegment.SetMinMax(0, mySignal.SamplesCount - 1);
+                    myActiveSegment.SetLeftRight(int.MinValue, int.MaxValue);
+                }
             }
         }
 
@@ -142,9 +145,12 @@ namespace CGProject1.Pages.AnalyzerContainer
             var analyzer = new Analyzer(channel);
 
             var factory = new ChartLineFactory(analyzer);
-            foreach (var group in groups)
+            lock (updateAnaylyzesLock)
             {
-                group.Add(factory);
+                foreach (var group in groups)
+                {
+                    group.Add(factory);
+                }
             }
 
             AsyncUpdateAnalyzerAndPanel();
@@ -254,31 +260,35 @@ namespace CGProject1.Pages.AnalyzerContainer
         private void UpdatePanel()
         {
             if (SpectrePanel == null || ComboBoxMode == null) return;
-
-            var count = groups[ComboBoxMode.SelectedIndex].Factories.Count;
-            var current = 0;
-
-            ClearSpectrePanel();
-            
-            foreach (var chartLine in groups[ComboBoxMode.SelectedIndex].Process())
+            lock (updateAnaylyzesLock)
             {
-                chartLine.Height = chartHeight;
-                chartLine.Segment.SetSegment(myVisibleSegment);
-                chartLine.Segment.OnChange += ChartLine_Segment_OnChange;
+                var count = groups[ComboBoxMode.SelectedIndex].Factories.Count;
+                var current = 0;
 
-                chartLine.DisplayHAxisInfo = false;
-                chartLine.DisplayHAxisTitle = false;
+                ClearSpectrePanel();
 
-                if (current == 0 || current == count - 1)
+                foreach (var chartLine in groups[ComboBoxMode.SelectedIndex].Process())
                 {
-                    chartLine.DisplayHAxisInfo = true;
-                    chartLine.DisplayHAxisTitle = true;
-                    chartLine.HAxisAlligment = current == 0 ? ChartLine.HAxisAlligmentEnum.Top : ChartLine.HAxisAlligmentEnum.Bottom;
+                    chartLine.Height = chartHeight;
+                    chartLine.Segment.SetSegment(myVisibleSegment);
+                    chartLine.Segment.OnChange += ChartLine_Segment_OnChange;
+
+                    chartLine.DisplayHAxisInfo = false;
+                    chartLine.DisplayHAxisTitle = false;
+
+                    if (current == 0 || current == count - 1)
+                    {
+                        chartLine.DisplayHAxisInfo = true;
+                        chartLine.DisplayHAxisTitle = true;
+                        chartLine.HAxisAlligment = current == 0
+                            ? ChartLine.HAxisAlligmentEnum.Top
+                            : ChartLine.HAxisAlligmentEnum.Bottom;
+                    }
+
+                    current++;
+
+                    SpectrePanel.Children.Add(chartLine);
                 }
-
-                current++;
-
-                SpectrePanel.Children.Add(chartLine);
             }
         }
 
@@ -341,36 +351,41 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         private void AfterUpdateAnalyzers()
         {
-            if (ComboBoxMode != null && ComboBoxMode.SelectedItem != null && !initialized)
+            lock (updateAnaylyzesLock)
             {
-                var group = groups[ComboBoxMode.SelectedIndex].Factories.FirstOrDefault();
-
-                if (group != null)
+                if (ComboBoxMode != null && ComboBoxMode.SelectedItem != null && !initialized)
                 {
-                    var oldSegment = new Segment();
-                    oldSegment.SetSegment(myVisibleSegment);
+                    var group = groups[ComboBoxMode.SelectedIndex].Factories.FirstOrDefault();
 
-                    myVisibleSegment.SetMinMax(0, Math.Max(0, group.Analyzer.SamplesCount - 1));
-
-                    if (isFirstInit)
+                    if (group != null)
                     {
-                        myVisibleSegment.SetLeftRight(int.MinValue, int.MaxValue);
-                        isFirstInit = false;
+                        var oldSegment = new Segment();
+                        oldSegment.SetSegment(myVisibleSegment);
+
+                        myVisibleSegment.SetMinMax(0, Math.Max(0, group.Analyzer.SamplesCount - 1));
+
+                        if (isFirstInit)
+                        {
+                            myVisibleSegment.SetLeftRight(int.MinValue, int.MaxValue);
+                            isFirstInit = false;
+                        }
+                        else
+                        {
+                            int newLength = myVisibleSegment.MaxValue - myVisibleSegment.MinValue + 1;
+                            int oldLength = oldSegment.MaxValue - oldSegment.MinValue + 1;
+
+                            int left = (int) Math.Round(
+                                (oldSegment.Left - oldSegment.MinValue + 1.0) * newLength / oldLength +
+                                myVisibleSegment.MinValue - 1);
+                            int right = (int) Math.Round(
+                                (oldSegment.Right - oldSegment.MinValue + 1.0) * newLength / oldLength +
+                                myVisibleSegment.MinValue - 1);
+
+                            myVisibleSegment.SetLeftRight(left, right);
+                        }
+
+                        initialized = true;
                     }
-                    else
-                    {
-                        int newLength = myVisibleSegment.MaxValue - myVisibleSegment.MinValue + 1;
-                        int oldLength = oldSegment.MaxValue - oldSegment.MinValue + 1;
-
-                        int left = (int) Math.Round((oldSegment.Left - oldSegment.MinValue + 1.0) * newLength / oldLength +
-                            myVisibleSegment.MinValue - 1);
-                        int right = (int) Math.Round((oldSegment.Right - oldSegment.MinValue + 1.0) * newLength / oldLength +
-                            myVisibleSegment.MinValue - 1);
-
-                        myVisibleSegment.SetLeftRight(left, right);
-                    }
-
-                    initialized = true;
                 }
             }
         }
