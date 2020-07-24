@@ -15,6 +15,7 @@ namespace CGProject1.Pages {
         private Label endDateTimeText;
         private Label durationText;
         private Label activeSegmentText;
+        private Label activeSegmentLengthText;
 
         public AboutSignalPage() {
             InitializeComponent();
@@ -26,6 +27,7 @@ namespace CGProject1.Pages {
             InfoLabelInit(ref endDateTimeText);
             InfoLabelInit(ref durationText);
             InfoLabelInit(ref activeSegmentText);
+            InfoLabelInit(ref activeSegmentLengthText);
         }
 
         public void Reset(Signal signal) {
@@ -37,6 +39,7 @@ namespace CGProject1.Pages {
                 endDateTimeText.Content = "No signal";
                 durationText.Content = "No signal";
                 activeSegmentText.Content = "No signal";
+                activeSegmentLengthText.Content = "No signal";
 
                 ChannelsTable.ItemsSource = null;
                 return;
@@ -45,8 +48,8 @@ namespace CGProject1.Pages {
             channelNumberText.Content = signal.channels.Count;
             samplesNumberText.Content = signal.SamplesCount;
             samplingFrqText.Content = $"{signal.SamplingFrq} Гц (шаг между отсчетами {signal.DeltaTime} сек)";
-            startDateTimeText.Content = signal.StartDateTime.ToString("dd-MM-yyyy HH\\:mm\\:ss\\.fff");
-            endDateTimeText.Content = signal.EndTime.ToString("dd-MM-yyyy HH\\:mm\\:ss\\.fff");
+            startDateTimeText.Content = signal.StartDateTime.ToString("dd-MM-yyyy HH\\:mm\\:ss\\.fff", CultureInfo.InvariantCulture);
+            endDateTimeText.Content = signal.EndTime.ToString("dd-MM-yyyy HH\\:mm\\:ss\\.fff", CultureInfo.InvariantCulture);
             TimeSpan duration = signal.Duration;
             durationText.Content = $"{duration.Days} суток {duration.Hours} часов {duration.Minutes} минут {(duration.Seconds + (double)duration.Milliseconds / 1000).ToString("0.000", CultureInfo.InvariantCulture)} секунд";
             ChannelsTable.ItemsSource = signal.channels;
@@ -55,7 +58,16 @@ namespace CGProject1.Pages {
         public void AddChannel(Channel channel) { }
 
         public void UpdateActiveSegment(int start, int end) {
-            activeSegmentText.Content = $"Активный сегмент: [{start}; {end}]";
+            int fragmentLen = end - start + 1;
+
+            activeSegmentText.Content = $"[{start}; {end}] ({fragmentLen} отсчетов)";
+
+            if (MainWindow.Instance.currentSignal == null) {
+                activeSegmentLengthText.Content = $"0 ({fragmentLen})";
+            } else {
+                TimeSpan fragmentDuration = TimeSpan.FromSeconds(MainWindow.Instance.currentSignal.DeltaTime * fragmentLen);
+                activeSegmentLengthText.Content = $"{fragmentDuration.Days} суток {fragmentDuration.Hours} часов {fragmentDuration.Minutes} минут {(fragmentDuration.Seconds + (double)fragmentDuration.Milliseconds / 1000).ToString("0.000", CultureInfo.InvariantCulture)} секунд";
+            }
         }
 
         private void InfoLabelInit(ref Label label) {

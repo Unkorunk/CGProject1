@@ -19,6 +19,7 @@
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
             <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -32,10 +33,11 @@
         <Label Grid.Column="0" Grid.Row="3" FontWeight="Bold">Частота дискретизации:</Label>
         <Label Grid.Column="0" Grid.Row="4" FontWeight="Bold">Дата и время начала записи:</Label>
         <Label Grid.Column="0" Grid.Row="5" FontWeight="Bold">Дата и время окончания записи:</Label>
-        <Label Grid.Column="0" Grid.Row="6" FontWeight="Bold">Длительность:</Label>
-        <!--<Label Grid.Column="0" Grid.Row="7" FontWeight="Bold">Активный фрагмент:</Label>-->
+        <Label Grid.Column="0" Grid.Row="6" FontWeight="Bold">Длительность сигнала:</Label>
+        <Label Grid.Column="0" Grid.Row="7" FontWeight="Bold">Активный фрагмент:</Label>
+        <Label Grid.Column="0" Grid.Row="8" FontWeight="Bold">Длительность фрагмента:</Label>
 
-        <Label Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="2" HorizontalAlignment="Center" FontWeight="Bold" FontSize="14">Информация о каналах</Label>
+        <Label Grid.Column="0" Grid.Row="9" Grid.ColumnSpan="2" HorizontalAlignment="Center" FontWeight="Bold" FontSize="14">Информация о каналах</Label>
 
         <DataGrid Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="9" x:Name="ChannelsTable" AutoGenerateColumns="False" IsReadOnly="True">
             <DataGrid.Columns>

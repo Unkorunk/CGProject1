@@ -283,11 +283,12 @@ namespace CGProject1
         {
             var openFileDialog = new OpenFileDialog()
             {
-                Filter = "txt files (*.txt)|*.txt|" +
+                Filter = "all files (*.txt;*.wav;*.wave;*.dat;*.mp3)|*.txt;*.wav;*.wave;*.dat;*.mp3|" +
+                         "txt files (*.txt)|*.txt|" +
                          "wave files (*.wav;*.wave)|*.wav;*.wave|" +
                          "dat files (*.dat)|*.dat|" +
-                         "mp3 files (*.mp3)|*.mp3|" +
-                         "all files (*.txt;*.wav;*.wave;*.dat;*.mp3)|*.txt;*.wav;*.wave;*.dat;*.mp3"
+                         "mp3 files (*.mp3)|*.mp3"
+                         
             };
 
             if (int.TryParse(Settings.Instance.Get("filterIndex"), out var filterIndex))
