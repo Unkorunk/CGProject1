@@ -4,16 +4,12 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using CGProject1.SignalProcessing;
 
 namespace CGProject1.Chart
 {
     public class ChartLine : FrameworkElement
     {
-        public delegate void OnMouseSelectDel(ChartLine sender, int newBegin, int newEnd);
-        public OnMouseSelectDel OnMouseSelect = (a, b, c) => { };
-        public delegate void OnChangeIntervalDel(ChartLine sender);
-        public OnChangeIntervalDel OnChangeInterval = (sender) => { };
-
         public enum ScalingMode
         {
             Global,
@@ -97,42 +93,12 @@ namespace CGProject1.Chart
 
         private int fakeBegin = 0;
         #endregion [SelectInterval] Variables
-
-        private int begin = 0;
-        private int end = 0;
+        
         public bool Selected { get; set; }
-        public int Begin
-        {
-            get => begin;
-            set
-            {
-                if (value <= end)
-                {
-                    begin = Math.Max(0, Math.Min(value, Channel.values.Length - 1));
 
-                    InvalidateVisual();
-                    OnChangeInterval(this);
-                }
-            }
-        }
-        public int End
-        {
-            get => end;
-            set
-            {
-                if (value >= begin)
-                {
-                    end = Math.Max(0, Math.Min(value, Channel.values.Length - 1));
-
-                    InvalidateVisual();
-                    OnChangeInterval(this);
-                }
-            }
-        }
+        public Segment Segment { get; }
 
         public bool GridDraw { get; set; }
-
-        public int Length { get => End - Begin + 1; }
 
         public bool ShowCurrentXY { get; set; }
 
@@ -145,9 +111,13 @@ namespace CGProject1.Chart
 
         private int curSelected = -1;
 
-        public ChartLine(in Channel channel)
+        public ChartLine(Channel channel)
         {
             Channel = channel;
+
+            Segment = new Segment(0, Math.Max(0, channel.SamplesCount - 1));
+            Segment.OnChange += (sender, change) => InvalidateVisual();
+            
             _groupedCharts = new List<ChartLine>() { this };
 
             DisplayHAxisInfo = true;
@@ -169,7 +139,7 @@ namespace CGProject1.Chart
         {
             base.OnRender(dc);
 
-            if (Length < 2) return;
+            if (Segment.Length < 2) return;
 
             var clipGeomery = new RectangleGeometry(new Rect(0, 0, ActualWidth, ActualHeight));
             dc.PushClip(clipGeomery);
@@ -240,12 +210,12 @@ namespace CGProject1.Chart
             #region [Optimization]
             const double startOptimizationWith = 1.0;
 
-            stepX = actSize.Width / (Length - 1);
+            stepX = actSize.Width / (Segment.Length - 1);
             optimization = stepX < startOptimizationWith;
             stepOptimization = 0;
             if (optimization)
             {
-                stepOptimization = (int)Math.Ceiling(startOptimizationWith * Length / actSize.Width);
+                stepOptimization = (int)Math.Ceiling(startOptimizationWith * Segment.Length / actSize.Width);
                 stepX *= stepOptimization;
                 stepX /= 2.0;
             }
@@ -269,7 +239,7 @@ namespace CGProject1.Chart
                         minChannelValue = Channel.MaxValue;
                         maxChannelValue = Channel.MinValue;
 
-                        for (int i = Begin; i <= End; i++)
+                        for (int i = Segment.Left; i <= Segment.Right; i++)
                         {
                             minChannelValue = Math.Min(minChannelValue, Channel.values[i]);
                             maxChannelValue = Math.Max(maxChannelValue, Channel.values[i]);
@@ -294,7 +264,7 @@ namespace CGProject1.Chart
                         minChannelValue = Channel.MaxValue;
                         maxChannelValue = Channel.MinValue;
 
-                        for (int i = Begin; i <= End; i++)
+                        for (int i = Segment.Left; i <= Segment.Right; i++)
                         {
                             minChannelValue = Math.Min(minChannelValue, Channel.values[i]);
                             maxChannelValue = Math.Max(maxChannelValue, Channel.values[i]);
@@ -302,7 +272,7 @@ namespace CGProject1.Chart
 
                         foreach (var chart in GroupedCharts)
                         {
-                            for (int i = chart.Begin; i <= chart.End; i++)
+                            for (int i = chart.Segment.Left; i <= chart.Segment.Right; i++)
                             {
                                 minChannelValue = Math.Min(minChannelValue, chart.Channel.values[i]);
                                 maxChannelValue = Math.Max(maxChannelValue, chart.Channel.values[i]);
@@ -317,7 +287,7 @@ namespace CGProject1.Chart
                         minChannelValue = 0;
                         maxChannelValue = Channel.MinValue;
 
-                        for (int i = Begin; i <= End; i++)
+                        for (int i = Segment.Left; i <= Segment.Right; i++)
                         {
                             maxChannelValue = Math.Max(maxChannelValue, Channel.values[i]);
                         }
@@ -349,11 +319,11 @@ namespace CGProject1.Chart
                     int idx;
                     if (optimization)
                     {
-                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + Begin);
+                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + Segment.Left);
                     }
                     else
                     {
-                        idx = (int)Math.Round(x / stepX + Begin);
+                        idx = (int)Math.Round(x / stepX + Segment.Left);
                     }
 
                     if (DisplayHAxisInfo)
@@ -464,7 +434,7 @@ namespace CGProject1.Chart
                 double centerX = 0.0;
                 if (optimization)
                 {
-                    centerX = interfaceOffset.Width + 2.0 * stepX * (curSelected - Begin) / stepOptimization;
+                    centerX = interfaceOffset.Width + 2.0 * stepX * (curSelected - Segment.Left) / stepOptimization;
 
                     dc.DrawLine(new Pen(Brushes.Green, 2.0),
                         new Point(centerX, interfaceOffset.Height),
@@ -473,7 +443,7 @@ namespace CGProject1.Chart
                 }
                 else
                 {
-                    centerX = interfaceOffset.Width + stepX * (curSelected - Begin);
+                    centerX = interfaceOffset.Width + stepX * (curSelected - Segment.Left);
 
                     dc.DrawLine(new Pen(Brushes.Green, 2.0),
                         new Point(centerX, interfaceOffset.Height),
@@ -537,7 +507,7 @@ namespace CGProject1.Chart
                 {
                     dc.DrawRectangle(brush,
                         new Pen(Brushes.Transparent, 2.0),
-                        new Rect(interfaceOffset.Width + 2.0 * stepX * (selectIntervalBegin - Begin) / stepOptimization,
+                        new Rect(interfaceOffset.Width + 2.0 * stepX * (selectIntervalBegin - Segment.Left) / stepOptimization,
                                  interfaceOffset.Height,
                                  2.0 * stepX * (selectIntervalEnd - selectIntervalBegin) / stepOptimization,
                                  actSize.Height
@@ -548,7 +518,7 @@ namespace CGProject1.Chart
                 {
                     dc.DrawRectangle(brush,
                         new Pen(Brushes.Transparent, 2.0),
-                        new Rect(interfaceOffset.Width + stepX * (selectIntervalBegin - Begin),
+                        new Rect(interfaceOffset.Width + stepX * (selectIntervalBegin - Segment.Left),
                                  interfaceOffset.Height,
                                  (selectIntervalEnd - selectIntervalBegin) * stepX,
                                  actSize.Height)
@@ -568,7 +538,7 @@ namespace CGProject1.Chart
                 position.Y >= interfaceOffset.Height)
             {
                 int idx = GetIdx(position);
-                selectIntervalBegin = selectIntervalEnd = Math.Clamp(idx, Begin, End);
+                selectIntervalBegin = selectIntervalEnd = Math.Clamp(idx, Segment.Left, Segment.Right);
                 fakeBegin = selectIntervalBegin;
 
                 enableSelectInterval = true;
@@ -595,16 +565,14 @@ namespace CGProject1.Chart
                     selectIntervalEnd = fakeBegin;
                 }
 
-                selectIntervalBegin = Math.Clamp(selectIntervalBegin, Begin, End);
-                selectIntervalEnd = Math.Clamp(selectIntervalEnd, Begin, End);
+                selectIntervalBegin = Math.Clamp(selectIntervalBegin, Segment.Left, Segment.Right);
+                selectIntervalEnd = Math.Clamp(selectIntervalEnd, Segment.Left, Segment.Right);
 
                 enableSelectInterval = false;
 
                 if (selectIntervalEnd > selectIntervalBegin)
                 {
-                    Begin = selectIntervalBegin;
-                    End = selectIntervalEnd;
-                    OnMouseSelect(this, Begin, End);
+                    Segment.SetLeftRight(selectIntervalBegin, selectIntervalEnd);
                 }
 
                 InvalidateVisual();
@@ -639,8 +607,8 @@ namespace CGProject1.Chart
                         selectIntervalEnd = fakeBegin;
                     }
 
-                    selectIntervalBegin = Math.Clamp(selectIntervalBegin, Begin, End);
-                    selectIntervalEnd = Math.Clamp(selectIntervalEnd, Begin, End);
+                    selectIntervalBegin = Math.Clamp(selectIntervalBegin, Segment.Left, Segment.Right);
+                    selectIntervalEnd = Math.Clamp(selectIntervalEnd, Segment.Left, Segment.Right);
                 }
 
                 InvalidateVisual();
@@ -680,11 +648,11 @@ namespace CGProject1.Chart
             int idx;
             if (optimization)
             {
-                idx = (int)Math.Round(position.X * stepOptimization / (2.0 * stepX) + Begin);
+                idx = (int)Math.Round(position.X * stepOptimization / (2.0 * stepX) + Segment.Left);
             }
             else
             {
-                idx = (int)Math.Round(position.X / stepX + Begin);
+                idx = (int)Math.Round(position.X / stepX + Segment.Left);
             }
             return idx;
         }
@@ -693,7 +661,7 @@ namespace CGProject1.Chart
         {
             if (step < 3)
             {
-                for (int i = Begin; i <= End; i++)
+                for (int i = Segment.Left; i <= Segment.Right; i++)
                 {
                     yield return Channel.values[i];
                 }
@@ -702,15 +670,15 @@ namespace CGProject1.Chart
 
             double prevMaxValue = double.NaN;
 
-            int iterations = (Length + step - 1) / step;
+            int iterations = (Segment.Length + step - 1) / step;
             for (int i = 0; i < iterations; i++)
             {
                 double minValue = double.MaxValue;
                 double maxValue = double.MinValue;
                 for (int j = 0; j < step; j++)
                 {
-                    int idx = Begin + i * step + j;
-                    if (idx > End) break;
+                    int idx = Segment.Left + i * step + j;
+                    if (idx > Segment.Right) break;
 
                     minValue = Math.Min(minValue, Channel.values[idx]);
                     maxValue = Math.Max(maxValue, Channel.values[idx]);

@@ -575,8 +575,8 @@ namespace CGProject1.Chart
                     if (token.IsCancellationRequested) break;
                     // step 5.6
                     var analyzer = new Analyzer(x, channel.SamplingFrq);
-                    analyzer.SetupChannel(0, x.Length, true, true);
-                    Channel amps = analyzer.AmplitudeSpectre();
+                    analyzer.SetupChannel(0, x.Length);
+                    Channel amps = analyzer.AmplitudeSpectralDensity();
 
                     int L1 = -(l - 1) / 2, L2 = l / 2;
                     for (int k = 0; k < samplesPerSection && !token.IsCancellationRequested; k++)

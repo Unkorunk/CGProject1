@@ -4,6 +4,7 @@ using System.Windows.Controls;
 
 using CGProject1.Chart;
 using CGProject1.Pages;
+using CGProject1.SignalProcessing;
 
 namespace CGProject1 {
     public partial class ChannelsPage : Page, IChannelComponent {
@@ -30,33 +31,30 @@ namespace CGProject1 {
             var item1 = new MenuItem();
             item1.Header = "Осциллограмма";
             item1.Click += (object sender, RoutedEventArgs args) => {
-                MainWindow.instance.AddOscillogram(channel);
+                MainWindow.Instance.AddOscillogram(channel);
             };
             chart.ContextMenu.Items.Add(item1);
 
             var item2 = new MenuItem();
             item2.Header = "Статистика";
             item2.Click += (object sender, RoutedEventArgs args) => {
-                MainWindow.instance.AddStatistics(channel);
+                MainWindow.Instance.AddStatistics(channel);
             };
             chart.ContextMenu.Items.Add(item2);
 
             var item3 = new MenuItem();
             item3.Header = "Анализ";
             item3.Click += (object sender, RoutedEventArgs args) => {
-                MainWindow.instance.AddAnalyze(channel);
+                MainWindow.Instance.AddAnalyze(channel);
             };
             chart.ContextMenu.Items.Add(item3);
 
             var item4 = new MenuItem();
             item4.Header = "Спектрограмма";
             item4.Click += (object sender, RoutedEventArgs args) => {
-                MainWindow.instance.AddSpectrogram(channel);
+                MainWindow.Instance.AddSpectrogram(channel);
             };
             chart.ContextMenu.Items.Add(item4);
-
-            chart.Begin = 0;
-            chart.End = channel.SamplesCount;
 
             ChannelsPanel.Children.Add(chart);
         }

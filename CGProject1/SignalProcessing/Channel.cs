@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Text;
 
-namespace CGProject1 {
-    public class Channel : INotifyPropertyChanged {
+namespace CGProject1.SignalProcessing {
+    public class Channel {
         public Channel(int samplesNum) {
             values = new double[samplesNum];
         }
@@ -13,9 +10,7 @@ namespace CGProject1 {
         public string Name { get; set; }
         public string Source { get; set; }
 
-        public double[] values;
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public readonly double[] values;
 
         public double MaxValue { get => values.Max(); }
         public double MinValue { get => values.Min(); }

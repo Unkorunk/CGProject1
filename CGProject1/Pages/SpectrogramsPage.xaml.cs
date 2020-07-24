@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using CGProject1.Chart;
+using CGProject1.SignalProcessing;
 
 
 namespace CGProject1.Pages {
@@ -108,8 +109,7 @@ namespace CGProject1.Pages {
             }
 
             foreach (var chart in charts) {
-                chart.Begin = begin;
-                chart.End = end;
+                chart.Segment.SetLeftRight(begin, end);
             }
         }
 
@@ -148,11 +148,10 @@ namespace CGProject1.Pages {
             cd1.Width = new GridLength(sp.RightOffset);
             bottomGrid.ColumnDefinitions.Add(cd1);
 
-            var chart = new ChartLine(in channel);
+            var chart = new ChartLine(channel);
             chart.Height = 45;
             chart.Margin = new Thickness(sp.LeftOffset, 2, 2, 2);
-            chart.Begin = this.begin;
-            chart.End = this.end;
+            chart.Segment.SetLeftRight(this.begin, this.end);
             chart.DisplayTitle = false;
             chart.GridDraw = true;
             chart.DisplayVAxisInfo = false;

@@ -29,9 +29,9 @@ namespace FileFormats
             float timecad = BitConverter.ToSingle(data, offset);
             offset += 4;
 
-            string begtime = windows1251.GetString(data, offset, 30);
+            string begtime = windows1251.GetString(data, offset, 19);
             offset += 30;
-            begtime = begtime.TrimEnd('\0');
+            //begtime = begtime.TrimEnd('\0');
 
             // unused
             offset += 30;
@@ -68,13 +68,54 @@ namespace FileFormats
 
             // TODO: specify format description
 
-            var rawChannelNames = windows1251.GetString(data, offset, data.Length - offset).Split(';');
-            if (rawChannelNames.Length == n_chan)
-            {
-                fileInfo.channelNames = rawChannelNames[0..n_chan];
-            }
-            else
-            {
+            // Footer processing
+            if (offset < data.Length - 1) {
+                int extdMark = (int)BitConverter.ToSingle(data, offset);
+                offset += 4;
+
+                //if (extdMark == 64747865) {
+                int milliseconds = (int)BitConverter.ToSingle(data, offset);
+                offset += 4;
+                fileInfo.dateTime = fileInfo.dateTime.AddMilliseconds(milliseconds);
+
+                int chanNameLength = (int)BitConverter.ToSingle(data, offset);
+                offset += 4;
+
+                // useless (chanNameOffset == sizeof(footer))
+                offset += 4;
+
+                int unitNameLength = (int)BitConverter.ToSingle(data, offset);
+                offset += 4;
+
+                // useless (unitNameOffset == sizeof(footer) + chanNameLength)
+                offset += 4;
+
+                if (chanNameLength == 0) {
+                    var rawChannelNames = windows1251.GetString(data, offset, data.Length - offset).Split(';');
+                    if (rawChannelNames.Length >= n_chan) {
+                        fileInfo.channelNames = rawChannelNames[0..n_chan];
+                    } else {
+                        fileInfo.channelNames = new string[n_chan];
+                    }
+                } else {
+                    var rawChannelNames = windows1251.GetString(data, offset, chanNameLength).Split(';');
+                    offset += chanNameLength;
+
+                    if (rawChannelNames.Length == n_chan) {
+                        fileInfo.channelNames = rawChannelNames[0..n_chan];
+                    } else {
+                        fileInfo.channelNames = new string[n_chan];
+                    }
+
+                    string unitName = windows1251.GetString(data, offset, unitNameLength);
+                }
+
+                    
+                //} else {
+                //    fileInfo.channelNames = new string[n_chan];
+                //}
+
+            } else {
                 fileInfo.channelNames = new string[n_chan];
             }
 
