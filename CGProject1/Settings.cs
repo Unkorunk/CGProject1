@@ -1,40 +1,50 @@
-﻿using System.IO;
+﻿using System;
 using System.Linq;
-using System.Text;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Configuration;
+using System.Globalization;
 
 namespace CGProject1
 {
     public class Settings
     {
-        private const string Filename = "settings.ini";
+        private static readonly Configuration Configuration =
+            ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
         private readonly Dictionary<string, string> values = new Dictionary<string, string>();
 
-        public static Settings Instance { get; }
+        private static readonly Dictionary<string, Settings> Instances = new Dictionary<string, Settings>();
 
-        private Settings()
+        public string Section { get; }
+
+        public static Settings GetInstance(string section)
         {
-            if (!File.Exists(Filename)) return;
-            var lines = File.ReadAllLines(Filename);
+            if (!ValidateKey(section)) return null;
+            if (!Instances.ContainsKey(section)) Instances[section] = new Settings(section);
+            return Instances[section];
+        }
 
-            foreach (var line in lines)
+        private Settings(string section)
+        {
+            Section = section;
+
+            if (!Configuration.AppSettings.Settings.AllKeys.Contains(section)) return;
+            if (Configuration.AppSettings.Settings[section].Value == string.Empty) return;
+
+            var items = Configuration.AppSettings.Settings[section].Value
+                .Split(";")
+                .Select(item => item.Split("="));
+
+            foreach (var item in items)
             {
-                var parts = line.Split("=");
-
-                if (parts.Length != 2 || !ValidateKey(parts[0]) || string.IsNullOrEmpty(parts[1]))
-                {
-                    values.Clear();
-                    return;
-                }
-
-                values.Add(parts[0], parts[1]);
+                if (item.Length != 2) throw new Exception();
+                values.Add(item[0], item[1]);
             }
         }
 
-        static Settings()
-        {
-            Instance = new Settings();
-        }
+        public void Set(string key, float value) => Set(key, value.ToString(CultureInfo.InvariantCulture));
+        public void Set(string key, double value) => Set(key, value.ToString(CultureInfo.InvariantCulture));
 
         public void Set<T>(string key, T value)
         {
@@ -59,22 +69,62 @@ namespace CGProject1
                    !char.IsDigit(key[0]);
         }
 
-        public string Get(string key)
+        public float GetOrDefault(string key, float defaultValue)
         {
-            if (!ValidateKey(key)) return null;
-            return values.TryGetValue(key, out var value) ? value : null;
+            if (!ValidateKey(key)) return defaultValue;
+            var item = values.TryGetValue(key, out var str) ? str : null;
+            if (item == null) return defaultValue;
+
+            return float.TryParse(item, NumberStyles.AllowThousands | NumberStyles.Float, CultureInfo.InvariantCulture,
+                out var value)
+                ? value
+                : defaultValue;
         }
 
-        public void Save()
+        public double GetOrDefault(string key, double defaultValue)
         {
-            var stringBuilder = new StringBuilder();
+            if (!ValidateKey(key)) return defaultValue;
+            var item = values.TryGetValue(key, out var str) ? str : null;
+            if (item == null) return defaultValue;
 
-            foreach (var (key, value) in values)
+            return double.TryParse(item, NumberStyles.AllowThousands | NumberStyles.Float, CultureInfo.InvariantCulture,
+                out var value)
+                ? value
+                : defaultValue;
+        }
+
+        public T GetOrDefault<T>(string key, T defaultValue)
+        {
+            if (!ValidateKey(key)) return defaultValue;
+            var item = values.TryGetValue(key, out var value) ? value : null;
+            if (item == null) return defaultValue;
+
+            var converter = TypeDescriptor.GetConverter(typeof(T));
+            if (converter == null) return defaultValue;
+
+            return (T) converter.ConvertFromString(item);
+        }
+
+        public static void Save()
+        {
+            foreach (var (section, instance) in Instances)
             {
-                stringBuilder.AppendLine($"{key}={value}");
+                var value = string.Join(";", instance.values.Select(item => $"{item.Key}={item.Value}"));
+
+                var item = Configuration.AppSettings.Settings[section];
+
+                if (item != null)
+                {
+                    item.Value = value;
+                }
+                else
+                {
+                    Configuration.AppSettings.Settings.Add(section, value);
+                }
             }
 
-            File.WriteAllText(Filename, stringBuilder.ToString());
+            Configuration.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection(Configuration.AppSettings.SectionInformation.Name);
         }
     }
 }

@@ -16,6 +16,7 @@ namespace CGProject1
 {
     public partial class MainWindow : Window
     {
+        private static readonly Settings Settings = Settings.GetInstance(nameof(MainWindow));
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
         
         public static MainWindow Instance { get; private set; }
@@ -64,7 +65,7 @@ namespace CGProject1
                 Serializer.SerializeModels(Modelling.defaultPath,
                     new List<ChannelConstructor>[]
                         {Modelling.discreteModels, Modelling.continiousModels, Modelling.randomModels});
-                Settings.Instance.Save();
+                Settings.Save();
             };
 
             statisticsPage = new StatisticsPage();
@@ -268,10 +269,7 @@ namespace CGProject1
 
             this.currentSignal.channels.Add(channel);
 
-            if (modelingWindow != null)
-            {
-                modelingWindow.Close();
-            }
+            modelingWindow?.Close();
 
             if (isSavingWindowShowing)
             {
@@ -293,10 +291,7 @@ namespace CGProject1
                          
             };
 
-            if (int.TryParse(Settings.Instance.Get("filterIndex"), out var filterIndex))
-            {
-                openFileDialog.FilterIndex = filterIndex;
-            }
+            openFileDialog.FilterIndex = Settings.GetOrDefault("filterIndex", openFileDialog.FilterIndex);
 
             if (openFileDialog.ShowDialog() == true)
             {
@@ -349,7 +344,7 @@ namespace CGProject1
                     Logger.Info($"File {openFileDialog.FileName} has incorrect format");
                 }
                 
-                Settings.Instance.Set("filterIndex", openFileDialog.FilterIndex);
+                Settings.Set("filterIndex", openFileDialog.FilterIndex);
             }
         }
 

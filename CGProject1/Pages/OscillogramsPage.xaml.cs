@@ -5,11 +5,14 @@ using CGProject1.Chart;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using CGProject1.SignalProcessing;
+using Xceed.Wpf.Toolkit;
 
 namespace CGProject1.Pages
 {
     public partial class OscillogramsPage : IChannelComponent, IDisposable
     {
+        private static readonly Settings Settings = Settings.GetInstance(nameof(OscillogramsPage));
+
         private readonly List<ChartLine> charts = new List<ChartLine>();
 
         private Signal mySignal;
@@ -18,6 +21,8 @@ namespace CGProject1.Pages
 
         private readonly Segment mySegment = new Segment();
         private readonly SegmentControl mySegmentControl;
+        
+        private bool settingsLoaded;
 
         public OscillogramsPage()
         {
@@ -57,7 +62,18 @@ namespace CGProject1.Pages
                 ScalingChooser.Items.Add(menuItem);
             }
 
+            LoadSettings();
+
             if (CountPerPage.Value != null) RecalculateHeight((int) CountPerPage.Value);
+        }
+        
+        private void LoadSettings()
+        {
+            CountPerPage.Minimum = Settings.GetOrDefault("countPerPageMinimum", CountPerPage.Minimum);
+            CountPerPage.Maximum = Settings.GetOrDefault("countPerPageMaximum", CountPerPage.Maximum);
+            CountPerPage.Value = Settings.GetOrDefault("countPerPageValue", CountPerPage.Value);
+
+            settingsLoaded = true;
         }
 
         private void SegmentSelector_Segment_OnChange(Segment sender, Segment.SegmentChange segmentChange)
@@ -273,6 +289,13 @@ namespace CGProject1.Pages
 
         private void CountPerPage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+            if (settingsLoaded && sender is IntegerUpDown countPerPage)
+            {
+                Settings.Set("countPerPageMinimum", countPerPage.Minimum);
+                Settings.Set("countPerPageValue", e.NewValue);
+                Settings.Set("countPerPageMaximum", countPerPage.Maximum);
+            }
+            
             RecalculateHeight((int) e.NewValue);
         }
 

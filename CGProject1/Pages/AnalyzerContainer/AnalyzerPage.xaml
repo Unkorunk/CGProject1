@@ -21,9 +21,9 @@
         </Grid.ColumnDefinitions>
 
         <Menu Grid.Row="0" Grid.ColumnSpan="2">
-            <ComboBox SelectedIndex="0" Name="ComboBoxMode" SelectionChanged="ComboBoxMode_SelectionChanged"/>
+            <ComboBox SelectedIndex="0" Name="ModeComboBox" SelectionChanged="ModeComboBox_SelectionChanged"/>
 
-            <ComboBox x:Name="ZeroModeSelector" SelectedIndex="2" SelectionChanged="ZeroModeSelector_OnSelectionChanged">
+            <ComboBox x:Name="ZeroModeComboBox" SelectedIndex="2" SelectionChanged="ZeroModeComboBox_OnSelectionChanged">
                 <ComboBoxItem Content="X(0) = X(0)"/>
                 <ComboBoxItem Content="X(0) = 0"/>
                 <ComboBoxItem Content="X(0) = |X(1)|"/>

@@ -15,6 +15,8 @@ namespace CGProject1.Pages
 {
     public partial class SpectrogramsPage : IChannelComponent
     {
+        private static readonly Settings Settings = Settings.GetInstance(nameof(SpectrogramsPage));
+        
         private static readonly List<byte[][]> Palettes = new List<byte[][]>();
 
         private byte[][] curPalette = Palettes[1];
@@ -36,32 +38,8 @@ namespace CGProject1.Pages
             end = 0;
 
             InitializeComponent();
-
-            if (int.TryParse(Settings.Instance.Get("paletteSelectedIndex"), out var paletteSelectedIndex))
-                PaletteComboBox.SelectedIndex = paletteSelectedIndex;
-
-            if (double.TryParse(Settings.Instance.Get("coeffMaximum"), out var coeffMaximum))
-                CoeffSlider.Maximum = coeffMaximum;
-            if (double.TryParse(Settings.Instance.Get("coeffValue"), out var coeffValue))
-                CoeffSlider.Value = coeffValue;
-            if (double.TryParse(Settings.Instance.Get("coeffMinimum"), out var coeffMinimum))
-                CoeffSlider.Minimum = coeffMinimum;
-
-            if (int.TryParse(Settings.Instance.Get("countPerPageMaximum"), out var countPerPageMaximum))
-                CountPerPage.Maximum = countPerPageMaximum;
-            if (int.TryParse(Settings.Instance.Get("countPerPageValue"), out var countPerPageValue))
-                CountPerPage.Value = countPerPageValue;
-            if (int.TryParse(Settings.Instance.Get("countPerPageMinimum"), out var countPerPageMinimum))
-                CountPerPage.Minimum = countPerPageMinimum;
-
-            if (double.TryParse(Settings.Instance.Get("brightnessMaximum"), out var brightnessMaximum))
-                BrightnessSlider.Maximum = brightnessMaximum;
-            if (double.TryParse(Settings.Instance.Get("brightnessValue"), out var brightnessValue))
-                BrightnessSlider.Value = brightnessValue;
-            if (double.TryParse(Settings.Instance.Get("brightnessMinimum"), out var brightnessMinimum))
-                BrightnessSlider.Minimum = brightnessMinimum;
-
-            settingsLoaded = true;
+            
+            LoadSettings();
 
             RecalculateHeight(1);
         }
@@ -87,6 +65,25 @@ namespace CGProject1.Pages
             for (var i = 0; i < 128; i++) blueRedYellow[i] = new byte[] {(byte) (i * 2), 0, (byte) (255 - i * 2)};
             for (var i = 128; i < 256; i++) blueRedYellow[i] = new byte[] {255, (byte) ((i - 128) * 2), 0};
             Palettes.Add(blueRedYellow);
+        }
+        
+        private void LoadSettings()
+        {
+            PaletteComboBox.SelectedIndex = Settings.GetOrDefault("paletteSelectedIndex", PaletteComboBox.SelectedIndex);
+            
+            CoeffSlider.Minimum = Settings.GetOrDefault("coeffMinimum", CoeffSlider.Minimum);
+            CoeffSlider.Maximum = Settings.GetOrDefault("coeffMaximum", CoeffSlider.Maximum);
+            CoeffSlider.Value = Settings.GetOrDefault("coeffValue", CoeffSlider.Value);
+            
+            CountPerPage.Minimum = Settings.GetOrDefault("countPerPageMinimum", CountPerPage.Minimum);
+            CountPerPage.Maximum = Settings.GetOrDefault("countPerPageMaximum", CountPerPage.Maximum);
+            CountPerPage.Value = Settings.GetOrDefault("countPerPageValue", CountPerPage.Value);
+            
+            BrightnessSlider.Minimum = Settings.GetOrDefault("brightnessMinimum", BrightnessSlider.Minimum);
+            BrightnessSlider.Maximum = Settings.GetOrDefault("brightnessMaximum", BrightnessSlider.Maximum);
+            BrightnessSlider.Value = Settings.GetOrDefault("brightnessValue", BrightnessSlider.Value);
+
+            settingsLoaded = true;
         }
 
         public void Reset(Signal signal)
@@ -233,7 +230,7 @@ namespace CGProject1.Pages
 
             if (settingsLoaded)
             {
-                Settings.Instance.Set("paletteSelectedIndex", PaletteComboBox.SelectedIndex);
+                Settings.Set("paletteSelectedIndex", PaletteComboBox.SelectedIndex);
             }
 
             curPalette = Palettes[PaletteComboBox.SelectedIndex];
@@ -271,9 +268,9 @@ namespace CGProject1.Pages
         {
             if (settingsLoaded && sender is Slider coeffSlider)
             {
-                Settings.Instance.Set("coeffMinimum", coeffSlider.Minimum);
-                Settings.Instance.Set("coeffValue", e.NewValue);
-                Settings.Instance.Set("coeffMaximum", coeffSlider.Maximum);
+                Settings.Set("coeffMinimum", coeffSlider.Minimum);
+                Settings.Set("coeffValue", e.NewValue);
+                Settings.Set("coeffMaximum", coeffSlider.Maximum);
             }
 
             CoeffSelector.Text = e.NewValue.ToString(CultureInfo.InvariantCulture);
@@ -304,9 +301,9 @@ namespace CGProject1.Pages
         {
             if (settingsLoaded && sender is IntegerUpDown countPerPage)
             {
-                Settings.Instance.Set("countPerPageMinimum", countPerPage.Minimum);
-                Settings.Instance.Set("countPerPageValue", e.NewValue);
-                Settings.Instance.Set("countPerPageMaximum", countPerPage.Maximum);
+                Settings.Set("countPerPageMinimum", countPerPage.Minimum);
+                Settings.Set("countPerPageValue", e.NewValue);
+                Settings.Set("countPerPageMaximum", countPerPage.Maximum);
             }
 
             RecalculateHeight((int) e.NewValue);
@@ -324,9 +321,9 @@ namespace CGProject1.Pages
         {
             if (settingsLoaded && sender is Slider brightnessSlider)
             {
-                Settings.Instance.Set("brightnessMinimum", brightnessSlider.Minimum);
-                Settings.Instance.Set("brightnessValue", e.NewValue);
-                Settings.Instance.Set("brightnessMaximum", brightnessSlider.Maximum);
+                Settings.Set("brightnessMinimum", brightnessSlider.Minimum);
+                Settings.Set("brightnessValue", e.NewValue);
+                Settings.Set("brightnessMaximum", brightnessSlider.Maximum);
             }
 
             BrightnessField.Text = e.NewValue.ToString(CultureInfo.InvariantCulture);
