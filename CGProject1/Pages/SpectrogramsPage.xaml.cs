@@ -171,8 +171,8 @@ namespace CGProject1.Pages {
                 spectrograms.Remove(sp);
                 charts.Remove(chart);
                 Spectrograms.Children.Remove(border);
-
             };
+
             sp.ContextMenu.Items.Add(item);
 
             bottomGrid.Children.Add(chart);
@@ -181,7 +181,6 @@ namespace CGProject1.Pages {
 
             Spectrograms.Children.Add(border);
         }
-
 
         private void UpdateSpectrograms(object sender, RoutedEventArgs e) {
             if (!double.TryParse(BrightnessField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newBrightness)
@@ -196,6 +195,8 @@ namespace CGProject1.Pages {
             if (newCoeff > 10) {
                 newCoeff = 10;
             }
+
+            BrightnessSlider.Value = newBrightness;
 
             BrightnessField.Text = newBrightness.ToString(CultureInfo.InvariantCulture);
             CoeffSelector.Text = newCoeff.ToString(CultureInfo.InvariantCulture);
@@ -267,6 +268,15 @@ namespace CGProject1.Pages {
 
         private void Page_SizeChanged(object sender, SizeChangedEventArgs e) {
             RecalculateHeight((int)CountPerPage.Value);
+        }
+
+        private void BrightnessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            this.boostCoeff = e.NewValue;
+            BrightnessField.Text = this.boostCoeff.ToString(CultureInfo.InvariantCulture);
+
+            foreach (var sp in spectrograms) {
+                sp.BoostCoeff = this.boostCoeff;
+            }
         }
     }
 }
