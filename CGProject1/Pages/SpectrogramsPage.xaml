@@ -23,6 +23,7 @@
 
                     <Label Content="Яркость:"/>
                     <TextBox x:Name="BrightnessField" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center">1.0</TextBox>
+                    <Slider x:Name="BrightnessSlider" Margin="5, 1, 5, 1" Width="100" Minimum="0" Maximum="10" Value="1" ValueChanged="BrightnessSlider_ValueChanged" VerticalAlignment="Center"></Slider>
 
                     <Label Content="Нахлёст:"/>
                     <TextBox x:Name="CoeffSelector" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center">1.0</TextBox>
