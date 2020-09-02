@@ -10,6 +10,8 @@ namespace CGProject1
     {
         private Func<int, string> myRightFilter, myLeftFilter;
         private readonly Segment mySegment;
+        private int mySmallStep = 10;
+        private int myBigStep = 40;
         
         public SegmentControl(Segment segment)
         {
@@ -19,11 +21,16 @@ namespace CGProject1
             mySegment = segment;
             mySegment.OnChange += MySegment_OnChange;
             MySegmentSelector.Segment.SetSegment(mySegment);
+
+            mySmallStep = (segment.Right - segment.Left) / 20;
+            myBigStep = (segment.Right - segment.Left) / 5;
         }
 
         private void MySegment_OnChange(Segment sender, Segment.SegmentChange changes)
         {
             MySegmentSelector.Segment.SetSegment(sender);
+            mySmallStep = (sender.Right - sender.Left) / 20;
+            myBigStep = (sender.Right - sender.Left) / 5;
         }
 
         private void OnChange(Segment sender, Segment.SegmentChange changes)
@@ -97,7 +104,23 @@ namespace CGProject1
             if (MySegmentSelector.Segment.Left != begin)
                 MySegmentSelector.Segment.Left = begin;
         }
-        
+
+        private void RightArrow_Click(object sender, RoutedEventArgs e) {
+            MySegmentSelector.Segment.Shift(mySmallStep);
+        }
+
+        private void LeftArrow_Click(object sender, RoutedEventArgs e) {
+            MySegmentSelector.Segment.Shift(-mySmallStep);
+        }
+
+        private void DoubleLeftArrow_Click(object sender, RoutedEventArgs e) {
+            MySegmentSelector.Segment.Shift(-myBigStep);
+        }
+
+        private void DoubleRightArrow_Click(object sender, RoutedEventArgs e) {
+            MySegmentSelector.Segment.Shift(myBigStep);
+        }
+
         #region Validators
         private void PreviewTextInputHandler(object sender, TextCompositionEventArgs e)
         {
