@@ -9,6 +9,8 @@ using Microsoft.Win32;
 
 namespace CGProject1 {
     public partial class SaveWindow : Window {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        
         public SaveWindow(Signal signal, int begin, int end) {
             InitializeComponent();
 
@@ -81,7 +83,7 @@ namespace CGProject1 {
                 }
             }
 
-            Logger.Instance.Log($"Tried to save signal {signalToSave}");
+            Logger.Info($"Tried to save signal {signalToSave}");
 
             if (signalToSave.channels.Count == 0) {
                 MessageBox.Show("Не выбрано ни одного канала", "Error", MessageBoxButton.OK, MessageBoxImage.Error);

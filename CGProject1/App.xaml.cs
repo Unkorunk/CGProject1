@@ -5,20 +5,21 @@ namespace CGProject1
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application {
+    public partial class App : Application
+    {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e) {
-            MessageBox.Show($"Error! \n\t {e.Exception.Message} \n\t Details in {Logger.LogFilename} from {Logger.Instance.Path}");
-            Logger.Instance.Log($"Error occured {e.Exception.Message} \n\t {e.Exception.StackTrace}", Logger.LogType.Error);
+            MessageBox.Show($"Error! \n\t {e.Exception.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            Logger.Error(e.Exception);
+            
             e.Handled = true;
             Current.Shutdown();
         }
 
-        private void Application_Startup(object sender, StartupEventArgs e) {
-            Logger.StartLogger();
-        }
-
-        private void Application_Exit(object sender, ExitEventArgs e) {
-            Logger.Instance.Dispose();
+        private void App_OnExit(object sender, ExitEventArgs e)
+        {
+            NLog.LogManager.Shutdown();
         }
     }
 }

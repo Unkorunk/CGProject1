@@ -8,10 +8,14 @@
 
   <ItemGroup>
     <None Remove="graph.ico" />
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.0.1" />
+    <PackageReference Include="NLog" Version="4.7.4" />
   </ItemGroup>
 
   <ItemGroup>
