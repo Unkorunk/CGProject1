@@ -8,118 +8,124 @@ using System.Windows.Input;
 using System.Windows.Media;
 using CGProject1.Chart;
 using CGProject1.SignalProcessing;
+using Xceed.Wpf.Toolkit;
+using MessageBox = System.Windows.MessageBox;
 
+namespace CGProject1.Pages
+{
+    public partial class SpectrogramsPage : IChannelComponent
+    {
+        private static readonly List<byte[][]> Palettes = new List<byte[][]>();
 
-namespace CGProject1.Pages {
-    public partial class SpectrogramsPage : Page, IChannelComponent {
-        private static List<byte[][]> palettes;
-
-        private byte[][] curPalette = palettes[1];
+        private byte[][] curPalette = Palettes[1];
 
         private double spectrogramHeight = 150;
-        private double coeffN = 1.0;
-        private double boostCoeff = 1.0;
 
-        private HashSet<string> channelNames;
-        private List<Spectrogram> spectrograms;
-        private List<Channel> channels;
-        private List<ChartLine> charts;
-
+        private readonly HashSet<string> channelNames = new HashSet<string>();
+        private readonly List<Spectrogram> spectrograms = new List<Spectrogram>();
+        private readonly List<ChartLine> charts = new List<ChartLine>();
 
         private int begin;
         private int end;
 
-        public SpectrogramsPage() {
-            channelNames = new HashSet<string>();
-            spectrograms = new List<Spectrogram>();
-            channels = new List<Channel>();
-            charts = new List<ChartLine>();
+        private bool settingsLoaded;
 
+        public SpectrogramsPage()
+        {
             begin = 0;
             end = 0;
 
             InitializeComponent();
 
-            CountPerPage.Maximum = 6;
-            CountPerPage.Minimum = 1;
-            CountPerPage.Value = 1;
+            if (int.TryParse(Settings.Instance.Get("paletteSelectedIndex"), out var paletteSelectedIndex))
+                PaletteComboBox.SelectedIndex = paletteSelectedIndex;
+
+            if (double.TryParse(Settings.Instance.Get("coeffMaximum"), out var coeffMaximum))
+                CoeffSlider.Maximum = coeffMaximum;
+            if (double.TryParse(Settings.Instance.Get("coeffValue"), out var coeffValue))
+                CoeffSlider.Value = coeffValue;
+            if (double.TryParse(Settings.Instance.Get("coeffMinimum"), out var coeffMinimum))
+                CoeffSlider.Minimum = coeffMinimum;
+
+            if (int.TryParse(Settings.Instance.Get("countPerPageMaximum"), out var countPerPageMaximum))
+                CountPerPage.Maximum = countPerPageMaximum;
+            if (int.TryParse(Settings.Instance.Get("countPerPageValue"), out var countPerPageValue))
+                CountPerPage.Value = countPerPageValue;
+            if (int.TryParse(Settings.Instance.Get("countPerPageMinimum"), out var countPerPageMinimum))
+                CountPerPage.Minimum = countPerPageMinimum;
+
+            if (double.TryParse(Settings.Instance.Get("brightnessMaximum"), out var brightnessMaximum))
+                BrightnessSlider.Maximum = brightnessMaximum;
+            if (double.TryParse(Settings.Instance.Get("brightnessValue"), out var brightnessValue))
+                BrightnessSlider.Value = brightnessValue;
+            if (double.TryParse(Settings.Instance.Get("brightnessMinimum"), out var brightnessMinimum))
+                BrightnessSlider.Minimum = brightnessMinimum;
+
+            settingsLoaded = true;
 
             RecalculateHeight(1);
         }
 
-        static SpectrogramsPage() {
-            palettes = new List<byte[][]>();
-
+        static SpectrogramsPage()
+        {
             var greyPalette = new byte[256][];
-            for (int i = 0; i < 256; i++) {
-                greyPalette[i] = new byte[3];
-                for (int j = 0; j < 3; j++) {
-                    greyPalette[i][j] = (byte)i;
-                }
-            }
-
-            palettes.Add(greyPalette);
+            for (var i = 0; i < 256; i++) greyPalette[i] = new byte[] {(byte) i, (byte) i, (byte) i};
+            Palettes.Add(greyPalette);
 
             var hotPalette = new byte[256][];
-
-            for (int i = 0; i <= 85; i++) hotPalette[i] = new byte[3] { (byte)(i * 3), 0, 0 };
-            for (int i = 86; i <= 170; i++) hotPalette[i] = new byte[3] { 255, (byte)((i - 85) * 3), 0 };
-            for (int i = 171; i <= 255; i++) hotPalette[i] = new byte[3] { 255, 255, (byte)((i - 170) * 3) };
-            palettes.Add(hotPalette);
+            for (var i = 0; i <= 85; i++) hotPalette[i] = new byte[] {(byte) (i * 3), 0, 0};
+            for (var i = 86; i <= 170; i++) hotPalette[i] = new byte[] {255, (byte) ((i - 85) * 3), 0};
+            for (var i = 171; i <= 255; i++) hotPalette[i] = new byte[] {255, 255, (byte) ((i - 170) * 3)};
+            Palettes.Add(hotPalette);
 
             var icePalette = new byte[256][];
-
-            for (int i = 0; i < 128; i++) {
-                icePalette[i] = new byte[3] { 0, (byte)(i * 2), (byte)(i * 2) };
-            }
-            for (int i = 128; i < 256; i++) {
-                icePalette[i] = new byte[3] { (byte)((i - 128) * 2), 255, 255 };
-            }
-            palettes.Add(icePalette);
+            for (var i = 0; i < 128; i++) icePalette[i] = new byte[] {0, (byte) (i * 2), (byte) (i * 2)};
+            for (var i = 128; i < 256; i++) icePalette[i] = new byte[] {(byte) ((i - 128) * 2), 255, 255};
+            Palettes.Add(icePalette);
 
             var blueRedYellow = new byte[256][];
-            for (int i = 0; i < 128; i++) {
-                blueRedYellow[i] = new byte[3] { (byte)(i * 2), 0, (byte)(255 - i * 2) };
-            }
-            for (int i = 128; i < 256; i++) {
-                blueRedYellow[i] = new byte[3] { 255, (byte)((i - 128) * 2), 0 };
-            }
-            palettes.Add(blueRedYellow);
+            for (var i = 0; i < 128; i++) blueRedYellow[i] = new byte[] {(byte) (i * 2), 0, (byte) (255 - i * 2)};
+            for (var i = 128; i < 256; i++) blueRedYellow[i] = new byte[] {255, (byte) ((i - 128) * 2), 0};
+            Palettes.Add(blueRedYellow);
         }
 
-        public void Reset(Signal signal) {
+        public void Reset(Signal signal)
+        {
             channelNames.Clear();
             spectrograms.Clear();
-            channels.Clear();
             charts.Clear();
 
             Spectrograms.Children.Clear();
         }
 
-        public void UpdateActiveSegment(int begin, int end) {
+        public void UpdateActiveSegment(int begin, int end)
+        {
             this.begin = begin;
             this.end = end;
 
             BeginLabel.Content = $"Начало: {begin}";
             EndLabel.Content = $"Конец: {end}";
 
-            foreach (var sp in spectrograms) {
+            foreach (var sp in spectrograms)
+            {
                 sp.Begin = begin;
                 sp.End = end;
             }
 
-            foreach (var chart in charts) {
+            foreach (var chart in charts)
+            {
                 chart.Segment.SetLeftRight(begin, end);
             }
         }
 
-        public void AddChannel(Channel channel) {
-            if (channelNames.Contains(channel.Name)) {
+        public void AddChannel(Channel channel)
+        {
+            if (channelNames.Contains(channel.Name))
+            {
                 return;
             }
 
             channelNames.Add(channel.Name);
-            channels.Add(channel);
 
             var border = new Border();
             border.BorderThickness = new Thickness(1);
@@ -128,16 +134,18 @@ namespace CGProject1.Pages {
             var channelPanel = new StackPanel();
             border.Child = channelPanel;
 
-            var sp = new Spectrogram(channel);
-            sp.Begin = this.begin;
-            sp.End = this.end;
-            sp.Palette = this.curPalette;
-            sp.CoeffN = this.coeffN;
-            sp.BoostCoeff = this.boostCoeff;
-            sp.SpectrogramHeight = this.spectrogramHeight;
-            sp.ShowCurrentXY = true;
-            sp.ContextMenu = new ContextMenu();
-            
+            var sp = new Spectrogram(channel)
+            {
+                Begin = begin,
+                End = end,
+                Palette = curPalette,
+                CoeffN = CoeffSlider.Value,
+                BoostCoeff = BrightnessSlider.Value,
+                SpectrogramHeight = this.spectrogramHeight,
+                ShowCurrentXY = true,
+                ContextMenu = new ContextMenu()
+            };
+
             channelPanel.Children.Add(sp);
 
             spectrograms.Add(sp);
@@ -157,17 +165,18 @@ namespace CGProject1.Pages {
             chart.DisplayVAxisInfo = false;
             chart.DisplayHAxisInfo = true;
             chart.HAxisAlligment = ChartLine.HAxisAlligmentEnum.Bottom;
-            chart.MappingXAxis = (int idx, ChartLine chart) => {
-                var t = chart.Channel.StartDateTime + TimeSpan.FromSeconds(chart.Channel.DeltaTime * idx);
+            chart.MappingXAxis = (idx, chartLine) =>
+            {
+                var t = chartLine.Channel.StartDateTime + TimeSpan.FromSeconds(chartLine.Channel.DeltaTime * idx);
                 return t.ToString("dd-MM-yyyy \n HH\\:mm\\:ss");
             };
             charts.Add(chart);
 
             var item = new MenuItem();
             item.Header = "Закрыть канал";
-            item.Click += (object sender, RoutedEventArgs args) => {
+            item.Click += (sender, args) =>
+            {
                 channelNames.Remove(channel.Name);
-                channels.Remove(channel);
                 spectrograms.Remove(sp);
                 charts.Remove(chart);
                 Spectrograms.Children.Remove(border);
@@ -182,17 +191,24 @@ namespace CGProject1.Pages {
             Spectrograms.Children.Add(border);
         }
 
-        private void UpdateSpectrograms(object sender, RoutedEventArgs e) {
-            if (!double.TryParse(BrightnessField.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newBrightness)
-                    || !double.TryParse(CoeffSelector.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out double newCoeff)) {
+        private void UpdateSpectrograms(object sender, RoutedEventArgs e)
+        {
+            if (!double.TryParse(BrightnessField.Text, NumberStyles.Any, CultureInfo.InvariantCulture,
+                    out double newBrightness)
+                || !double.TryParse(CoeffSelector.Text, NumberStyles.Any, CultureInfo.InvariantCulture,
+                    out double newCoeff))
+            {
                 MessageBox.Show("Некорректные параметры", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            if (newCoeff < 1) {
+            if (newCoeff < 1)
+            {
                 newCoeff = 1;
             }
-            if (newCoeff > 10) {
+
+            if (newCoeff > 10)
+            {
                 newCoeff = 10;
             }
 
@@ -201,81 +217,123 @@ namespace CGProject1.Pages {
             BrightnessField.Text = newBrightness.ToString(CultureInfo.InvariantCulture);
             CoeffSelector.Text = newCoeff.ToString(CultureInfo.InvariantCulture);
 
-            this.boostCoeff = newBrightness;
-            this.coeffN = newCoeff;
-
             this.CoeffSlider.Value = newCoeff;
 
-            foreach (var sp in spectrograms) {
-                sp.BoostCoeff = boostCoeff;
-                sp.CoeffN = coeffN;
+            foreach (var sp in spectrograms)
+            {
+                sp.BoostCoeff = BrightnessSlider.Value;
+                sp.CoeffN = CoeffSlider.Value;
                 sp.SpectrogramHeight = spectrogramHeight;
             }
         }
 
-        private void ComboBoxMode_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            if (PaletteSelector.SelectedIndex >= 0 && PaletteSelector.SelectedIndex < palettes.Count) {
-                curPalette = palettes[PaletteSelector.SelectedIndex];
+        private void PaletteComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (PaletteComboBox.SelectedIndex < 0 || PaletteComboBox.SelectedIndex >= Palettes.Count) return;
+
+            if (settingsLoaded)
+            {
+                Settings.Instance.Set("paletteSelectedIndex", PaletteComboBox.SelectedIndex);
             }
 
-            foreach (var sp in spectrograms) {
+            curPalette = Palettes[PaletteComboBox.SelectedIndex];
+                
+            foreach (var sp in spectrograms)
+            {
                 sp.Palette = curPalette;
             }
         }
 
-        private void previewTextInput(object sender, TextCompositionEventArgs e) {
+        private void PreviewTextInputHandle(object sender, TextCompositionEventArgs e)
+        {
             e.Handled = !TextIsNumeric(e.Text);
         }
 
-        private void previewPasting(object sender, DataObjectPastingEventArgs e) {
-            if (e.DataObject.GetDataPresent(typeof(string))) {
-                string input = (string)e.DataObject.GetData(typeof(string));
+        private void PreviewPastingHandle(object sender, DataObjectPastingEventArgs e)
+        {
+            if (e.DataObject.GetDataPresent(typeof(string)))
+            {
+                string input = (string) e.DataObject.GetData(typeof(string));
                 if (!TextIsNumeric(input)) e.CancelCommand();
-            } else {
+            }
+            else
+            {
                 e.CancelCommand();
             }
         }
 
-        private bool TextIsNumeric(string input) {
+        private bool TextIsNumeric(string input)
+        {
             return input.All(c => char.IsDigit(c) || char.IsControl(c) || c == '.');
         }
 
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            this.coeffN = e.NewValue;
-            CoeffSelector.Text = this.coeffN.ToString(CultureInfo.InvariantCulture);
+        private void CoeffSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (settingsLoaded && sender is Slider coeffSlider)
+            {
+                Settings.Instance.Set("coeffMinimum", coeffSlider.Minimum);
+                Settings.Instance.Set("coeffValue", e.NewValue);
+                Settings.Instance.Set("coeffMaximum", coeffSlider.Maximum);
+            }
 
-            foreach (var sp in spectrograms) {
-                sp.CoeffN = coeffN;
+            CoeffSelector.Text = e.NewValue.ToString(CultureInfo.InvariantCulture);
+
+            foreach (var sp in spectrograms)
+            {
+                sp.CoeffN = e.NewValue;
             }
         }
 
-        private void RecalculateHeight(int count) {
-            if (this.ActualHeight <= 0) {
+        private void RecalculateHeight(int count)
+        {
+            if (this.ActualHeight <= 0)
+            {
                 return;
             }
 
             double newHeight = (this.ActualHeight) / count;
             this.spectrogramHeight = newHeight;
 
-            foreach (var spectrogram in spectrograms) {
+            foreach (var spectrogram in spectrograms)
+            {
                 spectrogram.SpectrogramHeight = this.spectrogramHeight;
             }
         }
 
-        private void CountPerPage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
-            RecalculateHeight((int)e.NewValue);
+        private void CountPerPage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (settingsLoaded && sender is IntegerUpDown countPerPage)
+            {
+                Settings.Instance.Set("countPerPageMinimum", countPerPage.Minimum);
+                Settings.Instance.Set("countPerPageValue", e.NewValue);
+                Settings.Instance.Set("countPerPageMaximum", countPerPage.Maximum);
+            }
+
+            RecalculateHeight((int) e.NewValue);
         }
 
-        private void Page_SizeChanged(object sender, SizeChangedEventArgs e) {
-            RecalculateHeight((int)CountPerPage.Value);
+        private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (CountPerPage.Value.HasValue)
+            {
+                RecalculateHeight((int) CountPerPage.Value);
+            }
         }
 
-        private void BrightnessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            this.boostCoeff = e.NewValue;
-            BrightnessField.Text = this.boostCoeff.ToString(CultureInfo.InvariantCulture);
+        private void BrightnessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (settingsLoaded && sender is Slider brightnessSlider)
+            {
+                Settings.Instance.Set("brightnessMinimum", brightnessSlider.Minimum);
+                Settings.Instance.Set("brightnessValue", e.NewValue);
+                Settings.Instance.Set("brightnessMaximum", brightnessSlider.Maximum);
+            }
 
-            foreach (var sp in spectrograms) {
-                sp.BoostCoeff = this.boostCoeff;
+            BrightnessField.Text = e.NewValue.ToString(CultureInfo.InvariantCulture);
+
+            foreach (var sp in spectrograms)
+            {
+                sp.BoostCoeff = e.NewValue;
             }
         }
     }

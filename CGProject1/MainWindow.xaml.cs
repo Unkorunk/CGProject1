@@ -16,6 +16,8 @@ namespace CGProject1
 {
     public partial class MainWindow : Window
     {
+        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        
         public static MainWindow Instance { get; private set; }
 
         private ModelingWindow modelingWindow;
@@ -166,7 +168,7 @@ namespace CGProject1
 
             if (this.currentSignal == null)
             {
-                Logger.Instance.Log("Signal was reset to null");
+                Logger.Info("Signal was reset to null");
                 return;
             }
 
@@ -177,13 +179,13 @@ namespace CGProject1
                 channelsPage.AddChannel(currentSignal.channels[i]);
             }
 
-            Logger.Instance.Log("Signal was reset successfully");
-            Logger.Instance.Log($"Current signal {newSignal}");
+            Logger.Info("Signal was reset successfully");
+            Logger.Info($"Current signal {newSignal}");
         }
 
         private void OpenPane(LayoutAnchorable pane)
         {
-            Logger.Instance.Log($"Layout {pane.Title} opened");
+            Logger.Info($"Layout {pane.Title} opened");
             pane.Show();
             pane.IsSelected = true;
         }
@@ -256,7 +258,7 @@ namespace CGProject1
                 this.modelingWindow.Topmost = true;
                 this.modelingWindow.Topmost = false;
             }
-            Logger.Instance.Log("Modeling window opened");
+            Logger.Info("Modeling window opened");
         }
 
         public void AddChannel(Channel channel)
@@ -335,7 +337,7 @@ namespace CGProject1
                         }
                     }
 
-                    Logger.Instance.Log($"File {openFileDialog.FileName} was opened");
+                    Logger.Info($"File {openFileDialog.FileName} was opened");
 
                     signal.UpdateChannelsInfo();
 
@@ -344,7 +346,7 @@ namespace CGProject1
                 else
                 {
                     MessageBox.Show("Incorrect format", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Logger.Instance.Log($"File {openFileDialog.FileName} has incorrect format");
+                    Logger.Info($"File {openFileDialog.FileName} has incorrect format");
                 }
                 
                 Settings.Instance.Set("filterIndex", openFileDialog.FilterIndex);
@@ -371,7 +373,7 @@ namespace CGProject1
                 savingWindow.Topmost = true;
                 savingWindow.Topmost = false;
             }
-            Logger.Instance.Log("Save window opened");
+            Logger.Info("Save window opened");
         }
     }
 }

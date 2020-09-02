@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
         Title="Моделирование" Height="450" Width="800">
     <Grid>
@@ -19,10 +18,10 @@
         </Grid.RowDefinitions>
 
         <Label>Модели</Label>
-        <Label Grid.Column="1" x:Name="ParamsHeader">Параметры</Label>
-        <Label Grid.Column="2">Предпросмотр</Label>
+        <Label Grid.Row="0" Grid.Column="1" x:Name="ParamsHeader">Параметры</Label>
+        <Label Grid.Row="0" Grid.Column="2">Предпросмотр</Label>
         
-        <ScrollViewer Grid.Row="1" Grid.RowSpan="2">
+        <ScrollViewer Grid.Row="1" Grid.RowSpan="2" Grid.Column="0">
             <StackPanel>
                 <Label>Дискретные модели:</Label>
                 <StackPanel  x:Name="DiscreteModelsPanel"></StackPanel>
