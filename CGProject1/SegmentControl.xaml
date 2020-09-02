@@ -9,9 +9,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="125"/>
-            <ColumnDefinition Width="30"/>
             <ColumnDefinition/>
-            <ColumnDefinition Width="30"/>
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0">
@@ -41,22 +39,28 @@
                         IsEnabled="False"/>
         </Grid>
 
-        <StackPanel VerticalAlignment="Center" Grid.Column="1">
-            <Button Height="60" Margin="5 5 5 5" Name="LeftArrow" Click="LeftArrow_Click">&lt;</Button>
-            <Button Height="60" Margin="5 5 5 5" Name="DoubleLeftArrow" Click="DoubleLeftArrow_Click">&lt;&lt;</Button>
-        </StackPanel>
+        <Grid Grid.Column="1" VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Name="LeftLabel"/>
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Name="RightLabel"/>
 
-        <StackPanel Grid.Column="2">
-            <Label Name="LeftLabel"/>
-            <Label Name="RightLabel"/>
-
-            <chart:SegmentSelector x:Name="MySegmentSelector" Height="20"/>
-        </StackPanel>
-        
-        <StackPanel Grid.Column="3" VerticalAlignment="Center">
-            <Button Grid.Column="3" Height="60" Margin="5 5 5 5" Name="RightArrow" Click="RightArrow_Click">&gt;</Button>
-            <Button Grid.Column="3" Height="60" Margin="5 5 5 5" Name="DoubleRightArrow" Click="DoubleRightArrow_Click">&gt;&gt;</Button>
-        </StackPanel>
-        
+            <Button Grid.Row="1" Grid.Column="0" Margin="5 5 2 5" Click="DoubleLeftArrow_Click">&lt;&lt;</Button>
+            <Button Grid.Row="1" Grid.Column="1" Margin="2 5 5 5" Click="LeftArrow_Click">&lt;</Button>
+            <chart:SegmentSelector Grid.Row="1" Grid.Column="2" x:Name="MySegmentSelector" Height="20"/>
+            <Button Grid.Row="1" Grid.Column="3" Margin="5 5 2 5" Click="RightArrow_Click">&gt;</Button>
+            <Button Grid.Row="1" Grid.Column="4" Margin="2 5 5 5" Click="DoubleRightArrow_Click">&gt;&gt;</Button>
+        </Grid>
     </Grid>
 </UserControl>
