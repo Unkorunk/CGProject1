@@ -43,7 +43,7 @@ namespace CGProject1 {
             chart.ContextMenu.Items.Add(item2);
 
             var item3 = new MenuItem();
-            item3.Header = "Анализ";
+            item3.Header = "Анализ Фурье";
             item3.Click += (object sender, RoutedEventArgs args) => {
                 MainWindow.Instance.AddAnalyze(channel);
             };

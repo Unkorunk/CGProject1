@@ -9,11 +9,14 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Collections.Generic;
 using CGProject1.SignalProcessing;
+using Xceed.Wpf.Toolkit;
 
 namespace CGProject1.Pages.AnalyzerContainer
 {
     public partial class AnalyzerPage : IChannelComponent, IDisposable
     {
+        private static readonly Settings Settings = Settings.GetInstance(nameof(AnalyzerPage)); 
+        
         private readonly Segment myActiveSegment = new Segment();
         private readonly Segment myVisibleSegment = new Segment();
         private readonly SegmentControl mySegmentControl;
@@ -32,13 +35,15 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         private Signal mySignal;
 
+        private bool settingsLoaded;
+
         public AnalyzerPage()
         {
             InitializeComponent();
 
             foreach (var group in groups)
             {
-                ComboBoxMode.Items.Add(group.Title);
+                ModeComboBox.Items.Add(group.Title);
                 group.OnUpdate += Group_OnUpdate;
             }
 
@@ -51,7 +56,22 @@ namespace CGProject1.Pages.AnalyzerContainer
             mySegmentControl.SetLeftFilter(left => mySignal == null ? string.Empty : $"Left Frequency: {GetFrequency(true)}");
             mySegmentControl.SetRightFilter(right => mySignal == null ? string.Empty : $"Right Frequency: {GetFrequency(false)}");
 
+            LoadSettings();
+            
             if (CountPerPage.Value != null) RecalculateHeight((int) CountPerPage.Value);
+        }
+
+        private void LoadSettings()
+        {
+            ModeComboBox.SelectedIndex = Settings.GetOrDefault("modeSelectedIndex", ModeComboBox.SelectedIndex);
+            ZeroModeComboBox.SelectedIndex = Settings.GetOrDefault("zeroModeSelectedIndex", ZeroModeComboBox.SelectedIndex);
+            HalfWindowTextBox.Text = Settings.GetOrDefault("halfWindowText", HalfWindowTextBox.Text);
+
+            CountPerPage.Minimum = Settings.GetOrDefault("countPerPageMinimum", CountPerPage.Minimum);
+            CountPerPage.Maximum = Settings.GetOrDefault("countPerPageMaximum", CountPerPage.Maximum);
+            CountPerPage.Value = Settings.GetOrDefault("countPerPageValue", CountPerPage.Value);
+
+            settingsLoaded = true;
         }
 
         private void Group_OnUpdate()
@@ -101,7 +121,7 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         private ZeroModeEnum GetZeroMode()
         {
-            return ZeroModeSelector.SelectedIndex switch
+            return ZeroModeComboBox.SelectedIndex switch
             {
                 0 => ZeroModeEnum.Nothing,
                 1 => ZeroModeEnum.Null,
@@ -161,8 +181,13 @@ namespace CGProject1.Pages.AnalyzerContainer
             myVisibleSegment.SetLeftRight(int.MinValue, int.MaxValue);
         }
 
-        private void ComboBoxMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (settingsLoaded && sender is ComboBox modeComboBox)
+            {
+                Settings.Set("modeSelectedIndex", modeComboBox.SelectedIndex);
+            }
+            
             UpdatePanel();
         }
 
@@ -219,6 +244,13 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         private void CountPerPage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+            if (settingsLoaded && sender is IntegerUpDown countPerPage)
+            {
+                Settings.Set("countPerPageMinimum", countPerPage.Minimum);
+                Settings.Set("countPerPageValue", e.NewValue);
+                Settings.Set("countPerPageMaximum", countPerPage.Maximum);
+            }
+            
             RecalculateHeight((int) e.NewValue);
         }
 
@@ -229,8 +261,13 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         #endregion Page Functions
 
-        private void ZeroModeSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ZeroModeComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (settingsLoaded && sender is ComboBox zeroModeComboBox)
+            {
+                Settings.Set("zeroModeSelectedIndex", zeroModeComboBox.SelectedIndex);
+            }
+            
             AsyncUpdateAnalyzerAndPanel();
         }
 
@@ -259,15 +296,15 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         private void UpdatePanel()
         {
-            if (SpectrePanel == null || ComboBoxMode == null) return;
+            if (SpectrePanel == null || ModeComboBox == null) return;
             lock (updateAnaylyzesLock)
             {
-                var count = groups[ComboBoxMode.SelectedIndex].Factories.Count;
+                var count = groups[ModeComboBox.SelectedIndex].Factories.Count;
                 var current = 0;
 
                 ClearSpectrePanel();
 
-                foreach (var chartLine in groups[ComboBoxMode.SelectedIndex].Process())
+                foreach (var chartLine in groups[ModeComboBox.SelectedIndex].Process())
                 {
                     chartLine.Height = chartHeight;
                     chartLine.Segment.SetSegment(myVisibleSegment);
@@ -353,9 +390,9 @@ namespace CGProject1.Pages.AnalyzerContainer
         {
             lock (updateAnaylyzesLock)
             {
-                if (ComboBoxMode != null && ComboBoxMode.SelectedItem != null && !initialized)
+                if (ModeComboBox != null && ModeComboBox.SelectedItem != null && !initialized)
                 {
-                    var group = groups[ComboBoxMode.SelectedIndex].Factories.FirstOrDefault();
+                    var group = groups[ModeComboBox.SelectedIndex].Factories.FirstOrDefault();
 
                     if (group != null)
                     {
@@ -391,7 +428,7 @@ namespace CGProject1.Pages.AnalyzerContainer
         }
 
         private CancellationTokenSource tokenSource;
-        private bool tokenSourceInit = false;
+        private bool tokenSourceInit;
 
         private void AsyncUpdateAnalyzerAndPanel()
         {
@@ -408,6 +445,11 @@ namespace CGProject1.Pages.AnalyzerContainer
 
             var zeroMode = GetZeroMode();
             var halfWindowText = HalfWindowTextBox.Text;
+
+            if (settingsLoaded)
+            {
+                Settings.Set("halfWindowText", halfWindowText);
+            }
 
             Task.Factory.StartNew(() => UpdateAnalyzers(tokenSource.Token, zeroMode, halfWindowText), tokenSource.Token)
                 .ContinueWith((r) => { AfterUpdateAnalyzers(); UpdatePanel(); },

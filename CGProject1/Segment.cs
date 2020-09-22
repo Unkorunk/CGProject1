@@ -150,5 +150,16 @@ namespace CGProject1
                 _maxValue != segment._maxValue) throw new ArgumentException();
             SetLeftRight(segment._left, segment._right);
         }
+
+        public void Shift(int delta) {
+            if (delta > 0) {
+                delta = Math.Min(delta, _maxValue - _right);
+            }
+            if (delta < 0) {
+                delta = Math.Max(delta, _minValue - _left);
+            }
+            
+            SetLeftRight(_left + delta, _right + delta);
+        }
     }
 }

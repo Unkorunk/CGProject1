@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
-        xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
         Title="Система визуализации и анализа многоканальных сигналов" Height="800" Width="1200" WindowState="Maximized" Icon="/graph.ico">
     <Grid>
@@ -13,11 +12,8 @@
                 <RowDefinition Height="Auto"></RowDefinition>
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition></ColumnDefinition>
-            </Grid.ColumnDefinitions>
 
-            <Menu Grid.Row="0" Name="menu" VerticalAlignment="Top">
+            <Menu Grid.Row="0" VerticalAlignment="Top">
                 <MenuItem Header="Файл">
                     <MenuItem Header="Открыть" Click="OpenFileClick"></MenuItem>
                     <MenuItem Header="Сохранить как" Click="SaveAs_Click"></MenuItem>
@@ -35,7 +31,7 @@
                 </MenuItem>
                 <MenuItem Header="О программе" Click="AboutClick"></MenuItem>
             </Menu>
-            <xcad:DockingManager Grid.Row="1" Name="dm">
+            <xcad:DockingManager Grid.Row="1">
                 <xcad:DockingManager.DocumentHeaderTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -44,7 +40,7 @@
                         </StackPanel>
                     </DataTemplate>
                 </xcad:DockingManager.DocumentHeaderTemplate>
-                <xcad:LayoutRoot x:Name="_layoutRoot">
+                <xcad:LayoutRoot>
                     <xcad:LayoutPanel Orientation="Horizontal">
                         <xcad:LayoutAnchorablePaneGroup DockWidth="150">
                             <xcad:LayoutAnchorablePane x:Name="LeftPane">

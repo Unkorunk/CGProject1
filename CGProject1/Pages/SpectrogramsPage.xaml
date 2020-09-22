@@ -4,7 +4,6 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-      xmlns:local="clr-namespace:CGProject1.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       SizeChanged="Page_SizeChanged"
@@ -22,20 +21,21 @@
                     <Button Click="UpdateSpectrograms">Обновить спектрограммы</Button>
 
                     <Label Content="Яркость:"/>
-                    <TextBox x:Name="BrightnessField" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center">1.0</TextBox>
+                    <TextBox x:Name="BrightnessField" Width="30" DataObject.Pasting="PreviewPastingHandle" PreviewTextInput="PreviewTextInputHandle" HorizontalAlignment="Center" VerticalAlignment="Center">1.0</TextBox>
+                    <Slider x:Name="BrightnessSlider" Margin="5, 1, 5, 1" Width="100" Minimum="0" Maximum="10" Value="1" ValueChanged="BrightnessSlider_ValueChanged" VerticalAlignment="Center"></Slider>
 
                     <Label Content="Нахлёст:"/>
-                    <TextBox x:Name="CoeffSelector" Width="30" DataObject.Pasting="previewPasting" PreviewTextInput="previewTextInput" HorizontalAlignment="Center" VerticalAlignment="Center">1.0</TextBox>
-                    <Slider x:Name="CoeffSlider" Margin="5, 1, 5, 1" Width="100" Minimum="1" Maximum="10" ValueChanged="Slider_ValueChanged" VerticalAlignment="Center"></Slider>
+                    <TextBox x:Name="CoeffSelector" Width="30" DataObject.Pasting="PreviewPastingHandle" PreviewTextInput="PreviewTextInputHandle" HorizontalAlignment="Center" VerticalAlignment="Center">1.0</TextBox>
+                    <Slider x:Name="CoeffSlider" Margin="5, 1, 5, 1" Width="100" Minimum="1" Maximum="10" ValueChanged="CoeffSlider_ValueChanged" VerticalAlignment="Center"></Slider>
                 </StackPanel>
             </Border>
 
             <StackPanel Orientation="Horizontal">
                 <Label Content="Отображать каналов: "></Label>
-                <xctk:IntegerUpDown x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
+                <xctk:IntegerUpDown Minimum="1" Maximum="6" Value="1" x:Name="CountPerPage" ValueChanged="CountPerPage_ValueChanged"/>
             </StackPanel>
 
-            <ComboBox SelectedIndex="0" x:Name="PaletteSelector" SelectionChanged="ComboBoxMode_SelectionChanged">
+            <ComboBox SelectedIndex="0" x:Name="PaletteComboBox" SelectionChanged="PaletteComboBox_SelectionChanged">
                 <ComboBoxItem Content="GRAY"/>
                 <ComboBoxItem Content="HOT"/>
                 <ComboBoxItem Content="ICE"/>

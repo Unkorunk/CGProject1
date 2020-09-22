@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CGProject1"
         mc:Ignorable="d"
         Title="SettingsFixedScale" ResizeMode="NoResize" Width="180" Height="120">
     <Grid>
@@ -22,7 +21,7 @@
         <Label Grid.Row="1" Grid.Column="0" Content="To" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         <TextBox Name="TextBoxFrom" PreviewTextInput="TextBoxFrom_PreviewTextInput" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" TextWrapping="Wrap" TextAlignment="Center"/>
         <TextBox Name="TextBoxTo" PreviewTextInput="TextBoxTo_PreviewTextInput" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" TextWrapping="Wrap" TextAlignment="Center"/>
-        <Button Name="ButtonOK" Click="ButtonOK_Click" Grid.Row="2" Grid.Column="0" Content="OK"/>
-        <Button Name="ButtonCancel" Click="ButtonCancel_Click" Grid.Row="2" Grid.Column="2" Content="Cancel"/>
+        <Button Click="ButtonOK_Click" Grid.Row="2" Grid.Column="0" Content="OK"/>
+        <Button Click="ButtonCancel_Click" Grid.Row="2" Grid.Column="2" Content="Cancel"/>
     </Grid>
 </Window>

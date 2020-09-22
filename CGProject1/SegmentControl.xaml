@@ -7,43 +7,60 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="125"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="125"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            
-            <Grid Grid.Column="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                
-                <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">LEFT</Label>
-                <TextBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Name="LeftTextBox" MaxLength="9"
-                         PreviewTextInput="PreviewTextInputHandler" DataObject.Pasting="PreviewPastingHandler"
-                         TextChanged="LeftTextBox_OnTextChanged"/>
-                
-                <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">RIGHT</Label>
-                <TextBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Name="RightTextBox" MaxLength="9"
-                         PreviewTextInput="PreviewTextInputHandler" DataObject.Pasting="PreviewPastingHandler"
-                         TextChanged="RightTextBox_OnTextChanged"/>
-                
-                <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">LENGTH</Label>
-                <TextBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Name="LengthTextBox" MaxLength="9"
-                         PreviewTextInput="PreviewTextInputHandler" DataObject.Pasting="PreviewPastingHandler"
-                         IsEnabled="False"/>
-            </Grid>
-            
-            <StackPanel Grid.Column="1">
-                <Label Name="LeftLabel"/>
-                <Label Name="RightLabel"/>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
 
-                <chart:SegmentSelector x:Name="MySegmentSelector" Height="20"/>
-            </StackPanel>
+            <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">LEFT</Label>
+            <TextBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Name="LeftTextBox" MaxLength="9"
+                        PreviewTextInput="PreviewTextInputHandler" DataObject.Pasting="PreviewPastingHandler"
+                        TextChanged="LeftTextBox_OnTextChanged"/>
+
+            <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">RIGHT</Label>
+            <TextBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Name="RightTextBox" MaxLength="9"
+                        PreviewTextInput="PreviewTextInputHandler" DataObject.Pasting="PreviewPastingHandler"
+                        TextChanged="RightTextBox_OnTextChanged"/>
+
+            <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">LENGTH</Label>
+            <TextBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Name="LengthTextBox" MaxLength="9"
+                        PreviewTextInput="PreviewTextInputHandler" DataObject.Pasting="PreviewPastingHandler"
+                        IsEnabled="False"/>
         </Grid>
+
+        <Grid Grid.Column="1" VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Name="LeftLabel"/>
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Name="RightLabel"/>
+
+            <Button Grid.Row="1" Grid.Column="0" Margin="5 5 2 5" Click="DoubleLeftArrow_Click">&lt;&lt;</Button>
+            <Button Grid.Row="1" Grid.Column="1" Margin="2 5 5 5" Click="LeftArrow_Click">&lt;</Button>
+            <chart:SegmentSelector Grid.Row="1" Grid.Column="2" x:Name="MySegmentSelector" Height="20"/>
+            <Button Grid.Row="1" Grid.Column="3" Margin="5 5 2 5" Click="RightArrow_Click">&gt;</Button>
+            <Button Grid.Row="1" Grid.Column="4" Margin="2 5 5 5" Click="DoubleRightArrow_Click">&gt;&gt;</Button>
+        </Grid>
+    </Grid>
 </UserControl>
