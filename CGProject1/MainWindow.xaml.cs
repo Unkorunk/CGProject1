@@ -70,39 +70,27 @@ namespace CGProject1
             };
 
             statisticsPage = new StatisticsPage();
-            statisticsPane = new LayoutAnchorable();
-            statisticsPane.ContentId = "Statistics";
-            statisticsPane.Title = "Статистики";
+            statisticsPane = new LayoutAnchorable {ContentId = "Statistics", Title = "Статистики", CanClose = false, CanHide = false };
             RightPane.Children.Add(statisticsPane);
 
             channelsPage = new ChannelsPage();
-            channelsPane = new LayoutAnchorable();
-            channelsPane.ContentId = "Channels";
-            channelsPane.Title = "Каналы";
+            channelsPane = new LayoutAnchorable {ContentId = "Channels", Title = "Каналы", CanClose = false, CanHide = false};
             LeftPane.Children.Add(channelsPane);
 
             oscillogramsPage = new OscillogramsPage();
-            oscillogramsPane = new LayoutAnchorable();
-            oscillogramsPane.ContentId = "Oscillograms";
-            oscillogramsPane.Title = "Осциллограммы";
+            oscillogramsPane = new LayoutAnchorable {ContentId = "Oscillograms", Title = "Осциллограммы", CanClose = false, CanHide = false };
             UpperMiddlePane.Children.Add(oscillogramsPane);
 
             analyzerPage = new AnalyzerPage();
-            analyzerPane = new LayoutAnchorable();
-            analyzerPane.ContentId = "Änalyzer";
-            analyzerPane.Title = "Анализ Фурье";
+            analyzerPane = new LayoutAnchorable {ContentId = "Analyzer", Title = "Анализ Фурье", CanClose = false, CanHide = false };
             LowerMiddlePane.Children.Add(analyzerPane);
 
             spectrogramsPage = new SpectrogramsPage();
-            spectrogramsPane = new LayoutAnchorable();
-            spectrogramsPane.ContentId = "Spectrograms";
-            spectrogramsPane.Title = "Спектрограммы";
+            spectrogramsPane = new LayoutAnchorable {ContentId = "Spectrograms", Title = "Спектрограммы", CanClose = false, CanHide = false };
             LowerMiddlePane.Children.Add(spectrogramsPane);
 
             aboutSignalPage = new AboutSignalPage();
-            aboutSignalPane = new LayoutAnchorable();
-            aboutSignalPane.ContentId = "AboutSignal";
-            aboutSignalPane.Title = "О сигнале";
+            aboutSignalPane = new LayoutAnchorable {ContentId = "AboutSignal", Title = "О сигнале", CanClose = false, CanHide = false };
             RightPane.Children.Add(aboutSignalPane);
 
             pages = new IChannelComponent[]
@@ -395,6 +383,10 @@ namespace CGProject1
 
             var xmlDeserializer = new XmlLayoutSerializer(MyDockingManager);
             using (var reader = new StreamReader("lastLayout")) {
+                xmlDeserializer.LayoutSerializationCallback += (s, e) =>
+                {
+                    object o = e.Content;
+                };
                 xmlDeserializer.Deserialize(reader);
             }
         }
