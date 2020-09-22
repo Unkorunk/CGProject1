@@ -53,7 +53,7 @@
                             <xcad:LayoutDocumentPane x:Name="LowerMiddlePane">
                             </xcad:LayoutDocumentPane>
                         </xcad:LayoutDocumentPaneGroup >
-                        <xcad:LayoutAnchorablePaneGroup DockWidth="500">
+                        <xcad:LayoutAnchorablePaneGroup DockWidth="400">
                             <xcad:LayoutAnchorablePane x:Name="RightPane">
                             </xcad:LayoutAnchorablePane>
                         </xcad:LayoutAnchorablePaneGroup>

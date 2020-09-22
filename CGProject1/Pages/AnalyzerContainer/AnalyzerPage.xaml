@@ -28,6 +28,11 @@
                 <ComboBoxItem Content="X(0) = 0"/>
                 <ComboBoxItem Content="X(0) = |X(1)|"/>
             </ComboBox>
+            
+            <ComboBox x:Name="FreqOrPeriodComboBox" SelectedIndex="0" SelectionChanged="FreqOrPeriodComboBox_OnSelectionChanged">
+                <ComboBoxItem Content="Frequency"/>
+                <ComboBoxItem Content="Period"/>
+            </ComboBox>
 
             <StackPanel Orientation="Horizontal">
                 <Label Content="Отображать каналов: "></Label>

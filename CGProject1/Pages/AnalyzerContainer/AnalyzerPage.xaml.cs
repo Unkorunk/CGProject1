@@ -64,6 +64,7 @@ namespace CGProject1.Pages.AnalyzerContainer
         private void LoadSettings()
         {
             ModeComboBox.SelectedIndex = Settings.GetOrDefault("modeSelectedIndex", ModeComboBox.SelectedIndex);
+            FreqOrPeriodComboBox.SelectedIndex = Settings.GetOrDefault("freqOrPeriodSelectedIndex", FreqOrPeriodComboBox.SelectedIndex);
             ZeroModeComboBox.SelectedIndex = Settings.GetOrDefault("zeroModeSelectedIndex", ZeroModeComboBox.SelectedIndex);
             HalfWindowTextBox.Text = Settings.GetOrDefault("halfWindowText", HalfWindowTextBox.Text);
 
@@ -189,6 +190,35 @@ namespace CGProject1.Pages.AnalyzerContainer
             }
             
             UpdatePanel();
+        }
+        
+        private void FreqOrPeriodComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is ComboBox freqOrPeriodComboBox)
+            {
+                if (settingsLoaded)
+                {
+                    Settings.Set("freqOrPeriodSelectedIndex", freqOrPeriodComboBox.SelectedIndex);
+                }
+
+                foreach (var group in groups)
+                {
+                    if (freqOrPeriodComboBox.SelectedIndex == 0)
+                    {
+                        group.Unit = GroupChartLineFactory.UnitEnum.Frequency;
+                        mySegmentControl?.SetLeftFilter(left => mySignal == null ? string.Empty : $"Left Frequency: {GetFrequency(true)}");
+                        mySegmentControl?.SetRightFilter(right => mySignal == null ? string.Empty : $"Right Frequency: {GetFrequency(false)}");
+                    }
+                    else
+                    {
+                        group.Unit = GroupChartLineFactory.UnitEnum.Period;
+                        mySegmentControl?.SetLeftFilter(left => mySignal == null ? string.Empty : $"Left Period: {GetPeriod(true)}");
+                        mySegmentControl?.SetRightFilter(right => mySignal == null ? string.Empty : $"Right Period: {GetPeriod(false)}");
+                    }
+                }
+
+                UpdatePanel();
+            }
         }
 
         private void SelectInterval(object sender, RoutedEventArgs e)
@@ -382,8 +412,18 @@ namespace CGProject1.Pages.AnalyzerContainer
             if (chartLine == null) return double.NaN.ToString(CultureInfo.InvariantCulture);
 
             return left
-                ? ChartLineFactory.MappingXAxis(chartLine.Segment.Left, chartLine)
-                : ChartLineFactory.MappingXAxis(chartLine.Segment.Right, chartLine);
+                ? ChartLineFactory.MappingXAxisFreq(chartLine.Segment.Left, chartLine)
+                : ChartLineFactory.MappingXAxisFreq(chartLine.Segment.Right, chartLine);
+        }
+        
+        private string GetPeriod(bool left)
+        {
+            var chartLine = GetFirstChartLineForCurrentMode();
+            if (chartLine == null) return double.NaN.ToString(CultureInfo.InvariantCulture);
+
+            return left
+                ? ChartLineFactory.MappingXAxisPeriod(chartLine.Segment.Left, chartLine)
+                : ChartLineFactory.MappingXAxisPeriod(chartLine.Segment.Right, chartLine);
         }
 
         private void AfterUpdateAnalyzers()

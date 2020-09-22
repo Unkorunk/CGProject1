@@ -13,6 +13,28 @@ namespace CGProject1.Pages.AnalyzerContainer
         public delegate void DelUpdate();
         public event DelUpdate OnUpdate;
 
+        public enum UnitEnum
+        {
+            Frequency,
+            Period
+        }
+
+        private UnitEnum unit = UnitEnum.Frequency;
+
+        public UnitEnum Unit
+        {
+            get => unit;
+            set
+            {
+                foreach (var factory in Factories)
+                {
+                    factory.Unit = value;
+                }
+
+                unit = value;
+            }
+        }
+
         public string Title { get; }
         public IReadOnlyCollection<ChartLineFactory> Factories
         {
@@ -53,6 +75,7 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         public void Add(ChartLineFactory chartLineFactory)
         {
+            chartLineFactory.Unit = Unit;
             chartLineFactory.OnDeleted += Factory_OnDelete;
             factories.Add(chartLineFactory);
         }
