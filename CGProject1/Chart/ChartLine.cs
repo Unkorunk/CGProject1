@@ -310,25 +310,28 @@ namespace CGProject1.Chart
 
             if (GridDraw)
             {
-                var ht = 0.0;
-                for (int i = 0; i < 8; i++)
-                {
-                    double x = (i + 1) * actSize.Width / 9;
-                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width + x, interfaceOffset.Height),
-                        new Point(interfaceOffset.Width + x, interfaceOffset.Height + actSize.Height));
-                    int idx;
-                    if (optimization)
-                    {
-                        idx = (int)Math.Round(x * stepOptimization / (2.0 * stepX) + Segment.Left);
-                    }
-                    else
-                    {
-                        idx = (int)Math.Round(x / stepX + Segment.Left);
-                    }
+                double curX = Segment.Left;
+                double len = Segment.Right - Segment.Left;
+                double xPart = len / 10;
 
-                    if (DisplayHAxisInfo)
-                    {
-                        string XAxisText = MappingXAxis(idx, this);
+                double dx = Math.Pow(10, Math.Ceiling(Math.Log10(xPart)));
+                if (xPart < dx / 2) {
+                    dx /= 2;
+                    if (xPart < dx / 2) {
+                        dx /= 2;
+                    }
+                }
+
+                curX = Math.Ceiling(curX / dx) * dx;
+
+                var ht = 0.0;
+                while (curX <= Segment.Right) {
+                    var x = (curX - Segment.Left) / len * actSize.Width;
+                    dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width + x, interfaceOffset.Height),
+                            new Point(interfaceOffset.Width + x, interfaceOffset.Height + actSize.Height));
+
+                    if (DisplayHAxisInfo) {
+                        string XAxisText = MappingXAxis((int)curX, this);
 
                         var formText1 = new FormattedText(XAxisText,
                             CultureInfo.GetCultureInfo("en-us"),
@@ -338,21 +341,19 @@ namespace CGProject1.Chart
                         );
                         formText1.TextAlignment = TextAlignment.Center;
 
-                        if (HAxisAlligment == HAxisAlligmentEnum.Bottom)
-                        {
+                        if (HAxisAlligment == HAxisAlligmentEnum.Bottom) {
                             var offsetY1 = actSize.Height;
                             ht = Math.Max(ht, offsetY1 + formText1.Height);
                             dc.DrawText(formText1, new Point(interfaceOffset.Width + x, offsetY1));
-                        }
-                        else
-                        {
+                        } else {
                             dc.DrawText(formText1, new Point(interfaceOffset.Width + x, interfaceOffset.Height - (formText1.Height + 1)));
                         }
                     }
+
+                    curX += dx;
                 }
 
-                if (DisplayHAxisTitle)
-                {
+                if (DisplayHAxisTitle) {
                     var formText3 = new FormattedText(HAxisTitle,
                         CultureInfo.GetCultureInfo("en-us"),
                         FlowDirection.LeftToRight,
@@ -365,18 +366,30 @@ namespace CGProject1.Chart
                     dc.DrawText(formText3, new Point(interfaceOffset.Width + actSize.Width / 2, ht));
                 }
 
-                for (int i = 0; i < 5; i++)
-                {
-                    double y = (i + 1) * actSize.Height / 6;
+                double yLen = maxChannelValue - minChannelValue;
+                double yPart = yLen / 10;
+                double dy = Math.Pow(10, Math.Ceiling(Math.Log10(yPart)));
+
+                if (yPart < dy / 2) {
+                    dy /= 2;
+                    if (yPart < dy / 2) {
+                        dy /= 2;
+                    }
+                }
+
+                double curY = Math.Ceiling(minChannelValue / dy) * dy;
+
+                while (curY <= maxChannelValue) {
+                    var y = actSize.Height - (curY - minChannelValue) / yLen * actSize.Height;
+
                     dc.DrawLine(new Pen(Brushes.Gray, 1.0), new Point(interfaceOffset.Width, interfaceOffset.Height + y),
                         new Point(interfaceOffset.Width + actSize.Width, interfaceOffset.Height + y));
-                    string val = Math.Round(maxChannelValue - (i + 1) * (maxChannelValue - minChannelValue) / 6, 5).ToString(CultureInfo.InvariantCulture);
-                    if (val.Length > this.MaxVAxisLength)
-                    {
+
+                    string val = Math.Round(curY, 5).ToString(CultureInfo.InvariantCulture);
+                    if (val.Length > this.MaxVAxisLength) {
                         val = val.Substring(0, this.MaxVAxisLength);
                     }
-                    if (DisplayVAxisInfo)
-                    {
+                    if (DisplayVAxisInfo) {
                         var formText1 = new FormattedText(val,
                             CultureInfo.GetCultureInfo("en-us"),
                             FlowDirection.LeftToRight,
@@ -388,6 +401,8 @@ namespace CGProject1.Chart
 
                         dc.DrawText(formText1, new Point(interfaceOffset.Width, interfaceOffset.Height + y - formText1.Height / 2));
                     }
+
+                    curY += dy;
                 }
             }
 
