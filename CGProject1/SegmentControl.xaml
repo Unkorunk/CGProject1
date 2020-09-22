@@ -52,9 +52,11 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            
-            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Name="LeftLabel"/>
-            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Name="RightLabel"/>
+
+            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5">
+                <Label Name="LeftLabel"/>
+                <Label Name="RightLabel"/>
+            </StackPanel>
 
             <Button Grid.Row="1" Grid.Column="0" Margin="5 5 2 5" Click="DoubleLeftArrow_Click">&lt;&lt;</Button>
             <Button Grid.Row="1" Grid.Column="1" Margin="2 5 5 5" Click="LeftArrow_Click">&lt;</Button>
