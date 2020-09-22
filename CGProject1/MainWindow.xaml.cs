@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using FileFormats;
 
 using Xceed.Wpf.AvalonDock.Layout;
+using Xceed.Wpf.AvalonDock.Layout.Serialization;
 
 
 namespace CGProject1
@@ -70,31 +71,37 @@ namespace CGProject1
 
             statisticsPage = new StatisticsPage();
             statisticsPane = new LayoutAnchorable();
+            statisticsPane.ContentId = "Statistics";
             statisticsPane.Title = "Статистики";
             RightPane.Children.Add(statisticsPane);
 
             channelsPage = new ChannelsPage();
             channelsPane = new LayoutAnchorable();
+            channelsPane.ContentId = "Channels";
             channelsPane.Title = "Каналы";
             LeftPane.Children.Add(channelsPane);
 
             oscillogramsPage = new OscillogramsPage();
             oscillogramsPane = new LayoutAnchorable();
+            oscillogramsPane.ContentId = "Oscillograms";
             oscillogramsPane.Title = "Осциллограммы";
             UpperMiddlePane.Children.Add(oscillogramsPane);
 
             analyzerPage = new AnalyzerPage();
             analyzerPane = new LayoutAnchorable();
+            analyzerPane.ContentId = "Änalyzer";
             analyzerPane.Title = "Анализ Фурье";
             LowerMiddlePane.Children.Add(analyzerPane);
 
             spectrogramsPage = new SpectrogramsPage();
             spectrogramsPane = new LayoutAnchorable();
+            spectrogramsPane.ContentId = "Spectrograms";
             spectrogramsPane.Title = "Спектрограммы";
             LowerMiddlePane.Children.Add(spectrogramsPane);
 
             aboutSignalPage = new AboutSignalPage();
             aboutSignalPane = new LayoutAnchorable();
+            aboutSignalPane.ContentId = "AboutSignal";
             aboutSignalPane.Title = "О сигнале";
             RightPane.Children.Add(aboutSignalPane);
 
@@ -116,6 +123,7 @@ namespace CGProject1
             }
 
             ResetSignal(null);
+            LoadLayout();
         }
 
         public void AddStatistics(Channel channel)
@@ -369,6 +377,26 @@ namespace CGProject1
                 savingWindow.Topmost = false;
             }
             Logger.Info("Save window opened");
+        }
+
+        private void MainWindow_OnClosed(object? sender, EventArgs e)
+        {
+            var xmlSerializer = new XmlLayoutSerializer(MyDockingManager);
+            using (var writer = new StreamWriter("lastLayout"))
+            {
+                xmlSerializer.Serialize(writer);
+            }
+        }
+
+        private void LoadLayout() {
+            if (!File.Exists("lastLayout")) {
+                return;
+            }
+
+            var xmlDeserializer = new XmlLayoutSerializer(MyDockingManager);
+            using (var reader = new StreamReader("lastLayout")) {
+                xmlDeserializer.Deserialize(reader);
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System.Windows;
+using Xceed.Wpf.AvalonDock;
+using Xceed.Wpf.AvalonDock.Layout.Serialization;
 
 namespace CGProject1
 {
