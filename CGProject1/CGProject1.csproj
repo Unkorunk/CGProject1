@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WAVE\FileFormats.csproj" />
+    <ProjectReference Include="..\FileFormats\FileFormats.csproj" />
   </ItemGroup>
 
   <ItemGroup>

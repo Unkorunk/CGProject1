@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FileFormats
 {
-    public class TXTReader : IReader
+    public class TxtReader : IReader
     {
         private enum ParseState
         {

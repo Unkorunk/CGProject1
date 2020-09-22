@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FileFormats
 {
-    public class DATReader : IReader
+    public class DatReader : IReader
     {
         public bool TryRead(byte[] data, out FileInfo fileInfo)
         {

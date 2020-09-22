@@ -4,7 +4,7 @@ using System.Text;
 
 namespace FileFormats
 {
-    public class WAVEWriter : IWriter
+    public class WaveWriter : IWriter
     {
         public byte[] TryWrite(FileInfo fileInfo)
         {

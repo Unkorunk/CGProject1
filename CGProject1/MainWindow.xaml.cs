@@ -299,17 +299,17 @@ namespace CGProject1
                 switch (Path.GetExtension(openFileDialog.FileName))
                 {
                     case ".mp3":
-                        reader = new MP3Reader();
+                        reader = new Mp3Reader();
                         break;
                     case ".dat":
-                        reader = new DATReader();
+                        reader = new DatReader();
                         break;
                     case ".wav":
                     case ".wave":
-                        reader = new WAVEReader();
+                        reader = new WaveReader();
                         break;
                     case ".txt":
-                        reader = new TXTReader();
+                        reader = new TxtReader();
                         break;
                     default:
                         throw new NotImplementedException();

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace FileFormats
 {
-    public class DATWriter : IWriter
+    public class DatWriter : IWriter
     {
         public byte[] TryWrite(FileInfo fileInfo)
         {

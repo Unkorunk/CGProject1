@@ -97,14 +97,14 @@ namespace CGProject1 {
                 switch (Path.GetExtension(saveDialog.FileName))
                 {
                     case ".txt":
-                        writer = new TXTWriter();
+                        writer = new TxtWriter();
                         break;
                     case ".wav":
                     case ".wave":
-                        writer = new WAVEWriter();
+                        writer = new WaveWriter();
                         break;
                     case ".dat":
-                        writer = new DATWriter();
+                        writer = new DatWriter();
                         break;
                     default: throw new NotImplementedException();
                 }

@@ -2,9 +2,9 @@
 
 namespace FileFormats
 {
-    public class WAVEReader : IReader
+    public class WaveReader : IReader
     {
-        private const ushort WAVE_FORMAT_PCM = 0x0001;
+        private const ushort WaveFormatPcm = 0x0001;
 
         private struct FmtInfo
         {
@@ -53,7 +53,7 @@ namespace FileFormats
                 {
                     if (headerInfo1.cksize != 16) return false;
 
-                    if (!fmtChunk(data, ref offset, ref fileInfo, out fmtInfo))
+                    if (!FmtChunk(data, ref offset, ref fileInfo, out fmtInfo))
                     {
                         return false;
                     }
@@ -62,7 +62,7 @@ namespace FileFormats
                 }
                 else if (headerInfo1.ckID == "data")
                 {
-                    if (fmtInfoSet && dataChunk(data, ref offset, ref fileInfo, fmtInfo, headerInfo1))
+                    if (fmtInfoSet && DataChunk(data, ref offset, ref fileInfo, fmtInfo, headerInfo1))
                     {
                         return true;
                     }
@@ -91,12 +91,12 @@ namespace FileFormats
             return headerInfo;
         }
 
-        private static bool fmtChunk(byte[] data, ref int offset, ref FileInfo waveFile, out FmtInfo fmtInfo)
+        private static bool FmtChunk(byte[] data, ref int offset, ref FileInfo waveFile, out FmtInfo fmtInfo)
         {
             fmtInfo = new FmtInfo();
 
             ushort wFormatTag = BitConverter.ToUInt16(data, offset);
-            if (wFormatTag != WAVE_FORMAT_PCM) return false;
+            if (wFormatTag != WaveFormatPcm) return false;
             offset += 2;
 
             waveFile.nChannels = BitConverter.ToUInt16(data, offset);
@@ -119,7 +119,7 @@ namespace FileFormats
             return true;
         }
 
-        private static bool dataChunk(byte[] data, ref int offset, ref FileInfo waveFile, in FmtInfo fmtInfo, in HeaderInfo headerInfo)
+        private static bool DataChunk(byte[] data, ref int offset, ref FileInfo waveFile, in FmtInfo fmtInfo, in HeaderInfo headerInfo)
         {
             int bytesPerSample = fmtInfo.nBlockAlign / waveFile.nChannels;
             int bytesPerBlock = bytesPerSample * waveFile.nChannels;
