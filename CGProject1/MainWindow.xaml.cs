@@ -11,6 +11,7 @@ using Microsoft.Win32;
 using FileFormats;
 
 using Xceed.Wpf.AvalonDock.Layout;
+using Xceed.Wpf.AvalonDock.Layout.Serialization;
 
 
 namespace CGProject1
@@ -29,25 +30,53 @@ namespace CGProject1
         private bool isSavingWindowShowing = false;
 
         [NotNull] private readonly StatisticsPage statisticsPage = new StatisticsPage();
-        [NotNull] private readonly LayoutAnchorable statisticsPane = new LayoutAnchorable{Title = "Статистики"};
+        [NotNull] private readonly LayoutAnchorable statisticsPane = new LayoutAnchorable
+        {
+            ContentId = "Statistics", Title = "Statistics",
+            CanClose = false, CanHide = false
+        };
 
         [NotNull] private readonly ChannelsPage channelsPage = new ChannelsPage();
-        [NotNull] private readonly LayoutAnchorable channelsPane = new LayoutAnchorable{Title = "Channels"};
+        [NotNull] private readonly LayoutAnchorable channelsPane = new LayoutAnchorable
+        {
+            ContentId = "Channels", Title = "Channels",
+            CanClose = false, CanHide = false
+        };
 
         [NotNull] private readonly OscillogramsPage oscillogramsPage = new OscillogramsPage();
-        [NotNull] private readonly LayoutAnchorable oscillogramsPane = new LayoutAnchorable{Title = "Oscillograms"};
+        [NotNull] private readonly LayoutAnchorable oscillogramsPane = new LayoutAnchorable
+        {
+            ContentId = "Oscillograms", Title = "Oscillograms",
+            CanClose = false, CanHide = false
+        };
 
         [NotNull] private readonly AnalyzerPage analyzerPage = new AnalyzerPage();
-        [NotNull] private readonly LayoutAnchorable analyzerPane = new LayoutAnchorable(){Title = "Fourier analysis"};
+        [NotNull] private readonly LayoutAnchorable analyzerPane = new LayoutAnchorable()
+        {
+            ContentId = "Analyzer", Title = "Fourier analysis",
+            CanClose = false, CanHide = false
+        };
 
-        [NotNull] private readonly SpectrogramsPage spectrogramsPage = new SpectrogramsPage{Title = "Spectrograms"};
-        [NotNull] private readonly LayoutAnchorable spectrogramsPane = new LayoutAnchorable();
+        [NotNull] private readonly SpectrogramsPage spectrogramsPage = new SpectrogramsPage();
+        [NotNull] private readonly LayoutAnchorable spectrogramsPane = new LayoutAnchorable
+        {
+            ContentId = "Spectrograms", Title = "Spectrograms",
+            CanClose = false, CanHide = false
+        };
 
         [NotNull] private readonly AboutSignalPage aboutSignalPage = new AboutSignalPage();
-        [NotNull] private readonly LayoutAnchorable aboutSignalPane = new LayoutAnchorable{Title = "About signal"};
+        [NotNull] private readonly LayoutAnchorable aboutSignalPane = new LayoutAnchorable
+        {
+            ContentId = "AboutSignal", Title = "About signal",
+            CanClose = false, CanHide = false
+        };
 
         [NotNull] private readonly MicrophonePage microphonePage = new MicrophonePage();
-        [NotNull] private readonly LayoutAnchorable microphonePane = new LayoutAnchorable{Title = "Microphone"};
+        [NotNull] private readonly LayoutAnchorable microphonePane = new LayoutAnchorable
+        {
+            ContentId = "Microphone", Title = "Microphone",
+            CanClose = false, CanHide = false
+        };
 
         [NotNull] private readonly IChannelComponent[] pages;
         [NotNull] private readonly LayoutAnchorable[] panes;
@@ -71,11 +100,11 @@ namespace CGProject1
                         {Modelling.discreteModels, Modelling.continiousModels, Modelling.randomModels});
                 Settings.Save();
             };
-            
+
             LeftPane.Children.Add(channelsPane);
             UpperMiddlePane.Children.Add(oscillogramsPane);
-            RightPane.Children.Add(statisticsPane);
             RightPane.Children.Add(aboutSignalPane);
+            RightPane.Children.Add(statisticsPane);
             RightPane.Children.Add(microphonePane);
             LowerMiddlePane.Children.Add(analyzerPane);
             LowerMiddlePane.Children.Add(spectrogramsPane);
@@ -107,6 +136,7 @@ namespace CGProject1
             }
 
             ResetSignal(null);
+            LoadLayout();
         }
 
         public void AddStatistics(Channel channel)
@@ -359,6 +389,30 @@ namespace CGProject1
                 savingWindow.Topmost = false;
             }
             Logger.Info("Save window opened");
+        }
+
+        private void MainWindow_OnClosed(object? sender, EventArgs e)
+        {
+            var xmlSerializer = new XmlLayoutSerializer(MyDockingManager);
+            using (var writer = new StreamWriter("lastLayout"))
+            {
+                xmlSerializer.Serialize(writer);
+            }
+        }
+
+        private void LoadLayout() {
+            if (!File.Exists("lastLayout")) {
+                return;
+            }
+
+            var xmlDeserializer = new XmlLayoutSerializer(MyDockingManager);
+            using (var reader = new StreamReader("lastLayout")) {
+                xmlDeserializer.LayoutSerializationCallback += (s, e) =>
+                {
+                    object o = e.Content;
+                };
+                xmlDeserializer.Deserialize(reader);
+            }
         }
     }
 }
