@@ -6,13 +6,17 @@ namespace FileFormats
 {
     public class Mp3Reader : IReader
     {
+        public bool IsMp3FileReader { get; set; } = true;
+        
         public bool TryRead(byte[] indata, out FileInfo fileInfo)
         {
             var inStream = new MemoryStream(indata);
 
             fileInfo = new FileInfo();
 
-            var file = new Mp3FileReader(inStream);
+            WaveStream file;
+            if (IsMp3FileReader) file = new Mp3FileReader(inStream);
+            else file = new WaveFileReader(inStream);
 
             fileInfo.nChannels = file.WaveFormat.Channels;
             fileInfo.nSamplesPerSec = file.WaveFormat.SampleRate;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,26 +28,29 @@ namespace CGProject1
         private bool isModelingWindowShowing = false;
         private bool isSavingWindowShowing = false;
 
-        private StatisticsPage statisticsPage = null;
-        private LayoutAnchorable statisticsPane = null;
+        [NotNull] private readonly StatisticsPage statisticsPage = new StatisticsPage();
+        [NotNull] private readonly LayoutAnchorable statisticsPane = new LayoutAnchorable{Title = "Статистики"};
 
-        private ChannelsPage channelsPage = null;
-        private LayoutAnchorable channelsPane = null;
+        [NotNull] private readonly ChannelsPage channelsPage = new ChannelsPage();
+        [NotNull] private readonly LayoutAnchorable channelsPane = new LayoutAnchorable{Title = "Channels"};
 
-        private OscillogramsPage oscillogramsPage = null;
-        private LayoutAnchorable oscillogramsPane = null;
+        [NotNull] private readonly OscillogramsPage oscillogramsPage = new OscillogramsPage();
+        [NotNull] private readonly LayoutAnchorable oscillogramsPane = new LayoutAnchorable{Title = "Oscillograms"};
 
-        private AnalyzerPage analyzerPage = null;
-        private LayoutAnchorable analyzerPane = null;
+        [NotNull] private readonly AnalyzerPage analyzerPage = new AnalyzerPage();
+        [NotNull] private readonly LayoutAnchorable analyzerPane = new LayoutAnchorable(){Title = "Fourier analysis"};
 
-        private SpectrogramsPage spectrogramsPage = null;
-        private LayoutAnchorable spectrogramsPane = null;
+        [NotNull] private readonly SpectrogramsPage spectrogramsPage = new SpectrogramsPage{Title = "Spectrograms"};
+        [NotNull] private readonly LayoutAnchorable spectrogramsPane = new LayoutAnchorable();
 
-        private AboutSignalPage aboutSignalPage = null;
-        private LayoutAnchorable aboutSignalPane = null;
+        [NotNull] private readonly AboutSignalPage aboutSignalPage = new AboutSignalPage();
+        [NotNull] private readonly LayoutAnchorable aboutSignalPane = new LayoutAnchorable{Title = "About signal"};
 
-        private IChannelComponent[] pages;
-        private LayoutAnchorable[] panes;
+        [NotNull] private readonly MicrophonePage microphonePage = new MicrophonePage();
+        [NotNull] private readonly LayoutAnchorable microphonePane = new LayoutAnchorable{Title = "Microphone"};
+
+        [NotNull] private readonly IChannelComponent[] pages;
+        [NotNull] private readonly LayoutAnchorable[] panes;
 
         public Signal currentSignal;
 
@@ -67,41 +71,28 @@ namespace CGProject1
                         {Modelling.discreteModels, Modelling.continiousModels, Modelling.randomModels});
                 Settings.Save();
             };
-
-            statisticsPage = new StatisticsPage();
-            statisticsPane = new LayoutAnchorable();
-            statisticsPane.Title = "Статистики";
-            RightPane.Children.Add(statisticsPane);
-
-            channelsPage = new ChannelsPage();
-            channelsPane = new LayoutAnchorable();
-            channelsPane.Title = "Каналы";
+            
             LeftPane.Children.Add(channelsPane);
-
-            oscillogramsPage = new OscillogramsPage();
-            oscillogramsPane = new LayoutAnchorable();
-            oscillogramsPane.Title = "Осциллограммы";
             UpperMiddlePane.Children.Add(oscillogramsPane);
-
-            analyzerPage = new AnalyzerPage();
-            analyzerPane = new LayoutAnchorable();
-            analyzerPane.Title = "Анализ Фурье";
+            RightPane.Children.Add(statisticsPane);
+            RightPane.Children.Add(aboutSignalPane);
+            RightPane.Children.Add(microphonePane);
             LowerMiddlePane.Children.Add(analyzerPane);
-
-            spectrogramsPage = new SpectrogramsPage();
-            spectrogramsPane = new LayoutAnchorable();
-            spectrogramsPane.Title = "Спектрограммы";
             LowerMiddlePane.Children.Add(spectrogramsPane);
 
-            aboutSignalPage = new AboutSignalPage();
-            aboutSignalPane = new LayoutAnchorable();
-            aboutSignalPane.Title = "О сигнале";
-            RightPane.Children.Add(aboutSignalPane);
-
             pages = new IChannelComponent[]
-                {channelsPage, aboutSignalPage, statisticsPage, oscillogramsPage, analyzerPage, spectrogramsPage};
+            {
+                channelsPage, aboutSignalPage, statisticsPage,
+                oscillogramsPage, analyzerPage, spectrogramsPage,
+                microphonePage
+            };
+            
             panes = new LayoutAnchorable[]
-                {channelsPane, aboutSignalPane, statisticsPane, oscillogramsPane, analyzerPane, spectrogramsPane};
+            {
+                channelsPane, aboutSignalPane, statisticsPane,
+                oscillogramsPane, analyzerPane, spectrogramsPane,
+                microphonePane
+            };
 
             if (pages.Length != panes.Length)
             {
@@ -164,10 +155,10 @@ namespace CGProject1
 
             Modelling.ResetCounters();
 
-            this.currentSignal = newSignal;
+            currentSignal = newSignal;
             oscillogramsPage.Reset(newSignal);
 
-            if (this.currentSignal == null)
+            if (currentSignal == null)
             {
                 Logger.Info("Signal was reset to null");
                 return;
@@ -204,7 +195,6 @@ namespace CGProject1
         private void OpenOscillogramsPage(object sender, RoutedEventArgs e)
         {
             OpenPane(oscillogramsPane);
-
         }
 
         private void OpenSpectrogramsPage(object sender, RoutedEventArgs e)
