@@ -4,9 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using CGProject1.FFTWSharp;
 using CGProject1.Pages;
 using CGProject1.Pages.AnalyzerContainer;
 using CGProject1.SignalProcessing;
+using CGProject1.SignalProcessing.Models;
 using Microsoft.Win32;
 using FileFormats;
 
@@ -20,6 +22,7 @@ namespace CGProject1
     {
         private static readonly Settings Settings = Settings.GetInstance(nameof(MainWindow));
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly IDftCalculator DftCalculator = new FftwDftCalculator();
         
         public static MainWindow Instance { get; private set; }
 
@@ -50,14 +53,14 @@ namespace CGProject1
             CanClose = false, CanHide = false
         };
 
-        [NotNull] private readonly AnalyzerPage analyzerPage = new AnalyzerPage();
+        [NotNull] private readonly AnalyzerPage analyzerPage = new AnalyzerPage(DftCalculator);
         [NotNull] private readonly LayoutAnchorable analyzerPane = new LayoutAnchorable()
         {
             ContentId = "Analyzer", Title = "Fourier analysis",
             CanClose = false, CanHide = false
         };
 
-        [NotNull] private readonly SpectrogramsPage spectrogramsPage = new SpectrogramsPage();
+        [NotNull] private readonly SpectrogramsPage spectrogramsPage = new SpectrogramsPage(DftCalculator);
         [NotNull] private readonly LayoutAnchorable spectrogramsPane = new LayoutAnchorable
         {
             ContentId = "Spectrograms", Title = "Spectrograms",

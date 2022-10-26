@@ -12,8 +12,11 @@ namespace CGProject1.Chart
 {
     public class Spectrogram : FrameworkElement, IDisposable
     {
-        public Spectrogram(Channel channel)
+        private IDftCalculator myDftCalculator;
+
+        public Spectrogram(IDftCalculator dftCalculator, Channel channel)
         {
+            myDftCalculator = dftCalculator;
             curChannel = channel;
 
             this.begin = 0;
@@ -574,7 +577,16 @@ namespace CGProject1.Chart
 
                     if (token.IsCancellationRequested) break;
                     // step 5.6
-                    var analyzer = new Analyzer(x, channel.SamplingFrq);
+
+                    var channel1 = new Channel(x.Length);
+                    channel1.SamplingFrq = channel1.SamplingFrq;
+
+                    for (int j = 0; j < x.Length; j++)
+                    {
+                        channel1.values[j] = x[j];
+                    }
+
+                    var analyzer = new Analyzer(myDftCalculator, channel1);
                     analyzer.SetupChannel(0, x.Length);
                     Channel amps = analyzer.AmplitudeSpectralDensity();
 

@@ -36,9 +36,12 @@ namespace CGProject1.Pages.AnalyzerContainer
         private Signal mySignal;
 
         private bool settingsLoaded;
+        private readonly IDftCalculator myDftCalculator;
 
-        public AnalyzerPage()
+        public AnalyzerPage(IDftCalculator dftCalculator)
         {
+            myDftCalculator = dftCalculator;
+
             InitializeComponent();
 
             foreach (var group in groups)
@@ -163,7 +166,7 @@ namespace CGProject1.Pages.AnalyzerContainer
 
         public void AddChannel(Channel channel)
         {
-            var analyzer = new Analyzer(channel);
+            var analyzer = new Analyzer(myDftCalculator, channel);
 
             var factory = new ChartLineFactory(analyzer);
             lock (updateAnaylyzesLock)

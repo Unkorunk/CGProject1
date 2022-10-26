@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:chart="clr-namespace:CGProject1.Chart"
+             xmlns:chart1="clr-namespace:CGProject1.Chart;assembly=CGProject1.Chart"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Border BorderThickness="1.0" BorderBrush="Black">
@@ -43,7 +44,7 @@
                 </Grid>
             </StackPanel>
 
-            <chart:ChartHistogram x:Name="Histogram" Grid.Column="1"></chart:ChartHistogram>
+            <chart1:ChartHistogram x:Name="Histogram" Grid.Column="1"></chart1:ChartHistogram>
         </Grid>
     </Border>
 </UserControl>

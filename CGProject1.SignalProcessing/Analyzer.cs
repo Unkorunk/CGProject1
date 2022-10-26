@@ -1,12 +1,10 @@
-﻿using System;
-using System.Numerics;
-using System.Collections.Generic;
-using FFTWSharp;
+﻿using System.Numerics;
 
 namespace CGProject1.SignalProcessing
 {
     public class Analyzer
     {
+        private readonly IDftCalculator myDftCalculator;
         private readonly Channel myChannel;
 
         public int HalfWindowSmoothing { get; set; }
@@ -18,20 +16,10 @@ namespace CGProject1.SignalProcessing
 
         public int SamplesCount { get; private set; }
 
-        public Analyzer(Channel channel)
+        public Analyzer(IDftCalculator dftCalculator, Channel channel)
         {
+            myDftCalculator = dftCalculator;
             myChannel = channel;
-        }
-
-        public Analyzer(double[] vals, double frq)
-        {
-            myChannel = new Channel(vals.Length);
-            myChannel.SamplingFrq = frq;
-
-            for (int i = 0; i < vals.Length; i++)
-            {
-                myChannel.values[i] = vals[i];
-            }
         }
 
         public void SetupChannel(int begin, int end)
@@ -62,7 +50,7 @@ namespace CGProject1.SignalProcessing
 
         public Channel LogarithmicAsd()
         {
-            var res = new Channel(SamplesCount) {Name = $"[Logarithmic ASD] {myChannel.Name}", Source = "Analyzer"};
+            var res = new Channel(SamplesCount) { Name = $"[Logarithmic ASD] {myChannel.Name}", Source = "Analyzer" };
 
             for (int i = 0; i < SamplesCount; i++)
             {
@@ -76,7 +64,7 @@ namespace CGProject1.SignalProcessing
 
         public Channel LogarithmicPsd()
         {
-            var res = new Channel(SamplesCount) {Name = $"[Logarithmic PSD] {myChannel.Name}", Source = "Analyzer"};
+            var res = new Channel(SamplesCount) { Name = $"[Logarithmic PSD] {myChannel.Name}", Source = "Analyzer" };
 
             for (int i = 0; i < SamplesCount; i++)
             {
@@ -90,7 +78,7 @@ namespace CGProject1.SignalProcessing
 
         public Channel AmplitudeSpectralDensity()
         {
-            var res = new Channel(SamplesCount) {Name = $"[ASD] {myChannel.Name}", Source = "Analyzer"};
+            var res = new Channel(SamplesCount) { Name = $"[ASD] {myChannel.Name}", Source = "Analyzer" };
 
             for (int i = 0; i < SamplesCount; i++)
             {
@@ -104,7 +92,7 @@ namespace CGProject1.SignalProcessing
 
         public Channel PowerSpectralDensity()
         {
-            var res = new Channel(SamplesCount) {Name = $"[PSD] {myChannel.Name}", Source = "Analyzer"};
+            var res = new Channel(SamplesCount) { Name = $"[PSD] {myChannel.Name}", Source = "Analyzer" };
 
             for (int i = 0; i < SamplesCount; i++)
             {
@@ -187,18 +175,14 @@ namespace CGProject1.SignalProcessing
             }
         }
 
-        private Complex[] FFT(Complex[] input) {
-            if (input.Length < 2) {
-                return new Complex[0];
+        private Complex[] FFT(Complex[] input)
+        {
+            if (input.Length < 2)
+            {
+                return Array.Empty<Complex>();
             }
 
-            var arr = new fftwf_complexarray(input);
-            var outArr = new fftwf_complexarray(input.Length);
-
-            var plan = fftwf_plan.dft_1d(input.Length, arr, outArr, fftw_direction.Forward, fftw_flags.Estimate);
-            plan.Execute();
-
-            return outArr.GetData_Complex();
+            return myDftCalculator.Calculate(input);
         }
     }
 }

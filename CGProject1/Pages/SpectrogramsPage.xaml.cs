@@ -32,8 +32,12 @@ namespace CGProject1.Pages
 
         private bool settingsLoaded;
 
-        public SpectrogramsPage()
+        private readonly IDftCalculator myDftCalculator;
+
+        public SpectrogramsPage(IDftCalculator dftCalculator)
         {
+            myDftCalculator = dftCalculator;
+
             begin = 0;
             end = 0;
 
@@ -131,7 +135,7 @@ namespace CGProject1.Pages
             var channelPanel = new StackPanel();
             border.Child = channelPanel;
 
-            var sp = new Spectrogram(channel)
+            var sp = new Spectrogram(myDftCalculator, channel)
             {
                 Begin = begin,
                 End = end,

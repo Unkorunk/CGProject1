@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
@@ -20,7 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FileFormats\FileFormats.csproj" />
+    <ProjectReference Include="..\CGProject1.Chart\CGProject1.Chart.csproj" />
+    <ProjectReference Include="..\CGProject1.FileFormat\CGProject1.FileFormat.csproj" />
+    <ProjectReference Include="..\CGProject1.SignalProcessing\CGProject1.SignalProcessing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

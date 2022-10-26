@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
+using CGProject1.SignalProcessing.Models;
 
 namespace CGProject1.SignalProcessing {
     public class Serializer {

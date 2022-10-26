@@ -22,11 +22,6 @@ namespace CGProject1
             this.Analyzer = analyzer;
         }
 
-        public ChartAnalyzerFactory(Channel channel)
-        {
-            this.Analyzer = new Analyzer(channel);
-        }
-        
         private string MappingXAxis(int idx, ChartLine chart)
         {
             double curVal = chart.Channel.DeltaTime * idx;

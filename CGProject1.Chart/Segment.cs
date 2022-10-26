@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CGProject1
+namespace CGProject1.Chart
 {
     public class Segment
     {
@@ -13,7 +13,7 @@ namespace CGProject1
             Left = 4,
             Right = 8
         }
-        
+
         public delegate void DelChange(Segment sender, SegmentChange segmentChange);
 
         public event DelChange OnChange;
@@ -76,11 +76,11 @@ namespace CGProject1
             _left = 0;
             _right = 0;
         }
-        
+
         public Segment(int minValue, int maxValue)
         {
             if (minValue > maxValue) throw new ArgumentException();
-            
+
             _minValue = minValue;
             _maxValue = maxValue;
 
@@ -91,7 +91,7 @@ namespace CGProject1
         public Segment(int left, int right, int minValue, int maxValue) : this(minValue, maxValue)
         {
             if (left > right) throw new ArgumentException();
-            
+
             _left = Math.Clamp(left, _minValue, _right);
             _right = Math.Clamp(right, _left, _maxValue);
         }
@@ -108,7 +108,7 @@ namespace CGProject1
 
             if (oldLeft != _left) segmentChange |= SegmentChange.Left;
             if (oldRight != _right) segmentChange |= SegmentChange.Right;
-            
+
             if (segmentChange != SegmentChange.None) OnChange?.Invoke(this, segmentChange);
         }
 
@@ -119,7 +119,7 @@ namespace CGProject1
             var segmentChange = SegmentChange.None;
             int oldLeft = _left, oldRight = _right;
             int oldMinValue = _minValue, oldMaxValue = _maxValue;
-            
+
             _minValue = minValue;
             _maxValue = maxValue;
             _left = Math.Clamp(_left, _minValue, _maxValue);
@@ -129,7 +129,7 @@ namespace CGProject1
             if (oldMaxValue != _maxValue) segmentChange |= SegmentChange.Right;
             if (oldLeft != _left) segmentChange |= SegmentChange.Left;
             if (oldRight != _right) segmentChange |= SegmentChange.Right;
-            
+
             if (segmentChange != SegmentChange.None) OnChange?.Invoke(this, segmentChange);
         }
 
@@ -151,14 +151,18 @@ namespace CGProject1
             SetLeftRight(segment._left, segment._right);
         }
 
-        public void Shift(int delta) {
-            if (delta > 0) {
+        public void Shift(int delta)
+        {
+            if (delta > 0)
+            {
                 delta = Math.Min(delta, _maxValue - _right);
             }
-            if (delta < 0) {
+
+            if (delta < 0)
+            {
                 delta = Math.Max(delta, _minValue - _left);
             }
-            
+
             SetLeftRight(_left + delta, _right + delta);
         }
     }

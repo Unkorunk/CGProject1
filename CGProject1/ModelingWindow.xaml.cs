@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using CGProject1.Chart;
 using CGProject1.SignalProcessing;
+using CGProject1.SignalProcessing.Models;
 
 
 namespace CGProject1

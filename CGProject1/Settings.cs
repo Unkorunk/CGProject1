@@ -12,9 +12,9 @@ namespace CGProject1
         private static readonly Configuration Configuration =
             ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
 
-        private readonly Dictionary<string, string> values = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> values = new();
 
-        private static readonly Dictionary<string, Settings> Instances = new Dictionary<string, Settings>();
+        private static readonly Dictionary<string, Settings> Instances = new();
 
         public string Section { get; }
 

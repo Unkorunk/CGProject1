@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CGProject1.SignalProcessing {
+﻿namespace CGProject1.SignalProcessing.Models {
     public class ModelPreset {
         public ModelPreset(int id, double[] args, double[][] varargs) {
             this.ModelId = id;
