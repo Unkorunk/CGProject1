@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FileFormats
+namespace CGProject1.FileFormat
 {
     public class FileInfo
     {

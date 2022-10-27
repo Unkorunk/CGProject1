@@ -1,8 +1,8 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using CGProject1.FileFormat;
 using CGProject1.SignalProcessing;
-using FileFormats;
 using NAudio.Wave;
 
 namespace CGProject1.Pages

@@ -1,4 +1,4 @@
-﻿namespace FileFormats
+﻿namespace CGProject1.FileFormat
 {
     public interface IReader
     {

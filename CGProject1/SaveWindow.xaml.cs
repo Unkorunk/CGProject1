@@ -4,9 +4,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using CGProject1.FileFormat;
 using CGProject1.SignalProcessing;
-using FileFormats;
 using Microsoft.Win32;
+using FileInfo = CGProject1.FileFormat.FileInfo;
 
 namespace CGProject1 {
     public partial class SaveWindow : Window {
@@ -115,9 +116,9 @@ namespace CGProject1 {
             }
         }
 
-        private FileFormats.FileInfo SignalToFileInfo(Signal signal, int begin, int end)
+        private FileInfo SignalToFileInfo(Signal signal, int begin, int end)
         {
-            var fileInfo = new FileFormats.FileInfo
+            var fileInfo = new FileInfo
             {
                 nChannels = signal.channels.Count,
                 nSamplesPerSec = signal.SamplingFrq,

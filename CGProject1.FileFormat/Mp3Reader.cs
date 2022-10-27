@@ -2,7 +2,7 @@
 using System.IO;
 using NAudio.Wave;
 
-namespace FileFormats
+namespace CGProject1.FileFormat
 {
     public class Mp3Reader : IReader
     {

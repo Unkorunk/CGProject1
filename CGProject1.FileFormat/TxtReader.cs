@@ -3,7 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace FileFormats
+namespace CGProject1.FileFormat
 {
     public class TxtReader : IReader
     {
