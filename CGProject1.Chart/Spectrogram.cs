@@ -12,11 +12,11 @@ namespace CGProject1.Chart
 {
     public class Spectrogram : FrameworkElement, IDisposable
     {
-        private IDftCalculator myDftCalculator;
+        private readonly SpectrogramAnalyzer myAnalyzer;
 
         public Spectrogram(IDftCalculator dftCalculator, Channel channel)
         {
-            myDftCalculator = dftCalculator;
+            myAnalyzer = new SpectrogramAnalyzer(channel, dftCalculator);
             curChannel = channel;
 
             this.begin = 0;
@@ -24,7 +24,7 @@ namespace CGProject1.Chart
 
             SizeChanged += (object sender, SizeChangedEventArgs e) =>
             {
-                SetupChannel(curChannel);
+                SetupChannel();
             };
         }
 
@@ -33,7 +33,7 @@ namespace CGProject1.Chart
             get => coeffN; set
             {
                 coeffN = value;
-                SetupChannel(curChannel);
+                SetupChannel();
             }
         }
 
@@ -51,7 +51,7 @@ namespace CGProject1.Chart
             get => spectrogramHeight; set
             {
                 spectrogramHeight = value;
-                SetupChannel(curChannel);
+                SetupChannel();
             }
         }
 
@@ -84,7 +84,7 @@ namespace CGProject1.Chart
             get => begin; set
             {
                 begin = value;
-                SetupChannel(curChannel);
+                SetupChannel();
             }
         }
 
@@ -93,7 +93,7 @@ namespace CGProject1.Chart
             get => end; set
             {
                 end = value;
-                SetupChannel(curChannel);
+                SetupChannel();
             }
         }
 
@@ -131,7 +131,7 @@ namespace CGProject1.Chart
         {
             if (matrix == null)
             {
-                SetupChannel(curChannel);
+                SetupChannel();
                 return;
             }
 
@@ -436,21 +436,7 @@ namespace CGProject1.Chart
             drawingContext.DrawRectangle(Brushes.Transparent, new Pen(Brushes.Black, 1.0), new Rect(ActualWidth - rightOffset + 5, titleOffset, bitmap.PixelWidth, height));
         }
 
-        private struct CalculationResult
-        {
-            public bool initialized;
-
-            public double[,] matrix;
-            public double minValue;
-            public double maxValue;
-
-            public double height;
-
-            public static CalculationResult Empty =
-                new CalculationResult() { initialized = false };
-        }
-
-        private void SetupChannel(Channel channel)
+        private void SetupChannel()
         {
             if (tokenSource != null) {
                 tokenSource.Cancel();
@@ -463,185 +449,36 @@ namespace CGProject1.Chart
             tokenSource = new CancellationTokenSource();
             tokenSourceDisposed = false;
 
-            Task.Factory.StartNew(() => CalculateMatrix(channel, this.begin, this.end, tokenSource.Token), tokenSource.Token)
+            var height = spectrogramHeight;
+            Task.Factory.StartNew(() => CalculateMatrix(begin, end, tokenSource.Token), tokenSource.Token)
                 .ContinueWith((mtx) =>
                 {
                     var result = mtx.Result;
 
-                    if (result.initialized)
+                    if (result != null)
                     {
-                        this.matrix = result.matrix;
-                        this.minValue = result.minValue;
-                        this.maxValue = result.maxValue;
+                        matrix = result.matrix;
+                        minValue = result.minValue;
+                        maxValue = result.maxValue;
 
-                        this.Height = result.height;
+                        Height = height;
 
                         InvalidateVisual();
                     }
                 }, tokenSource.Token, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
         }
 
-        private CalculationResult CalculateMatrix(Channel channel, int left, int right, CancellationToken token)
+        private SpectrogramAnalyzer.CalculationResult? CalculateMatrix(int left, int right, CancellationToken token)
         {
             if (ActualWidth == 0 || spectrogramHeight == 0)
             {
-                return CalculationResult.Empty;
+                return null;
             }
 
-            int len = right - left + 1;
+            var width = (int)(ActualWidth - rightOffset - leftOffset);
+            var height = (int)(spectrogramHeight - titleOffset);
 
-            int width = (int)(ActualWidth - rightOffset - leftOffset);
-            int height = (int)(spectrogramHeight - titleOffset);
-
-            // step 1
-            int sectionsCount = width;
-            int samplesPerSection = height;
-
-            if (width <= 0 || height <= 0)
-            {
-                return CalculationResult.Empty;
-            }
-
-            var spectrogramMatrix = new double[samplesPerSection, sectionsCount];
-
-            // step 2
-            double sectionBase = (double)len / sectionsCount;
-
-            // step 3
-            int sectionN = (int)(sectionBase * coeffN);
-
-            // step 4
-            int N = 2 * samplesPerSection;
-
-            int NN = N;
-            if (sectionN > N)
-            {
-                int mult = (sectionN + N - 1) / N;
-                NN = mult * N;
-            }
-            int l = NN / N;
-
-            ThreadPool.GetMaxThreads(out var threadCount, out var completionPortThreads);
-            var countdownEvent = new CountdownEvent(threadCount);
-
-            // step 5
-            WaitCallback threadAction = (obj) =>
-            {
-                int offset = (int)obj;
-
-                for (int i = offset; i < sectionsCount; i += threadCount)
-                {
-                    if (token.IsCancellationRequested) break;
-
-                    double[] x = new double[NN];
-
-                    // step 5.1
-                    int start = (int)(i * sectionBase);
-
-                    // step 5.3
-                    double avrg = 0;
-                    for (int j = 0; j < sectionN; j++)
-                    {
-                        if (j + start >= len)
-                        {
-                            x[j] = 0;
-                        }
-                        else
-                        {
-                            x[j] = channel.values[left + j + start];
-                        }
-
-                        avrg += x[j];
-                    }
-
-                    avrg /= sectionN;
-
-                    for (int j = 0; j < sectionN; j++)
-                    {
-                        x[j] -= avrg;
-                    }
-
-                    if (token.IsCancellationRequested) break;
-                    // step 5.4
-                    for (int j = 0; j < sectionN; j++)
-                    {
-                        double w = 0.54 - 0.46 * Math.Cos(2 * Math.PI * j / Math.Max(1, sectionN - 1));
-                        x[j] *= w;
-                    }
-
-                    // step 5.5
-                    for (int j = sectionN; j < NN; j++)
-                    {
-                        x[j] = 0;
-                    }
-
-                    if (token.IsCancellationRequested) break;
-                    // step 5.6
-
-                    var channel1 = new Channel(x.Length);
-                    channel1.SamplingFrq = channel1.SamplingFrq;
-
-                    for (int j = 0; j < x.Length; j++)
-                    {
-                        channel1.values[j] = x[j];
-                    }
-
-                    var analyzer = new Analyzer(myDftCalculator, channel1);
-                    analyzer.SetupChannel(0, x.Length);
-                    Channel amps = analyzer.AmplitudeSpectralDensity();
-
-                    int L1 = -(l - 1) / 2, L2 = l / 2;
-                    for (int k = 0; k < samplesPerSection && !token.IsCancellationRequested; k++)
-                    {
-                        double sumAvg = 0.0;
-                        for (int j = L1; j <= L2; j++)
-                        {
-                            sumAvg += amps.values[Math.Abs(l * k + j) % amps.values.Length];
-                        }
-                        amps.values[k] = sumAvg / l;
-                    }
-
-                    if (token.IsCancellationRequested) break;
-                    // step 5.7
-                    for (int j = 0; j < samplesPerSection; j++)
-                    {
-                        spectrogramMatrix[j, i] = amps.values[j];
-                    }
-                }
-
-                countdownEvent.Signal();
-            };
-
-            for (int i = 0; i < threadCount; i++)
-            {
-                ThreadPool.QueueUserWorkItem(threadAction, i);
-            }
-
-            try { countdownEvent.Wait(token); } catch (OperationCanceledException) { }
-
-            // step 6
-            double maxVal = double.MinValue;
-            double minVal = double.MaxValue;
-
-            for (int i = 0; i < sectionsCount; i++)
-            {
-                for (int j = 0; j < samplesPerSection; j++)
-                {
-                    maxVal = Math.Max(maxVal, spectrogramMatrix[j, i]);
-                    minVal = Math.Min(minVal, spectrogramMatrix[j, i]);
-                }
-            }
-
-            return new CalculationResult()
-            {
-                initialized = true,
-
-                matrix = spectrogramMatrix,
-                maxValue = maxVal,
-                minValue = minVal,
-
-                height = spectrogramHeight
-            };
+            return myAnalyzer.CalculateMatrix(left, right, width, height, coeffN, token);
         }
 
         public void Dispose()
