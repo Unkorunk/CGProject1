@@ -454,7 +454,7 @@ namespace CGProject1
             ChartPreview.Children.Add(chart);
         }
 
-        private void OnSave_Click(object sender, RoutedEventArgs e) {
+        private async void OnSave_Click(object sender, RoutedEventArgs e) {
             Channel channel = null;
 
             if (this.curModelType != ModelType.Model) {
@@ -493,7 +493,7 @@ namespace CGProject1
                 newSignal.StartDateTime = Modelling.defaultStartDateTime;
                 newSignal.channels.Add(channel);
                 newSignal.UpdateChannelsInfo();
-                MainWindow.Instance.ResetSignal(newSignal);
+                await MainWindow.Instance.ResetSignal(newSignal);
                 this.currentModel.IncCounter();
                 return;
             }

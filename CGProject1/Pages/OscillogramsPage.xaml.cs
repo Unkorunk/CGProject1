@@ -4,6 +4,7 @@ using System.Windows;
 using CGProject1.Chart;
 using System.Windows.Controls;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using CGProject1.SignalProcessing;
 using Xceed.Wpf.Toolkit;
 
@@ -95,12 +96,12 @@ namespace CGProject1.Pages
             }
         }
 
-        private void MySegment_OnChange(Segment sender, Segment.SegmentChange segmentChange)
+        private async void MySegment_OnChange(Segment sender, Segment.SegmentChange segmentChange)
         {
             if (segmentChange.HasFlag(Segment.SegmentChange.Left) ||
                 segmentChange.HasFlag(Segment.SegmentChange.Right))
             {
-                MainWindow.Instance.UpdateActiveSegment(mySegment.Left, mySegment.Right);
+                await MainWindow.Instance.UpdateActiveSegment(mySegment.Left, mySegment.Right);
 
                 foreach (var chart in charts)
                 {
@@ -109,8 +110,9 @@ namespace CGProject1.Pages
             }
         }
 
-        public void UpdateActiveSegment(int begin, int end)
+        public Task UpdateActiveSegment(int begin, int end)
         {
+            return Task.CompletedTask;
         }
 
         public void Reset(Signal newSignal)

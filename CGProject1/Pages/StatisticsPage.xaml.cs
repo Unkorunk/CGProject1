@@ -1,30 +1,38 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using CGProject1.Pages;
 using CGProject1.SignalProcessing;
 
-namespace CGProject1 {
+namespace CGProject1
+{
     /// <summary>
     /// Interaction logic for StatisticsPage.xaml
     /// </summary>
-    public partial class StatisticsPage : Page, IChannelComponent {
+    public partial class StatisticsPage : Page, IChannelComponent
+    {
         private readonly Dictionary<string, StatisticsItem> subscribed = new Dictionary<string, StatisticsItem>();
 
         private int begin;
         private int end;
 
-        public StatisticsPage() {
+        public StatisticsPage()
+        {
             InitializeComponent();
         }
 
-        public void Reset(Signal signal) {
+        public void Reset(Signal signal)
+        {
             subscribed.Clear();
             ChannelsPanel.Children.Clear();
         }
 
-        public void AddChannel(Channel chart) {
-            if (!subscribed.ContainsKey(chart.Name)) {
+        public void AddChannel(Channel chart)
+        {
+            if (!subscribed.ContainsKey(chart.Name))
+            {
                 StatisticsItem item = new StatisticsItem(chart);
 
                 //ChartLine.OnChangeIntervalDel onChangeInterval = (sender) =>
@@ -33,7 +41,8 @@ namespace CGProject1 {
                 MenuItem closeChannel = new MenuItem();
                 closeChannel.Header = "Закрыть канал";
 
-                closeChannel.Click += (object sender, RoutedEventArgs args) => {
+                closeChannel.Click += (object sender, RoutedEventArgs args) =>
+                {
                     subscribed.Remove(chart.Name);
                     ChannelsPanel.Children.Remove(item);
                 };
@@ -50,13 +59,13 @@ namespace CGProject1 {
             }
         }
 
-        public void UpdateActiveSegment(int begin, int end) {
+        public async Task UpdateActiveSegment(int begin, int end)
+        {
             this.begin = begin;
             this.end = end;
 
-            foreach (var item in subscribed.Values) {
-                item.UpdateInfo(begin, end);
-            }
+            var tasks = subscribed.Values.Select(item => item.UpdateInfo(begin, end));
+            await Task.WhenAll(tasks);
         }
     }
 }

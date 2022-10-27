@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using CGProject1.DtfCalculator;
@@ -22,7 +24,7 @@ namespace CGProject1
         private static readonly Settings Settings = Settings.GetInstance(nameof(MainWindow));
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
         private static readonly IDftCalculator DftCalculator = new FftwDftCalculator();
-        
+
         public static MainWindow Instance { get; private set; }
 
         private ModelingWindow modelingWindow;
@@ -32,6 +34,7 @@ namespace CGProject1
         private bool isSavingWindowShowing = false;
 
         [NotNull] private readonly StatisticsPage statisticsPage = new StatisticsPage();
+
         [NotNull] private readonly LayoutAnchorable statisticsPane = new LayoutAnchorable
         {
             ContentId = "Statistics", Title = "Statistics",
@@ -39,6 +42,7 @@ namespace CGProject1
         };
 
         [NotNull] private readonly ChannelsPage channelsPage = new ChannelsPage();
+
         [NotNull] private readonly LayoutAnchorable channelsPane = new LayoutAnchorable
         {
             ContentId = "Channels", Title = "Channels",
@@ -46,6 +50,7 @@ namespace CGProject1
         };
 
         [NotNull] private readonly OscillogramsPage oscillogramsPage = new OscillogramsPage();
+
         [NotNull] private readonly LayoutAnchorable oscillogramsPane = new LayoutAnchorable
         {
             ContentId = "Oscillograms", Title = "Oscillograms",
@@ -53,6 +58,7 @@ namespace CGProject1
         };
 
         [NotNull] private readonly AnalyzerPage analyzerPage = new AnalyzerPage(DftCalculator);
+
         [NotNull] private readonly LayoutAnchorable analyzerPane = new LayoutAnchorable()
         {
             ContentId = "Analyzer", Title = "Fourier analysis",
@@ -60,6 +66,7 @@ namespace CGProject1
         };
 
         [NotNull] private readonly SpectrogramsPage spectrogramsPage = new SpectrogramsPage(DftCalculator);
+
         [NotNull] private readonly LayoutAnchorable spectrogramsPane = new LayoutAnchorable
         {
             ContentId = "Spectrograms", Title = "Spectrograms",
@@ -67,6 +74,7 @@ namespace CGProject1
         };
 
         [NotNull] private readonly AboutSignalPage aboutSignalPage = new AboutSignalPage();
+
         [NotNull] private readonly LayoutAnchorable aboutSignalPane = new LayoutAnchorable
         {
             ContentId = "AboutSignal", Title = "About signal",
@@ -74,6 +82,7 @@ namespace CGProject1
         };
 
         [NotNull] private readonly MicrophonePage microphonePage = new MicrophonePage();
+
         [NotNull] private readonly LayoutAnchorable microphonePane = new LayoutAnchorable
         {
             ContentId = "Microphone", Title = "Microphone",
@@ -99,7 +108,7 @@ namespace CGProject1
 
                 Serializer.SerializeModels(Modelling.defaultPath,
                     new List<ChannelConstructor>[]
-                        {Modelling.discreteModels, Modelling.continiousModels, Modelling.randomModels});
+                        { Modelling.discreteModels, Modelling.continiousModels, Modelling.randomModels });
                 Settings.Save();
             };
 
@@ -117,7 +126,7 @@ namespace CGProject1
                 oscillogramsPage, analyzerPage, spectrogramsPage,
                 microphonePage
             };
-            
+
             panes = new LayoutAnchorable[]
             {
                 channelsPane, aboutSignalPane, statisticsPane,
@@ -137,7 +146,7 @@ namespace CGProject1
                 panes[i].Content = frame;
             }
 
-            ResetSignal(null);
+            Task.WaitAll(ResetSignal(null));
             LoadLayout();
         }
 
@@ -165,18 +174,16 @@ namespace CGProject1
             OpenPane(spectrogramsPane);
         }
 
-        public void UpdateActiveSegment(int begin, int end)
+        public async Task UpdateActiveSegment(int begin, int end)
         {
             this.begin = begin;
             this.end = end;
 
-            foreach (var page in pages)
-            {
-                page.UpdateActiveSegment(begin, end);
-            }
+            var tasks = pages.Select(page => page.UpdateActiveSegment(begin, end));
+            await Task.WhenAll(tasks);
         }
 
-        public void ResetSignal(Signal newSignal)
+        public async Task ResetSignal(Signal newSignal)
         {
             CloseAll();
 
@@ -196,7 +203,7 @@ namespace CGProject1
                 return;
             }
 
-            UpdateActiveSegment(0, newSignal.SamplesCount - 1);
+            await UpdateActiveSegment(0, newSignal.SamplesCount - 1);
 
             for (int i = 0; i < currentSignal.channels.Count; i++)
             {
@@ -260,10 +267,10 @@ namespace CGProject1
         private void AboutClick(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Система визуализации и анализа многоканальных сигналов\r\n" +
-                "Авторы:\r\n" +
-                "Михалев Юрий (SmelJey)\r\n" +
-                "Калинин Владислав (Unkorunk)\r\n" +
-                "29.02.2020",
+                            "Авторы:\r\n" +
+                            "Михалев Юрий (SmelJey)\r\n" +
+                            "Калинин Владислав (Unkorunk)\r\n" +
+                            "29.02.2020",
                 "О программе", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -281,6 +288,7 @@ namespace CGProject1
                 this.modelingWindow.Topmost = true;
                 this.modelingWindow.Topmost = false;
             }
+
             Logger.Info("Modeling window opened");
         }
 
@@ -301,7 +309,7 @@ namespace CGProject1
             channelsPage.AddChannel(channel);
         }
 
-        private void OpenFileClick(object sender, RoutedEventArgs e)
+        private async void OpenFileClick(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog()
             {
@@ -310,7 +318,6 @@ namespace CGProject1
                          "wave files (*.wav;*.wave)|*.wav;*.wave|" +
                          "dat files (*.dat)|*.dat|" +
                          "mp3 files (*.mp3)|*.mp3"
-                         
             };
 
             openFileDialog.FilterIndex = Settings.GetOrDefault("filterIndex", openFileDialog.FilterIndex);
@@ -337,7 +344,7 @@ namespace CGProject1
                         throw new NotImplementedException();
                 }
 
-                if (reader.TryRead(File.ReadAllBytes(openFileDialog.FileName), out var fileInfo))
+                if (reader.TryRead(await File.ReadAllBytesAsync(openFileDialog.FileName), out var fileInfo))
                 {
                     var signal = new Signal(Path.GetFileName(openFileDialog.FileName));
                     signal.SamplingFrq = fileInfo.nSamplesPerSec;
@@ -358,14 +365,14 @@ namespace CGProject1
 
                     signal.UpdateChannelsInfo();
 
-                    ResetSignal(signal);
+                    await ResetSignal(signal);
                 }
                 else
                 {
                     MessageBox.Show("Incorrect format", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     Logger.Info($"File {openFileDialog.FileName} has incorrect format");
                 }
-                
+
                 Settings.Set("filterIndex", openFileDialog.FilterIndex);
             }
         }
@@ -390,6 +397,7 @@ namespace CGProject1
                 savingWindow.Topmost = true;
                 savingWindow.Topmost = false;
             }
+
             Logger.Info("Save window opened");
         }
 
@@ -402,13 +410,16 @@ namespace CGProject1
             }
         }
 
-        private void LoadLayout() {
-            if (!File.Exists("lastLayout")) {
+        private void LoadLayout()
+        {
+            if (!File.Exists("lastLayout"))
+            {
                 return;
             }
 
             var xmlDeserializer = new XmlLayoutSerializer(MyDockingManager);
-            using (var reader = new StreamReader("lastLayout")) {
+            using (var reader = new StreamReader("lastLayout"))
+            {
                 xmlDeserializer.LayoutSerializationCallback += (s, e) =>
                 {
                     object o = e.Content;

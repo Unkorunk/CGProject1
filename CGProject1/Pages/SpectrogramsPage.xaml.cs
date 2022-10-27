@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -99,7 +100,7 @@ namespace CGProject1.Pages
             Spectrograms.Children.Clear();
         }
 
-        public void UpdateActiveSegment(int begin, int end)
+        public Task UpdateActiveSegment(int begin, int end)
         {
             this.begin = begin;
             this.end = end;
@@ -117,6 +118,8 @@ namespace CGProject1.Pages
             {
                 chart.Segment.SetLeftRight(begin, end);
             }
+
+            return Task.CompletedTask;
         }
 
         public void AddChannel(Channel channel)

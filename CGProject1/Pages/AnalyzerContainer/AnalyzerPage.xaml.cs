@@ -134,9 +134,10 @@ namespace CGProject1.Pages.AnalyzerContainer
             };
         }
 
-        public void UpdateActiveSegment(int left, int right)
+        public Task UpdateActiveSegment(int left, int right)
         {
             myActiveSegment.SetLeftRight(left, right);
+            return Task.CompletedTask;
         }
 
         public void Reset(Signal newSignal)

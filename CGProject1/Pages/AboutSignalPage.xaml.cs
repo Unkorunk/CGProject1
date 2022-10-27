@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using CGProject1.SignalProcessing;
 
@@ -57,7 +58,7 @@ namespace CGProject1.Pages {
 
         public void AddChannel(Channel channel) { }
 
-        public void UpdateActiveSegment(int start, int end) {
+        public Task UpdateActiveSegment(int start, int end) {
             int fragmentLen = end - start + 1;
 
             activeSegmentText.Content = $"[{start}; {end}] ({fragmentLen} отсчетов)";
@@ -68,6 +69,8 @@ namespace CGProject1.Pages {
                 TimeSpan fragmentDuration = TimeSpan.FromSeconds(MainWindow.Instance.currentSignal.DeltaTime * fragmentLen);
                 activeSegmentLengthText.Content = $"{fragmentDuration.Days} суток {fragmentDuration.Hours} часов {fragmentDuration.Minutes} минут {(fragmentDuration.Seconds + (double)fragmentDuration.Milliseconds / 1000).ToString("0.000", CultureInfo.InvariantCulture)} секунд";
             }
+
+            return Task.CompletedTask;
         }
 
         private void InfoLabelInit(ref Label label) {

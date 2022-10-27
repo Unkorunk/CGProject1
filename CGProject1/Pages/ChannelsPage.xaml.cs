@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -59,6 +60,9 @@ namespace CGProject1 {
             ChannelsPanel.Children.Add(chart);
         }
 
-        public void UpdateActiveSegment(int begin, int end) { }
+        public Task UpdateActiveSegment(int begin, int end)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

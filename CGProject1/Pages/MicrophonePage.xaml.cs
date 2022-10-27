@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using CGProject1.FileFormat;
@@ -27,7 +28,7 @@ namespace CGProject1.Pages
             DeviceComboBox.SelectedIndex = DeviceComboBox.Items.Count != 0 ? 0 : -1;
         }
 
-        private void RecordButton_OnClick(object sender, RoutedEventArgs e)
+        private async void RecordButton_OnClick(object sender, RoutedEventArgs e)
         {
             if (sender is Button button)
             {
@@ -40,7 +41,7 @@ namespace CGProject1.Pages
                 }
                 else
                 {
-                    End();
+                    await End();
                 }
             }
         }
@@ -73,7 +74,7 @@ namespace CGProject1.Pages
             }
         }
 
-        private void End()
+        private async Task End()
         {
             if (waveIn != null)
             {
@@ -81,7 +82,7 @@ namespace CGProject1.Pages
                 waveIn.Dispose();
                 waveIn = null;
 
-                var waveReader = new Mp3Reader {IsMp3FileReader = false};
+                var waveReader = new Mp3Reader { IsMp3FileReader = false };
                 if (waveReader.TryRead(memoryStream.GetBuffer(), out var fileInfo))
                 {
                     var signal = new Signal("Microphone Signal");
@@ -98,10 +99,10 @@ namespace CGProject1.Pages
                             signal.channels[i].values[j] = fileInfo.data[j, i];
                         }
                     }
-                    
+
                     signal.UpdateChannelsInfo();
 
-                    MainWindow.Instance.ResetSignal(signal);
+                    await MainWindow.Instance.ResetSignal(signal);
                 }
 
                 waveFileWriter.Dispose();
@@ -117,8 +118,9 @@ namespace CGProject1.Pages
         {
         }
 
-        public void UpdateActiveSegment(int start, int end)
+        public Task UpdateActiveSegment(int start, int end)
         {
+            return Task.CompletedTask;
         }
     }
 }
