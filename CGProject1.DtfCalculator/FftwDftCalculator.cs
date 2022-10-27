@@ -2,9 +2,9 @@
 using CGProject1.SignalProcessing;
 using FFTWSharp;
 
-namespace CGProject1.FFTWSharp
+namespace CGProject1.DtfCalculator
 {
-    internal class FftwDftCalculator : IDftCalculator
+    public class FftwDftCalculator : IDftCalculator
     {
         public Complex[] Calculate(Complex[] input)
         {

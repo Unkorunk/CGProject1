@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CGProject1.Chart\CGProject1.Chart.csproj" />
+    <ProjectReference Include="..\CGProject1.DtfCalculator\CGProject1.DtfCalculator.csproj" />
     <ProjectReference Include="..\CGProject1.FileFormat\CGProject1.FileFormat.csproj" />
     <ProjectReference Include="..\CGProject1.SignalProcessing\CGProject1.SignalProcessing.csproj" />
   </ItemGroup>
@@ -48,9 +49,6 @@
 
   <ItemGroup>
     <None Update="libfftw3-3.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="libfftw3f-3.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

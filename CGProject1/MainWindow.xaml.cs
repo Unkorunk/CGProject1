@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using CGProject1.FFTWSharp;
+using CGProject1.DtfCalculator;
 using CGProject1.FileFormat;
 using CGProject1.Pages;
 using CGProject1.Pages.AnalyzerContainer;

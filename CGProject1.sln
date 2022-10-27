@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CGProject1", "CGProject1\CG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CGProject1.FileFormat", "CGProject1.FileFormat\CGProject1.FileFormat.csproj", "{E523A41B-CF17-4B55-8757-E6F0D654DC89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CGProject1.SignalProcessing", "CGProject1.SignalProcessing\CGProject1.SignalProcessing.csproj", "{1F020E0A-B729-4587-8921-4FD6902B422A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CGProject1.SignalProcessing", "CGProject1.SignalProcessing\CGProject1.SignalProcessing.csproj", "{1F020E0A-B729-4587-8921-4FD6902B422A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CGProject1.Chart", "CGProject1.Chart\CGProject1.Chart.csproj", "{6695F8B7-6B78-4F13-BF86-B5FF7DCC790B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CGProject1.Chart", "CGProject1.Chart\CGProject1.Chart.csproj", "{6695F8B7-6B78-4F13-BF86-B5FF7DCC790B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CGProject1.DtfCalculator", "CGProject1.DtfCalculator\CGProject1.DtfCalculator.csproj", "{5BC25704-26DB-4095-9FCB-9C8E148466FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{6695F8B7-6B78-4F13-BF86-B5FF7DCC790B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6695F8B7-6B78-4F13-BF86-B5FF7DCC790B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6695F8B7-6B78-4F13-BF86-B5FF7DCC790B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BC25704-26DB-4095-9FCB-9C8E148466FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BC25704-26DB-4095-9FCB-9C8E148466FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BC25704-26DB-4095-9FCB-9C8E148466FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BC25704-26DB-4095-9FCB-9C8E148466FE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
