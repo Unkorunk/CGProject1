@@ -6,7 +6,6 @@ using System.Windows.Input;
 using System.Windows.Controls;
 using System.Threading.Tasks;
 using System.Threading;
-using System.Transactions;
 using CGProject1.SignalProcessing;
 
 namespace CGProject1
@@ -14,39 +13,32 @@ namespace CGProject1
     /// <summary>
     /// Interaction logic for StatisticsItem.xaml
     /// </summary>
-    public partial class StatisticsItem : UserControl, IDisposable
+    public partial class StatisticsItem : IDisposable
     {
-        private Channel _subscriber;
-
         private int begin;
         private int end;
-        private int length { get => end - begin + 1; }
+        private int length => end - begin + 1;
 
         private CancellationTokenSource tokenSource;
         private bool tokenSourceDisposed = true;
 
-        public Channel Subscriber
-        {
-            get => _subscriber;
-            set
-            {
-                _subscriber = value;
-                UpdateInfo(0, value.SamplesCount - 1);
-            }
-        }
+        private readonly Channel mySubscriber;
+        private readonly StatisticalAnalyzer myAnalyzer;
 
         public StatisticsItem(Channel subscriber)
         {
             InitializeComponent();
 
-            Subscriber = subscriber;
+            mySubscriber = subscriber;
+            myAnalyzer = new StatisticalAnalyzer(subscriber);
         }
 
         public void UpdateInfo(int begin, int end)
         {
-            if (Subscriber == null) return;
+            if (mySubscriber == null) return;
 
-            if (tokenSource != null) {
+            if (tokenSource != null)
+            {
                 tokenSource.Cancel();
                 if (!tokenSourceDisposed)
                 {
@@ -54,6 +46,7 @@ namespace CGProject1
                     tokenSourceDisposed = true;
                 }
             }
+
             tokenSource = new CancellationTokenSource();
             tokenSourceDisposed = false;
             var token = tokenSource.Token;
@@ -61,7 +54,9 @@ namespace CGProject1
             this.begin = begin;
             this.end = end;
 
-            ChannelNameLabel.Content = "Name: " + Subscriber.Name;
+            var request = new StatisticalAnalyzer.Request(begin, end);
+
+            ChannelNameLabel.Content = "Name: " + mySubscriber.Name;
             ChannelIntervalLabel.Content = "Begin: " + (this.begin + 1) + "; End: " + (this.end + 1);
 
             Task.Factory.StartNew(() =>
@@ -69,27 +64,27 @@ namespace CGProject1
                 var leftColumn = new StringBuilder();
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var average = CalcAverage(Subscriber);
+                var average = myAnalyzer.CalcAverage(request);
                 leftColumn.AppendLine(string.Format("Среднее: {0:0.##}", average));
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var variance = CalcVariance(average, Subscriber);
+                var variance = myAnalyzer.CalcVariance(request, average);
                 leftColumn.AppendLine(string.Format("Дисперсия: {0:0.##}", variance));
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var sd = CalcSD(variance);
+                var sd = myAnalyzer.CalcSD(variance);
                 leftColumn.AppendLine(string.Format("Ср.кв.откл: {0:0.##}", sd));
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var variability = CalcVariability(sd, average);
+                var variability = myAnalyzer.CalcVariability(sd, average);
                 leftColumn.AppendLine(string.Format("Вариация: {0:0.##}", variability));
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var skewness = CalcSkewness(variance, average, Subscriber);
+                var skewness = myAnalyzer.CalcSkewness(request, variance, average);
                 leftColumn.AppendLine(string.Format("Асимметрия: {0:0.##}", skewness));
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var kurtosis = CalcKurtosis(variance, average, Subscriber);
+                var kurtosis = myAnalyzer.CalcKurtosis(request, variance, average);
                 leftColumn.Append(string.Format("Эксцесс: {0:0.##}", kurtosis));
 
                 return leftColumn.ToString();
@@ -101,61 +96,62 @@ namespace CGProject1
                 var rightColumn = new StringBuilder();
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var minValue = CalcMinValue(Subscriber);
+                var minValue = myAnalyzer.CalcMinValue(request);
                 rightColumn.AppendLine(string.Format("Минимум: {0:0.##}", minValue));
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var maxValue = CalcMaxValue(Subscriber);
+                var maxValue = myAnalyzer.CalcMaxValue(request);
                 rightColumn.AppendLine(string.Format("Максимум: {0:0.##}", maxValue));
-                
+
                 if (token.IsCancellationRequested) return string.Empty;
-                var quantile5 = CalcQuantile(Subscriber, 0.05);
+                var quantile5 = myAnalyzer.CalcQuantile(request, 0.05);
                 rightColumn.AppendLine(string.Format("Квантиль 0.05: {0:0.##}", quantile5));
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var quantile95 = CalcQuantile(Subscriber, 0.95);
+                var quantile95 = myAnalyzer.CalcQuantile(request, 0.95);
                 rightColumn.AppendLine(string.Format("Квантиль 0.95: {0:0.##}", quantile95));
 
                 if (token.IsCancellationRequested) return string.Empty;
-                var median = CalcQuantile(Subscriber, 0.5);
+                var median = myAnalyzer.CalcQuantile(request, 0.5);
                 rightColumn.Append(string.Format("Медиана: {0:0.##}", median));
 
                 return rightColumn.ToString();
             }, token).ContinueWith((task) => RightLabel.Content = task.Result, token,
                 TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
 
-            if (int.TryParse(IntervalTextBox.Text, out int K))
+            if (int.TryParse(IntervalTextBox.Text, out var k))
             {
-                K = Math.Max(1, K);
+                k = Math.Max(1, k);
 
                 Task.Factory.StartNew(() =>
                 {
-                    var minValue = CalcMinValue(Subscriber);
-                    var maxValue = CalcMaxValue(Subscriber);
+                    var minValue = myAnalyzer.CalcMinValue(request);
+                    var maxValue = myAnalyzer.CalcMaxValue(request);
 
-                    if (this.length > 0)
+                    if (length > 0)
                     {
-                        int[] cnt = new int[K];
-                        for (int i = 0; i < this.length; i++)
+                        var cnt = new int[k];
+                        for (var i = 0; i < length; i++)
                         {
                             if (token.IsCancellationRequested) return null;
-                            double p = (Subscriber.values[this.begin + i] - minValue) / (maxValue - minValue);
+                            var p = (mySubscriber.values[this.begin + i] - minValue) / (maxValue - minValue);
                             if (Math.Abs(maxValue - minValue) < 1e-6) p = 0.0;
-                            cnt[(int)((K - 1) * p)]++;
+                            cnt[(int)((k - 1) * p)]++;
                         }
 
-                        double[] newData = new double[K];
-                        for (int i = 0; i < K; i++)
+                        var newData = new double[k];
+                        for (var i = 0; i < k; i++)
                         {
                             if (token.IsCancellationRequested) return null;
-                            newData[i] = cnt[i] * 1.0 / this.length;
+                            newData[i] = cnt[i] * 1.0 / length;
                         }
 
                         return newData;
                     }
 
                     return null;
-                }, token).ContinueWith((task) => {
+                }, token).ContinueWith((task) =>
+                {
                     if (task.Result != null)
                     {
                         Histogram.Data = task.Result;
@@ -165,16 +161,16 @@ namespace CGProject1
             }
         }
 
-        private void previewTextInput(object sender, TextCompositionEventArgs e)
+        private void IntervalTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !TextIsNumeric(e.Text);
         }
 
-        private void previewPasting(object sender, DataObjectPastingEventArgs e)
+        private void IntervalTextBox_PreviewPasting(object sender, DataObjectPastingEventArgs e)
         {
             if (e.DataObject.GetDataPresent(typeof(string)))
             {
-                string input = (string)e.DataObject.GetData(typeof(string));
+                var input = (string)e.DataObject.GetData(typeof(string));
                 if (!TextIsNumeric(input)) e.CancelCommand();
             }
             else
@@ -183,179 +179,17 @@ namespace CGProject1
             }
         }
 
-        private void textChanged(object sender, TextChangedEventArgs e) => UpdateInfo(this.begin, this.end);
+        private void IntervalTextBox_TextChanged(object sender, TextChangedEventArgs e) =>
+            UpdateInfo(this.begin, this.end);
 
-        private void previewKeyDown(object sender, KeyEventArgs e)
+        private void IntervalTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             e.Handled = (e.Key == Key.Space);
         }
 
-        private bool TextIsNumeric(string input)
+        private static bool TextIsNumeric(string input)
         {
             return input.All(c => char.IsDigit(c) || char.IsControl(c));
-        }
-
-        public double CalcAverage(Channel chart)
-        {
-            if (length <= 0) return 0.0;
-
-            double average = 0.0;
-            for (int i = this.begin; i <= this.end; i++)
-            {
-                average += chart.values[i];
-            }
-            average /= length;
-
-            return average;
-        }
-
-        public double CalcVariance(double average, Channel chart)
-        {
-            if (length <= 0) return 0.0;
-
-            double variance = 0.0;
-            for (int i = this.begin; i <= this.end; i++)
-            {
-                variance += Math.Pow(chart.values[i] - average, 2);
-            }
-            variance /= length;
-
-            return variance;
-        }
-
-        public double CalcSD(double variance) => Math.Sqrt(variance);
-
-        public double CalcVariability(double sd, double average) => sd / average;
-
-        public double CalcSkewness(double variance, double average, Channel chart)
-        {
-            if (length <= 0) return 0.0;
-
-            double mse3 = Math.Pow(variance, 3.0 / 2.0);
-
-            double skewness = 0.0;
-            for (int i = this.begin; i <= this.end; i++)
-            {
-                skewness += Math.Pow(chart.values[i] - average, 3);
-            }
-            skewness /= length * mse3;
-
-            return skewness;
-        }
-
-        public double CalcKurtosis(double variance, double average, Channel chart)
-        {
-            if (length <= 0) return 0.0;
-
-            double mse4 = Math.Pow(variance, 2);
-
-            double kurtosis = 0.0;
-            for (int i = this.begin; i <= this.end; i++)
-            {
-                kurtosis += Math.Pow(chart.values[i] - average, 4);
-            }
-            kurtosis = kurtosis / (length * mse4) - 3.0;
-
-            return kurtosis;
-        }
-
-        public double CalcQuantile(Channel chart, double p)
-        {
-            if (length <= 0) return 0.0;
-
-            p = Math.Clamp(p, 0.0, 1.0);
-            int k = (int)(p * (length - 1));
-
-            double[] arr = new double[length];
-            for (int i = 0; i < arr.Length; i++)
-            {
-                arr[i] = chart.values[this.begin + i];
-            }
-
-            return OrderStatistics(arr, k);
-        }
-
-        public double CalcMinValue(Channel chart)
-        {
-            if (length <= 0) return 0.0;
-
-            double minValue = double.MaxValue;
-            for (int i = this.begin; i <= this.end; i++)
-            {
-                minValue = Math.Min(minValue, chart.values[i]);
-            }
-
-            return minValue;
-        }
-
-        public double CalcMaxValue(Channel chart)
-        {
-            if (length <= 0) return 0.0;
-
-            double maxValue = double.MinValue;
-            for (int i = this.begin; i <= this.end; i++)
-            {
-                maxValue = Math.Max(maxValue, chart.values[i]);
-            }
-
-            return maxValue;
-        }
-
-        private void Swap(ref double lhs, ref double rhs)
-        {
-            double t = lhs;
-            lhs = rhs;
-            rhs = t;
-        }
-
-        private int Partition(double[] arr, int left, int right)
-        {
-            double pivot = arr[left];
-            while (true)
-            {
-                while (arr[left] < pivot)
-                {
-                    left++;
-                }
-
-                while (arr[right] > pivot)
-                {
-                    right--;
-                }
-
-                if (left < right)
-                {
-                    if (arr[left] == arr[right]) return right;
-
-                    Swap(ref arr[left], ref arr[right]);
-                }
-                else
-                {
-                    return right;
-                }
-            }
-        }
-
-        private double OrderStatistics(double[] arr, int k)
-        {
-            int left = 0, right = arr.Length;
-            while (true)
-            {
-                int mid = Partition(arr, left, right - 1);
-
-                if (mid == k)
-                {
-                    return arr[mid];
-                }
-                else if (k < mid)
-                {
-                    right = mid;
-                }
-                else
-                {
-                    left = mid + 1;
-                }
-            }
         }
 
         public void Dispose()

@@ -3,8 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:chart="clr-namespace:CGProject1.Chart"
-             xmlns:chart1="clr-namespace:CGProject1.Chart;assembly=CGProject1.Chart"
+             xmlns:chart="clr-namespace:CGProject1.Chart;assembly=CGProject1.Chart"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Border BorderThickness="1.0" BorderBrush="Black">
@@ -37,14 +36,14 @@
                     <Label Content="Кол-во интервалов(K):" Grid.Column="0"></Label>
                     <TextBox Name="IntervalTextBox" Text="100" Grid.Column="1"
                              VerticalAlignment="Center"
-                             PreviewTextInput="previewTextInput"
-                             PreviewKeyDown="previewKeyDown"
-                             DataObject.Pasting="previewPasting"
-                             TextChanged="textChanged"></TextBox>
+                             PreviewTextInput="IntervalTextBox_PreviewTextInput"
+                             PreviewKeyDown="IntervalTextBox_PreviewKeyDown"
+                             DataObject.Pasting="IntervalTextBox_PreviewPasting"
+                             TextChanged="IntervalTextBox_TextChanged"></TextBox>
                 </Grid>
             </StackPanel>
 
-            <chart1:ChartHistogram x:Name="Histogram" Grid.Column="1"></chart1:ChartHistogram>
+            <chart:ChartHistogram x:Name="Histogram" Grid.Column="1"/>
         </Grid>
     </Border>
 </UserControl>
