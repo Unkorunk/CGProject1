@@ -1,12 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using CGProject1.FileFormat.API;
+using FileInfo = CGProject1.FileFormat.API.FileInfo;
 
 namespace CGProject1.FileFormat
 {
     public class WaveWriter : IWriter
     {
-        public byte[] TryWrite(FileInfo fileInfo)
+        public bool TryWrite(Stream stream1, FileInfo fileInfo)
         {
             var stream = new MemoryStream();
 
@@ -31,7 +33,8 @@ namespace CGProject1.FileFormat
             // ckID
             stream.Write(Encoding.ASCII.GetBytes("RIFF"));
             // cksize
-            int cksize = 4 + 24 + 8 + bytesPerSample * fileInfo.nChannels * fileInfo.data.GetLength(0) + fileInfo.data.GetLength(0) % 2;
+            int cksize = 4 + 24 + 8 + bytesPerSample * fileInfo.nChannels * fileInfo.data.GetLength(0) +
+                         fileInfo.data.GetLength(0) % 2;
             stream.Write(BitConverter.GetBytes(cksize));
             // WAVEID
             stream.Write(Encoding.ASCII.GetBytes("WAVE"));
@@ -103,7 +106,7 @@ namespace CGProject1.FileFormat
                             stream.Write(BitConverter.GetBytes(curVal3));
                             break;
                         default:
-                            return null;
+                            return false;
                     }
                 }
             }
@@ -113,7 +116,10 @@ namespace CGProject1.FileFormat
                 stream.Write(new byte[1]);
             }
 
-            return stream.ToArray();
+            using var bw = new BinaryWriter(stream1, Encoding.ASCII, true);
+            bw.Write(stream.ToArray());
+
+            return true;
         }
     }
 }

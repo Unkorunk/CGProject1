@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace CGProject1.FileFormat
+﻿namespace CGProject1.FileFormat.API
 {
     public class FileInfo
     {

@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CGProject1.SignalProcessing
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CGProject1.Chart", "CGProject1.Chart\CGProject1.Chart.csproj", "{6695F8B7-6B78-4F13-BF86-B5FF7DCC790B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CGProject1.DtfCalculator", "CGProject1.DtfCalculator\CGProject1.DtfCalculator.csproj", "{5BC25704-26DB-4095-9FCB-9C8E148466FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CGProject1.DtfCalculator", "CGProject1.DtfCalculator\CGProject1.DtfCalculator.csproj", "{5BC25704-26DB-4095-9FCB-9C8E148466FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CGProject1.FileFormat.API", "CGProject1.FileFormat.API\CGProject1.FileFormat.API.csproj", "{967276C1-3A15-4313-9281-6F6B18AC0EC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{5BC25704-26DB-4095-9FCB-9C8E148466FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BC25704-26DB-4095-9FCB-9C8E148466FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5BC25704-26DB-4095-9FCB-9C8E148466FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{967276C1-3A15-4313-9281-6F6B18AC0EC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{967276C1-3A15-4313-9281-6F6B18AC0EC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{967276C1-3A15-4313-9281-6F6B18AC0EC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{967276C1-3A15-4313-9281-6F6B18AC0EC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

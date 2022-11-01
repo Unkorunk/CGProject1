@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using CGProject1.DtfCalculator;
 using CGProject1.FileFormat;
+using CGProject1.FileFormat.API;
 using CGProject1.Pages;
 using CGProject1.Pages.AnalyzerContainer;
 using CGProject1.SignalProcessing;
@@ -344,7 +345,8 @@ namespace CGProject1
                         throw new NotImplementedException();
                 }
 
-                if (reader.TryRead(await File.ReadAllBytesAsync(openFileDialog.FileName), out var fileInfo))
+                await using var fileStream = new FileStream(openFileDialog.FileName, FileMode.Open);
+                if (reader.TryRead(fileStream, out var fileInfo))
                 {
                     var signal = new Signal(Path.GetFileName(openFileDialog.FileName));
                     signal.SamplingFrq = fileInfo.nSamplesPerSec;

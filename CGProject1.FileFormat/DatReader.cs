@@ -1,13 +1,19 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Text;
+using CGProject1.FileFormat.API;
+using FileInfo = CGProject1.FileFormat.API.FileInfo;
 
 namespace CGProject1.FileFormat
 {
     public class DatReader : IReader
     {
-        public bool TryRead(byte[] data, out FileInfo fileInfo)
+        public bool TryRead(Stream stream, out FileInfo fileInfo)
         {
+            var data = new byte[stream.Length];
+            stream.Read(data, 0, data.Length);
+
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var windows1251 = Encoding.GetEncoding("windows-1251");
 

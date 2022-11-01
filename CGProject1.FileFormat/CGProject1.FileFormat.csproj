@@ -16,4 +16,8 @@
     <PackageReference Include="NAudio" Version="1.10.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CGProject1.FileFormat.API\CGProject1.FileFormat.API.csproj" />
+  </ItemGroup>
+
 </Project>

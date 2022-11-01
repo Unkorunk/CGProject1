@@ -2,12 +2,14 @@
 using System.Globalization;
 using System.IO;
 using System.Text;
+using CGProject1.FileFormat.API;
+using FileInfo = CGProject1.FileFormat.API.FileInfo;
 
 namespace CGProject1.FileFormat
 {
     public class DatWriter : IWriter
     {
-        public byte[] TryWrite(FileInfo fileInfo)
+        public bool TryWrite(Stream stream1, FileInfo fileInfo)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var windows1251 = Encoding.GetEncoding("windows-1251");
@@ -42,7 +44,10 @@ namespace CGProject1.FileFormat
 
             // TODO: channel names
 
-            return stream.ToArray();
+            using var bw = new BinaryWriter(stream1, windows1251, true);
+            bw.Write(stream.ToArray());
+
+            return true;
         }
     }
 }

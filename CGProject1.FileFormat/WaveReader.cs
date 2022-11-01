@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using CGProject1.FileFormat.API;
+using FileInfo = CGProject1.FileFormat.API.FileInfo;
 
 namespace CGProject1.FileFormat
 {
@@ -19,8 +22,11 @@ namespace CGProject1.FileFormat
             public int cksize;
         }
 
-        public bool TryRead(byte[] data, out FileInfo fileInfo)
+        public bool TryRead(Stream stream, out FileInfo fileInfo)
         {
+            var data = new byte[stream.Length];
+            stream.Read(data, 0, data.Length);
+
             fileInfo = new FileInfo();
 
             int offset = 0;

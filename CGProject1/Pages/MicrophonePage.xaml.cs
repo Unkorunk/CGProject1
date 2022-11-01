@@ -83,7 +83,7 @@ namespace CGProject1.Pages
                 waveIn = null;
 
                 var waveReader = new Mp3Reader { IsMp3FileReader = false };
-                if (waveReader.TryRead(memoryStream.GetBuffer(), out var fileInfo))
+                if (waveReader.TryRead(memoryStream, out var fileInfo))
                 {
                     var signal = new Signal("Microphone Signal");
                     signal.SamplingFrq = fileInfo.nSamplesPerSec;

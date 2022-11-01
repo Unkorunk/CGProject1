@@ -5,9 +5,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using CGProject1.FileFormat;
+using CGProject1.FileFormat.API;
 using CGProject1.SignalProcessing;
 using Microsoft.Win32;
-using FileInfo = CGProject1.FileFormat.FileInfo;
+using FileInfo = CGProject1.FileFormat.API.FileInfo;
 
 namespace CGProject1 {
     public partial class SaveWindow : Window {
@@ -111,8 +112,10 @@ namespace CGProject1 {
                     default: throw new NotImplementedException();
                 }
 
-                File.WriteAllBytes(saveDialog.FileName,
-                    writer.TryWrite(SignalToFileInfo(signalToSave, begin, end)));
+                var fileInfo = SignalToFileInfo(signalToSave, begin, end);
+                using var fileStream = new FileStream(saveDialog.FileName, FileMode.Create);
+                if (!writer.TryWrite(fileStream, fileInfo))
+                    MessageBox.Show("Failed write to file");
             }
         }
 

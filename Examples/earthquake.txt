@@ -1,9 +1,9 @@
 # channels number
 6
 # samples number
-      1214
+1214
 # sampling rate
-         1
+1
 # start date
 20-07-2014
 # start time
